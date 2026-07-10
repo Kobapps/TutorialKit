@@ -2,6 +2,12 @@
 
 All notable changes to TutorialKit are documented here.
 
+## [0.17.0] — 2026-07-10
+
+### Changed
+- **Softer graph canvas.** Replaced the hard line grid with a subtle **dot grid** that pans and zooms
+  with the graph (theme-aware, purely decorative) for a calmer, more modern backdrop.
+
 ## [0.16.0] — 2026-07-10
 
 ### Changed

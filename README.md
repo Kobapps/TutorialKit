@@ -139,7 +139,7 @@ Export any graph to JSON from its inspector (**Export JSON…**) and edit/host i
 **blackboard** panel for typed variables, node **groups**, copy/paste & duplicate, full **undo/redo**,
 one-click **Auto Layout**, an **inspector** for the selected node (with field tooltips), an animated
 pulse on the live node during **▶ Test in Play**, a **grouped toolbar** (manage / layout / view /
-info), and right-click **Add Node** search.
+info), a soft **dot-grid** canvas, and right-click **Add Node** search.
 
 The toolbar's **layout** button flips the graph between left → right and **top → bottom** (VFX-graph
 style: flow ports move to the top/bottom of each node, data ports stay on the sides); Auto Layout

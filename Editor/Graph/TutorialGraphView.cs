@@ -82,7 +82,7 @@ namespace TutorialKit.Editor
             this.AddManipulator(new RectangleSelector());
             this.AddManipulator(new ClickSelector());
 
-            var grid = new GridBackground { name = "grid" };
+            var grid = new DotGridBackground(this) { name = "grid" };
             Insert(0, grid);
             grid.StretchToParentSize();
 
@@ -113,6 +113,59 @@ namespace TutorialKit.Editor
                     _minimapPlaced = true;
                 }
             });
+        }
+
+        /// <summary>
+        /// A soft dot-grid canvas background. Draws faint dots that pan and zoom with the graph (reading
+        /// the view transform), instead of Unity's hard line grid. Theme-aware; purely decorative.
+        /// </summary>
+        private sealed class DotGridBackground : VisualElement
+        {
+            private readonly GraphView _view;
+            private const float BaseSpacing = 26f;
+            private const float BaseRadius = 1.5f;
+            private readonly Color _dotColor;
+
+            public DotGridBackground(GraphView view)
+            {
+                _view = view;
+                pickingMode = PickingMode.Ignore;
+                this.StretchToParentSize();
+
+                bool dark = EditorGUIUtility.isProSkin;
+                style.backgroundColor = dark ? new Color(0.16f, 0.165f, 0.19f) : new Color(0.76f, 0.77f, 0.79f);
+                _dotColor = dark ? new Color(1f, 1f, 1f, 0.075f) : new Color(0f, 0f, 0f, 0.09f);
+
+                generateVisualContent += OnGenerate;
+                _view.viewTransformChanged += _ => MarkDirtyRepaint();
+                RegisterCallback<GeometryChangedEvent>(_ => MarkDirtyRepaint());
+            }
+
+            private void OnGenerate(MeshGenerationContext mgc)
+            {
+                float w = resolvedStyle.width, h = resolvedStyle.height;
+                if (w <= 1f || h <= 1f || _view == null) return;
+
+                var t = _view.viewTransform;
+                float scale = Mathf.Max(0.0001f, t.scale.x);
+                float spacing = BaseSpacing * scale;
+                if (spacing < 9f) return; // zoomed too far out — drop the dots so it stays clean
+
+                float radius = BaseRadius * Mathf.Clamp(scale, 0.65f, 1.5f);
+                float startX = Mathf.Repeat(t.position.x, spacing);
+                float startY = Mathf.Repeat(t.position.y, spacing);
+
+                var p = mgc.painter2D;
+                p.fillColor = _dotColor;
+                p.BeginPath();
+                for (float x = startX; x <= w; x += spacing)
+                    for (float y = startY; y <= h; y += spacing)
+                    {
+                        p.MoveTo(new Vector2(x + radius, y));
+                        p.Arc(new Vector2(x, y), radius, new Angle(0f, AngleUnit.Degree), new Angle(360f, AngleUnit.Degree));
+                    }
+                p.Fill();
+            }
         }
 
         // ---- Loading ----
