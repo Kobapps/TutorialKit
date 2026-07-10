@@ -3,18 +3,26 @@ using UnityEngine;
 namespace TutorialKit
 {
     /// <summary>
-    /// Generates the small UI sprites the overlay needs (rounded panel, hand pointer, arrow,
-    /// tap ring, dot) at runtime so the package ships with no art dependencies. All sprites are
-    /// white so they can be tinted; real art can be supplied via the pointer/text-box view fields.
-    /// Results are cached.
+    /// Supplies the small UI sprites the overlay needs. The hand pointers and arrow load bundled art
+    /// (CC0, Kenney Cursor Pack) from the package's <c>Resources/TutorialKit/Pointers</c> folder; the
+    /// rounded panel, tap ring and dot are generated procedurally. Every accessor falls back to a
+    /// procedural shape if the art is missing, so the package still works with no art present. Results
+    /// are cached; a game can still override the pointer art via the pointer/text-box view fields.
     /// </summary>
     public static class TutorialSpriteFactory
     {
-        private static Sprite _panel, _hand, _arrow, _ring, _dot;
+        private static Sprite _panel, _hand, _handOpen, _handClosed, _arrow, _ring, _dot;
+
+        /// <summary>Bundled pointer art (CC0, Kenney Cursor Pack) loaded from the package's Resources;
+        /// falls back to the procedural shape if the art is ever missing.</summary>
+        private const string ArtPath = "TutorialKit/Pointers/";
+        private static Sprite Art(string name) => Resources.Load<Sprite>(ArtPath + name);
 
         public static Sprite RoundedPanel => _panel ??= BuildRoundedRect(96, 26);
-        public static Sprite Hand => _hand ??= BuildHand(128);
-        public static Sprite Arrow => _arrow ??= BuildArrow(128);
+        public static Sprite Hand => _hand ??= Art("hand_point") ?? BuildHand(128);
+        public static Sprite HandOpen => _handOpen ??= Art("hand_open") ?? BuildHand(128);
+        public static Sprite HandClosed => _handClosed ??= Art("hand_closed") ?? BuildHand(128);
+        public static Sprite Arrow => _arrow ??= Art("arrow") ?? BuildArrow(128);
         public static Sprite Ring => _ring ??= BuildRing(128, 0.16f);
         public static Sprite Dot => _dot ??= BuildCircle(64);
 

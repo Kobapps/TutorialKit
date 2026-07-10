@@ -1,6 +1,6 @@
 {
   "name": "com.tutorialkit",
-  "version": "0.8.3",
+  "version": "0.9.0",
   "displayName": "TutorialKit",
   "description": "AAA-quality, adapter-based framework for authoring and playing tutorial sequences: vignette highlights, animated pointers, styled text boxes, input gating, custom game commands, persistent progress, a GraphView authoring editor, and remote JSON loading.",
   "unity": "6000.0",

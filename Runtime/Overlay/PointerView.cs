@@ -150,11 +150,21 @@ namespace TutorialKit
             Vector2 start = ResolvePosition(r.Target, r.ScreenOffset);
             Vector2 end = ResolvePosition(r.SecondaryTarget, r.ScreenOffset);
             _follow.anchoredPosition = start;
+            // Only the bundled hand art has distinct open/closed poses; skip swaps for arrow/custom art.
+            Sprite open = handSprite != null ? handSprite : TutorialSpriteFactory.HandOpen;
+            Sprite closed = handSprite != null ? handSprite : TutorialSpriteFactory.HandClosed;
             float move = 0.9f / Speed;
             _sequence = DOTween.Sequence().SetUpdate(true).SetLoops(-1, LoopType.Restart);
-            _sequence.AppendCallback(() => { _follow.anchoredPosition = start; _inner.localScale = Vector3.one; });
+            _sequence.AppendCallback(() =>
+            {
+                _follow.anchoredPosition = start;
+                _inner.localScale = Vector3.one;
+                _pointerImage.sprite = open;   // hovering, hand open
+            });
             _sequence.Append(_inner.DOScale(0.85f, 0.2f)); // grab
+            _sequence.AppendCallback(() => _pointerImage.sprite = closed); // fist closes
             _sequence.Append(_follow.DOAnchorPos(end, move).SetEase(Ease.InOutSine));
+            _sequence.AppendCallback(() => _pointerImage.sprite = open);   // release, hand opens
             _sequence.Append(_inner.DOScale(1f, 0.2f));     // release
             _sequence.AppendInterval(0.35f / Speed);
         }

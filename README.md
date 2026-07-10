@@ -104,7 +104,9 @@ dir.Signals.Emit("firstMatchMade");
 - **Highlight**: Show/Hide Vignette (circle or rounded-rect hole, softness, padding; add
   `Additional Targets` to cut **multiple holes** at once; taps pass through the holes unless you turn
   off `Allow Clicks Through Holes` to lock them too)
-- **Pointer**: Show/Hide Pointer (point, tap, swipe, drag, merge)
+- **Pointer**: Show/Hide Pointer (point, tap, swipe, drag, merge) — ships with bundled hand & arrow
+  art (CC0, Kenney); the drag gesture even closes the hand into a fist. Assign your own
+  `handSprite`/`arrowSprite` on the pointer view to override.
 - **Text**: Show/Hide Text Box (default styled box or custom prefab, typewriter, wait-for-continue)
 - **Interaction**: Set Input Lock, Game Command, Emit Signal
 - **Target providers**: Target By Id, Target By Screen Position (subclass `TargetNodeBase` for custom

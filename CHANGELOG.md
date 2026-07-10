@@ -2,6 +2,17 @@
 
 All notable changes to TutorialKit are documented here.
 
+## [0.9.0] — 2026-07-10
+
+### Added
+- **Bundled pointer art.** The hand and arrow pointers now ship real art (CC0, from the Kenney Cursor
+  Pack, rasterized to 256px sprites) under `Runtime/Resources/TutorialKit/Pointers` — used by default
+  instead of the procedural silhouettes (which remain as a fallback). The **drag** gesture now animates
+  an open hand → closed fist → open hand for a clear grab/release read. A game can still override the
+  art via the pointer view's `handSprite` / `arrowSprite`. See `Third Party Notices.md` for the license.
+- Demo launcher gains a **✋ Pointer gestures** showcase that tours point, tap, swipe, drag, merge and
+  the arrow pointer so every pose is visible.
+
 ## [0.8.3] — 2026-07-10
 
 ### Changed
