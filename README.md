@@ -136,7 +136,8 @@ Export any graph to JSON from its inspector (**Export JSON…**) and edit/host i
 **Window ▸ TutorialKit ▸ Tutorial Graph Editor** — a draggable/collapsible **minimap**, a
 **blackboard** panel for typed variables, node **groups**, copy/paste & duplicate, full **undo/redo**,
 one-click **Auto Layout**, an **inspector** for the selected node (with field tooltips), an animated
-pulse on the live node during **▶ Test in Play**, icon toolbar, and right-click **Add Node** search.
+pulse on the live node during **▶ Test in Play**, a **sectioned toolbar** (Manage / Layout / View /
+Info), and right-click **Add Node** search.
 
 Toggle **Vertical** in the toolbar to flow the graph **top → bottom** (VFX-graph style: flow ports move
 to the top/bottom of each node, data ports stay on the sides); Auto Layout follows the chosen direction.
@@ -175,7 +176,8 @@ bundled default. Per-tutorial art can still be assigned on the pointer view.
 
 See [Documentation~/custom-nodes.md](Documentation~/custom-nodes.md). In short: subclass
 `TutorialNode`, add `[TutorialNode("Menu/Path")]`, implement `ExecuteAsync`. It appears in the graph
-editor, the JSON format, and the AI skill automatically.
+editor, the JSON format, and the AI skill automatically. Select the node and click **Edit Script** in
+the inspector header to jump straight to its `.cs` file.
 
 ## Requirements
 

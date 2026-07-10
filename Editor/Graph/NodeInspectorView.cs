@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -14,11 +15,15 @@ namespace TutorialKit.Editor
         private readonly VisualElement _header;
         private readonly VisualElement _chip;
         private readonly Label _title;
+        private readonly Button _editScript;
         private readonly Label _typeLabel;
         private readonly Label _desc;
         private readonly Label _empty;
         private readonly VisualElement _card;
         private readonly VisualElement _fields;
+
+        private MonoScript _script;
+        private static readonly Dictionary<Type, MonoScript> _scriptCache = new Dictionary<Type, MonoScript>();
 
         public NodeInspectorView()
         {
@@ -32,6 +37,13 @@ namespace TutorialKit.Editor
             _title.AddToClassList("tk-inspector-title");
             _header.Add(_chip);
             _header.Add(_title);
+
+            _editScript = new Button(OpenScript) { tooltip = "Open this node's C# script in your editor" };
+            _editScript.AddToClassList("tk-inspector-editscript");
+            _editScript.Add(ScriptIcon());
+            _editScript.Add(new Label("Edit Script"));
+            _editScript.style.display = DisplayStyle.None;
+            _header.Add(_editScript);
             Add(_header);
 
             _typeLabel = new Label();
@@ -62,6 +74,8 @@ namespace TutorialKit.Editor
             _title.text = "Inspector";
             _typeLabel.text = "";
             _desc.text = "";
+            _script = null;
+            _editScript.style.display = DisplayStyle.None;
             _empty.style.display = DisplayStyle.Flex;
             _card.style.display = DisplayStyle.None;
             SetAccent(DefaultAccent);
@@ -87,6 +101,10 @@ namespace TutorialKit.Editor
             _desc.text = info != null ? info.Description ?? "" : "";
             _desc.style.display = string.IsNullOrEmpty(_desc.text) ? DisplayStyle.None : DisplayStyle.Flex;
 
+            // Shortcut to open the node's own .cs (works for one-class-per-file nodes, i.e. custom nodes).
+            _script = FindScript(node.GetType());
+            _editScript.style.display = _script != null ? DisplayStyle.Flex : DisplayStyle.None;
+
             var el = TutorialNodeView.FindNodeProperty(serializedGraph, node.Id);
             if (el == null) return;
 
@@ -110,6 +128,45 @@ namespace TutorialKit.Editor
                 { style = { color = new Color(0.6f, 0.62f, 0.68f), unityFontStyleAndWeight = FontStyle.Italic } });
 
             _fields.Bind(serializedGraph);
+        }
+
+        private void OpenScript()
+        {
+            if (_script != null) AssetDatabase.OpenAsset(_script);
+        }
+
+        private static Image ScriptIcon()
+        {
+            var img = new Image { style = { width = 13, height = 13, marginRight = 3 } };
+            try { img.image = EditorGUIUtility.IconContent("cs Script Icon").image; } catch { }
+            return img;
+        }
+
+        // Resolve the MonoScript for a node type by matching the class it defines. This finds custom
+        // nodes authored one-per-file (file named after the class); built-in nodes that share a file
+        // return no script, so the button simply stays hidden for them.
+        private static MonoScript FindScript(Type type)
+        {
+            if (type == null) return null;
+            if (_scriptCache.TryGetValue(type, out var cached))
+                return cached; // may be null (cached "not found")
+
+            MonoScript found = null;
+            foreach (var guid in AssetDatabase.FindAssets("t:MonoScript " + type.Name))
+            {
+                var path = AssetDatabase.GUIDToAssetPath(guid);
+                var ms = AssetDatabase.LoadAssetAtPath<MonoScript>(path);
+                if (ms == null) continue;
+                var cls = ms.GetClass();
+                if (cls == type ||
+                    (cls == null && System.IO.Path.GetFileNameWithoutExtension(path) == type.Name))
+                {
+                    found = ms;
+                    break;
+                }
+            }
+            _scriptCache[type] = found;
+            return found;
         }
 
         private void SetAccent(Color accent)

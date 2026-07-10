@@ -2,6 +2,16 @@
 
 All notable changes to TutorialKit are documented here.
 
+## [0.13.0] — 2026-07-10
+
+### Added
+- **Sectioned graph toolbar.** The editor's top bar is now grouped into labelled sections —
+  **Manage** (pick / save / test), **Layout** (auto layout, frame, vertical), **View** (blackboard,
+  minimap, attach) and **Info** (status) — with dividers, so controls are easier to find.
+- **Edit Script shortcut in the node inspector.** Selecting a custom node shows an **Edit Script**
+  button in the inspector header that opens its `.cs` file (like a MonoBehaviour's script field). Nodes
+  authored one-per-file (the custom-node convention) resolve automatically.
+
 ## [0.12.0] — 2026-07-10
 
 ### Added

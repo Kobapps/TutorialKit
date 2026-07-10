@@ -94,8 +94,11 @@ namespace TutorialKit.Editor
 
         private void BuildToolbar()
         {
-            var toolbar = new Toolbar();
+            var bar = new VisualElement();
+            bar.AddToClassList("tk-ribbon");
 
+            // ---- Manage: pick / save / run a tutorial ----
+            var manage = Section(bar, "Manage");
             var menu = new ToolbarMenu { text = "Tutorials" };
             foreach (var guid in AssetDatabase.FindAssets("t:TutorialGraph"))
             {
@@ -107,12 +110,16 @@ namespace TutorialKit.Editor
                     if (g != null) OpenGraph(g);
                 });
             }
-            toolbar.Add(menu);
-
-            toolbar.Add(IconButton("Save", "SaveActive", "Save all assets (Ctrl+S)",
+            manage.Add(menu);
+            manage.Add(IconButton("Save", "SaveActive", "Save all assets (Ctrl+S)",
                 () => { if (_graph != null) AssetDatabase.SaveAssets(); }));
-            toolbar.Add(IconButton("Auto Layout", "ScaleTool", "Tidy the graph (respects the layout direction)",
+            manage.Add(IconButton("Test", "PlayButton", "Enter Play mode and run this tutorial", TestInPlay));
+
+            // ---- Layout: arrange & orient the graph ----
+            var layout = Section(bar, "Layout");
+            layout.Add(IconButton("Auto Layout", "ScaleTool", "Tidy the graph (respects the layout direction)",
                 () => _graphView?.AutoLayout()));
+            layout.Add(IconButton("Frame", "ViewToolZoom", "Frame all nodes (A)", () => _graphView?.FrameAll()));
             _verticalToggle = new ToolbarToggle
             {
                 text = "Vertical",
@@ -125,29 +132,53 @@ namespace TutorialKit.Editor
                 _graphView?.SetVertical(e.newValue);
                 if (_graphView != null) _verticalToggle.SetValueWithoutNotify(_graphView.Vertical);
             });
-            toolbar.Add(_verticalToggle);
-            toolbar.Add(IconButton("Frame", "ViewToolZoom", "Frame all nodes (A)",
-                () => _graphView?.FrameAll()));
-            toolbar.Add(IconButton("Test in Play", "PlayButton", "Enter Play mode and run this tutorial",
-                TestInPlay));
+            layout.Add(_verticalToggle);
 
-            toolbar.Add(new ToolbarSpacer());
+            // ---- View: panels & live-attach ----
+            var view = Section(bar, "View");
+            view.Add(new ToolbarButton(() => _graphView?.ToggleBlackboard()) { text = "Blackboard" });
+            view.Add(new ToolbarButton(() => _graphView?.ToggleMinimap()) { text = "Minimap" });
             var attachToggle = new ToolbarToggle { text = "Attach", value = _attach, tooltip = "Auto-follow the running tutorial in Play mode" };
             attachToggle.RegisterValueChangedCallback(e => _attach = e.newValue);
-            toolbar.Add(attachToggle);
-            toolbar.Add(new ToolbarButton(() => _graphView?.ToggleBlackboard()) { text = "Blackboard" });
-            toolbar.Add(new ToolbarButton(() => _graphView?.ToggleMinimap()) { text = "Minimap" });
+            view.Add(attachToggle);
 
-            _statusLabel = new Label(" No tutorial loaded ")
-            {
-                style = { unityTextAlign = TextAnchor.MiddleLeft, marginLeft = 12, flexGrow = 1 },
-            };
-            toolbar.Add(_statusLabel);
+            // ---- Info: status (stretches to fill) ----
+            var info = Section(bar, "Info");
+            var infoWrap = info.parent;
+            infoWrap.style.flexGrow = 1;
+            info.style.flexGrow = 1;
+            _statusLabel = new Label(" No tutorial loaded ");
+            _statusLabel.AddToClassList("tk-ribbon-status");
+            info.Add(_statusLabel);
 
-            toolbar.Add(IconButton("Settings", "Settings", "TutorialKit settings & AI skill",
+            // ---- Settings (far right) ----
+            var settings = Section(bar, "");
+            settings.Add(IconButton("Settings", "Settings", "TutorialKit settings & AI skill",
                 TutorialKitSettingsWindow.ShowWindow));
 
-            rootVisualElement.Add(toolbar);
+            rootVisualElement.Add(bar);
+        }
+
+        // A ribbon section: a row of controls with a small caption beneath, preceded by a divider.
+        private static VisualElement Section(VisualElement bar, string title)
+        {
+            if (bar.childCount > 0)
+            {
+                var sep = new VisualElement();
+                sep.AddToClassList("tk-ribbon-sep");
+                bar.Add(sep);
+            }
+            var wrap = new VisualElement();
+            wrap.AddToClassList("tk-ribbon-section");
+            var row = new VisualElement();
+            row.AddToClassList("tk-ribbon-row");
+            wrap.Add(row);
+            var label = new Label(title ?? "");
+            label.AddToClassList("tk-ribbon-label");
+            if (string.IsNullOrEmpty(title)) label.style.visibility = Visibility.Hidden;
+            wrap.Add(label);
+            bar.Add(wrap);
+            return row;
         }
 
         private static ToolbarButton IconButton(string text, string iconName, string tooltip, Action onClick)
