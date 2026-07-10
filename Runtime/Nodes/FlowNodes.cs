@@ -22,12 +22,12 @@ namespace TutorialKit
     }
 
     /// <summary>
-    /// Mandatory terminal. Every graph has exactly one (the editor adds/keeps it and it can't be
-    /// deleted or duplicated); all branches converge here. Marks the tutorial complete.
+    /// Terminal node — marks the tutorial (or a branch of it) complete. A graph needs at least one; the
+    /// editor adds one if a graph has none. Branching flows can have several — one per terminating branch.
     /// </summary>
     [Serializable]
-    [TutorialNode("Flow/End", "Ends the tutorial successfully (one per graph, managed automatically).",
-        Color = "#455A64", HideInMenu = true)]
+    [TutorialNode("Flow/End", "Ends the tutorial (or a branch). A graph needs at least one.",
+        Color = "#455A64")]
     public sealed class EndNode : TutorialNode
     {
         private static readonly string[] NoPorts = Array.Empty<string>();

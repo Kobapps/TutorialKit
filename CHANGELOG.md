@@ -2,6 +2,18 @@
 
 All notable changes to TutorialKit are documented here.
 
+## [0.16.0] — 2026-07-10
+
+### Changed
+- **Multiple End nodes are allowed again.** Branching flows often terminate in more than one place, so
+  `End` is back in the Add-Node menu and can be freely added and deleted. A graph still needs at least
+  one — the editor adds one only when a graph has none (and no longer merges extras). Start is still the
+  single, non-deletable entry.
+
+### Added
+- **Branch validation.** Any flow output that leads nowhere (a branch that stops without reaching an
+  `End`) marks its node with a ⚠ badge and a tooltip. Re-checked on load and on every edge change.
+
 ## [0.15.0] — 2026-07-10
 
 ### Changed

@@ -9,8 +9,6 @@ progress — all decoupled from your game through small **adapters**.
 - **Standalone** package — drop it in, wire ~4 adapters, ship.
 - **Remote-updatable** — load/patch tutorials from JSON without a client rebuild.
 
-<img width="1425" height="808" alt="image" src="https://github.com/user-attachments/assets/ab50cbee-5847-40e3-867a-efae583e64bf" />
-
 ---
 
 ## Installation
@@ -48,8 +46,9 @@ example graphs (highlight, pointer, text, waits, commands, dynamic targets).
 
 1. Add a **Tutorial Graph**: `Assets ▸ Create ▸ TutorialKit ▸ Tutorial Graph`.
 2. Open it: double-click the asset, or `Window ▸ TutorialKit ▸ Tutorial Graph Editor`.
-   Every graph has a built-in **Start** and **End** node (the fixed entry and exit — they can't be
-   deleted or duplicated). Right-click the canvas ▸ **Add Node** to build the flow between them.
+   Every graph has a built-in **Start** node (the fixed entry — it can't be deleted) and at least one
+   **End**; branching flows can have several Ends (one per terminating branch). Right-click the canvas ▸
+   **Add Node** to build the flow. Any branch that doesn't reach an End gets a ⚠ badge.
 3. Mark game elements: add a **Tutorial Target** component to any UI element or world object and
    give it an id (e.g. `play_button`). Reference that id from `Show Vignette` / `Show Pointer` nodes.
 4. Start it from a **Tutorial Trigger** component (On Start / On Signal / Manual), or from code:

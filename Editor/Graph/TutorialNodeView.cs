@@ -26,6 +26,7 @@ namespace TutorialKit.Editor
         private readonly bool _vertical;
         private VisualElement _topStrip, _bottomStrip;
         private Label _visitedBadge;
+        private Label _warnBadge;
         private IVisualElementScheduledItem _pulse;
         private double _pulseStart;
         private bool _visited;
@@ -121,6 +122,19 @@ namespace TutorialKit.Editor
             };
             titleContainer.Add(_visitedBadge);
 
+            _warnBadge = new Label("⚠")
+            {
+                style =
+                {
+                    color = new StyleColor(new Color(1f, 0.78f, 0.2f)),
+                    unityFontStyleAndWeight = FontStyle.Bold,
+                    fontSize = 12,
+                    display = DisplayStyle.None,
+                    marginRight = 4,
+                },
+            };
+            titleContainer.Add(_warnBadge);
+
             _summary = new Label();
             _summary.AddToClassList("tk-node-summary");
             RefreshSummary();
@@ -142,6 +156,13 @@ namespace TutorialKit.Editor
 
         public void SetEntry(bool isEntry) =>
             _entryBadge.style.display = isEntry ? DisplayStyle.Flex : DisplayStyle.None;
+
+        /// <summary>Show/hide the branch-validation warning badge (⚠) with an explanatory tooltip.</summary>
+        public void SetWarning(bool warn, string tooltipText)
+        {
+            _warnBadge.style.display = warn ? DisplayStyle.Flex : DisplayStyle.None;
+            _warnBadge.tooltip = warn ? tooltipText : null;
+        }
 
         public override void OnSelected()
         {
