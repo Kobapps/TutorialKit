@@ -9,6 +9,8 @@ progress — all decoupled from your game through small **adapters**.
 - **Standalone** package — drop it in, wire ~4 adapters, ship.
 - **Remote-updatable** — load/patch tutorials from JSON without a client rebuild.
 
+<img width="1425" height="808" alt="image" src="https://github.com/user-attachments/assets/ab50cbee-5847-40e3-867a-efae583e64bf" />
+
 ---
 
 ## Installation
