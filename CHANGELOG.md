@@ -2,6 +2,15 @@
 
 All notable changes to TutorialKit are documented here.
 
+## [0.14.0] — 2026-07-10
+
+### Changed
+- **Every graph now has a required Start node.** It's the fixed entry point: the editor adds one to any
+  graph that lacks it (wired to whatever ran first), and it **can't be deleted or duplicated** and no
+  longer appears in the Add-Node menu. The old "Set as Start" right-click action is removed. All example
+  graphs (and the code-built samples) now begin with a Start node. Custom nodes can hide from the menu
+  too via `[TutorialNode(..., HideInMenu = true)]`.
+
 ## [0.13.0] — 2026-07-10
 
 ### Added

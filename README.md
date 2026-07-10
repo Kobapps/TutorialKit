@@ -46,7 +46,8 @@ example graphs (highlight, pointer, text, waits, commands, dynamic targets).
 
 1. Add a **Tutorial Graph**: `Assets ▸ Create ▸ TutorialKit ▸ Tutorial Graph`.
 2. Open it: double-click the asset, or `Window ▸ TutorialKit ▸ Tutorial Graph Editor`.
-   Right-click the canvas ▸ **Add Node** to build a flow. Right-click a node ▸ **Set as Start**.
+   Every graph has one built-in **Start** node (the entry — it can't be deleted or duplicated).
+   Right-click the canvas ▸ **Add Node** to build a flow out from Start.
 3. Mark game elements: add a **Tutorial Target** component to any UI element or world object and
    give it an id (e.g. `play_button`). Reference that id from `Show Vignette` / `Show Pointer` nodes.
 4. Start it from a **Tutorial Trigger** component (On Start / On Signal / Manual), or from code:

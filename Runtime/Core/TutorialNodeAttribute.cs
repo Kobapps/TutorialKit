@@ -25,6 +25,10 @@ namespace TutorialKit
         /// <summary>Accent colour (hex, e.g. "#3A7BD5") for the node header in the editor.</summary>
         public string Color { get; set; }
 
+        /// <summary>Hide this type from the node-create menu (still registered for serialization). Used
+        /// by the built-in Start node, which the editor manages automatically — one per graph.</summary>
+        public bool HideInMenu { get; set; }
+
         public TutorialNodeAttribute(string menuPath, string description = null)
         {
             MenuPath = menuPath;

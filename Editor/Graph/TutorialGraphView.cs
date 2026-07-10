@@ -132,6 +132,7 @@ namespace TutorialKit.Editor
             if (graph != null)
             {
                 graph.Validate();
+                if (EnsureStartNode(graph)) EditorUtility.SetDirty(graph);
                 SerializedGraph = new SerializedObject(graph);
 
                 foreach (var node in graph.Nodes)
@@ -212,6 +213,35 @@ namespace TutorialKit.Editor
 
         // ---- Authoring ----
 
+        /// <summary>
+        /// Guarantees the graph has exactly one <see cref="StartNode"/> as its entry — adds one (wired
+        /// to whatever ran first before) if missing, and points <c>EntryNodeId</c> at it. Returns true
+        /// if the graph changed. This is the per-graph "required Start node" invariant.
+        /// </summary>
+        public static bool EnsureStartNode(TutorialGraph graph)
+        {
+            if (graph == null) return false;
+
+            StartNode start = null;
+            foreach (var n in graph.Nodes) if (n is StartNode s) { start = s; break; }
+            if (start != null)
+            {
+                if (graph.EntryNodeId == start.Id) return false;
+                graph.EntryNodeId = start.Id;
+                return true;
+            }
+
+            var oldEntry = graph.EntryNode; // the node that ran first before a Start existed
+            start = new StartNode();
+            start.EnsureId();
+            start.EditorPosition = oldEntry != null ? oldEntry.EditorPosition + new Vector2(-300f, 0f) : Vector2.zero;
+            graph.AddNode(start);
+            if (oldEntry != null && oldEntry.Id != start.Id)
+                graph.AddEdge(start.Id, TutorialNode.OutPort, oldEntry.Id);
+            graph.EntryNodeId = start.Id;
+            return true;
+        }
+
         public void CreateNode(NodeTypeInfo info, Vector2 graphPosition)
         {
             if (Graph == null || info == null) return;
@@ -259,6 +289,8 @@ namespace TutorialKit.Editor
 
             if (change.elementsToRemove != null)
             {
+                // The Start node is mandatory — never let it be deleted.
+                change.elementsToRemove.RemoveAll(el => el is TutorialNodeView sv && sv.Node is StartNode);
                 foreach (var el in change.elementsToRemove)
                 {
                     switch (el)
@@ -308,17 +340,6 @@ namespace TutorialKit.Editor
 
         public override void BuildContextualMenu(ContextualMenuPopulateEvent evt)
         {
-            if (evt.target is TutorialNodeView nodeView)
-            {
-                evt.menu.AppendAction("Set as Start", _ =>
-                {
-                    Undo.RegisterCompleteObjectUndo(Graph, "Set Start Node");
-                    Graph.EntryNodeId = nodeView.Node.Id;
-                    EditorUtility.SetDirty(Graph);
-                    RefreshEntryBadges();
-                });
-            }
-
             int nodeSel = 0;
             foreach (var s in selection) if (s is TutorialNodeView) nodeSel++;
             if (nodeSel > 0)
@@ -435,6 +456,7 @@ namespace TutorialKit.Editor
             {
                 var node = NodeTypeRegistry.Create(cn.type);
                 if (node == null) continue;
+                if (node is StartNode) continue; // only one Start per graph — never paste another
                 if (!string.IsNullOrEmpty(cn.data)) JsonUtility.FromJsonOverwrite(cn.data, node);
                 string newId = Guid.NewGuid().ToString("N");
                 node.Id = newId;

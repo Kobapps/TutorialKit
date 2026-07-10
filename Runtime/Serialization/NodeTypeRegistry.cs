@@ -14,6 +14,7 @@ namespace TutorialKit
         public string Description;
         public Color Color;
         public bool HasColor;
+        public bool HideInMenu;
 
         public string DisplayName
         {
@@ -99,6 +100,7 @@ namespace TutorialKit
                         TypeId = attr != null && !string.IsNullOrEmpty(attr.TypeId) ? attr.TypeId : t.Name,
                         MenuPath = attr != null ? attr.MenuPath : "Custom/" + t.Name,
                         Description = attr?.Description,
+                        HideInMenu = attr != null && attr.HideInMenu,
                     };
                     if (attr != null && !string.IsNullOrEmpty(attr.Color) &&
                         ColorUtility.TryParseHtmlString(attr.Color, out var c))

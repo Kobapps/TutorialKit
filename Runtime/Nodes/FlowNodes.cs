@@ -6,9 +6,13 @@ using UnityEngine;
 
 namespace TutorialKit
 {
-    /// <summary>Entry point marker. Passes straight through; conventional start of a graph.</summary>
+    /// <summary>
+    /// Mandatory entry point. Every graph has exactly one (the editor adds/keeps it and it can't be
+    /// deleted or duplicated). Passes straight through to the first connected node.
+    /// </summary>
     [Serializable]
-    [TutorialNode("Flow/Start", "Entry point of the tutorial.", Color = "#2E7D32")]
+    [TutorialNode("Flow/Start", "Entry point of the tutorial (one per graph, managed automatically).",
+        Color = "#2E7D32", HideInMenu = true)]
     public sealed class StartNode : TutorialNode
     {
         public override bool HasInput => false;

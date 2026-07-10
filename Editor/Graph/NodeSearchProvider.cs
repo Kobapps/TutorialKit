@@ -31,6 +31,7 @@ namespace TutorialKit.Editor
             var groups = new HashSet<string>();
             foreach (var info in NodeTypeRegistry.All)
             {
+                if (info.HideInMenu) continue; // e.g. the Start node — one per graph, managed automatically
                 string path = info.MenuPath ?? info.Type.Name;
                 var segments = path.Split('/');
 
