@@ -185,35 +185,20 @@
     margin-right: 3px;
 }
 
-/* Sectioned ribbon toolbar */
+/* Grouped ribbon toolbar (single row, dividers between groups) */
 .tk-ribbon {
     flex-direction: row;
     align-items: stretch;
     background-color: rgb(56, 56, 56);
     border-bottom-width: 1px;
     border-bottom-color: rgba(0, 0, 0, 0.45);
-    padding: 3px 4px 1px 4px;
+    padding: 3px 4px;
 }
 
 .tk-ribbon-section {
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 6px;
-}
-
-.tk-ribbon-row {
     flex-direction: row;
     align-items: center;
-}
-
-.tk-ribbon-label {
-    font-size: 9px;
-    -unity-font-style: bold;
-    color: rgba(255, 255, 255, 0.36);
-    -unity-text-align: middle-center;
-    margin-top: 1px;
-    letter-spacing: 1px;
+    padding: 0 4px;
 }
 
 .tk-ribbon-sep {

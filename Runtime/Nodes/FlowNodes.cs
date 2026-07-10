@@ -21,9 +21,13 @@ namespace TutorialKit
             => UniTask.FromResult(OutPort);
     }
 
-    /// <summary>Ends the tutorial (marks it complete).</summary>
+    /// <summary>
+    /// Mandatory terminal. Every graph has exactly one (the editor adds/keeps it and it can't be
+    /// deleted or duplicated); all branches converge here. Marks the tutorial complete.
+    /// </summary>
     [Serializable]
-    [TutorialNode("Flow/End", "Ends the tutorial successfully.", Color = "#455A64")]
+    [TutorialNode("Flow/End", "Ends the tutorial successfully (one per graph, managed automatically).",
+        Color = "#455A64", HideInMenu = true)]
     public sealed class EndNode : TutorialNode
     {
         private static readonly string[] NoPorts = Array.Empty<string>();

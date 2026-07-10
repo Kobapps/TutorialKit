@@ -132,7 +132,9 @@ namespace TutorialKit.Editor
             if (graph != null)
             {
                 graph.Validate();
-                if (EnsureStartNode(graph)) EditorUtility.SetDirty(graph);
+                bool req = EnsureStartNode(graph);
+                req |= EnsureEndNode(graph);
+                if (req) EditorUtility.SetDirty(graph);
                 SerializedGraph = new SerializedObject(graph);
 
                 foreach (var node in graph.Nodes)
@@ -242,6 +244,64 @@ namespace TutorialKit.Editor
             return true;
         }
 
+        /// <summary>
+        /// Guarantees the graph has exactly one <see cref="EndNode"/> — adds one (wiring every loose
+        /// flow output to it) if none exists, or merges any extras into a single one. Returns true if
+        /// the graph changed. The per-graph "required End node" invariant, symmetric with Start.
+        /// </summary>
+        public static bool EnsureEndNode(TutorialGraph graph)
+        {
+            if (graph == null) return false;
+
+            var ends = new List<EndNode>();
+            foreach (var n in graph.Nodes) if (n is EndNode e) ends.Add(e);
+            if (ends.Count == 1) return false;
+
+            if (ends.Count == 0)
+            {
+                var end = new EndNode();
+                end.EnsureId();
+                end.EditorPosition = FarRightPosition(graph);
+                graph.AddNode(end);
+                // Terminate every loose flow output at the End so all branches converge there.
+                foreach (var n in graph.Nodes)
+                {
+                    if (n == null || n is EndNode) continue;
+                    foreach (var port in n.OutputPorts)
+                    {
+                        bool hasNext = false;
+                        foreach (var _ in graph.GetNextNodeIds(n.Id, port)) { hasNext = true; break; }
+                        if (!hasNext) graph.AddEdge(n.Id, port, end.Id);
+                    }
+                }
+                return true;
+            }
+
+            // Merge extra End nodes into the first (re-point their inputs) and remove them.
+            var keep = ends[0];
+            for (int i = 1; i < ends.Count; i++)
+            {
+                var extra = ends[i];
+                var incoming = new List<TutorialEdge>();
+                foreach (var e in graph.Edges) if (e.ToNodeId == extra.Id) incoming.Add(e);
+                foreach (var e in incoming) graph.AddEdge(e.FromNodeId, e.FromPort, keep.Id);
+                graph.RemoveNode(extra.Id);
+            }
+            return true;
+        }
+
+        private static Vector2 FarRightPosition(TutorialGraph graph)
+        {
+            bool any = false; float maxX = 0f, yAtMax = 0f;
+            foreach (var n in graph.Nodes)
+            {
+                if (n == null || n is EndNode) continue;
+                var p = n.EditorPosition;
+                if (!any || p.x > maxX) { maxX = p.x; yAtMax = p.y; any = true; }
+            }
+            return any ? new Vector2(maxX + 300f, yAtMax) : new Vector2(300f, 0f);
+        }
+
         public void CreateNode(NodeTypeInfo info, Vector2 graphPosition)
         {
             if (Graph == null || info == null) return;
@@ -289,8 +349,8 @@ namespace TutorialKit.Editor
 
             if (change.elementsToRemove != null)
             {
-                // The Start node is mandatory — never let it be deleted.
-                change.elementsToRemove.RemoveAll(el => el is TutorialNodeView sv && sv.Node is StartNode);
+                // The Start and End nodes are mandatory — never let them be deleted.
+                change.elementsToRemove.RemoveAll(el => el is TutorialNodeView sv && (sv.Node is StartNode || sv.Node is EndNode));
                 foreach (var el in change.elementsToRemove)
                 {
                     switch (el)
@@ -456,7 +516,7 @@ namespace TutorialKit.Editor
             {
                 var node = NodeTypeRegistry.Create(cn.type);
                 if (node == null) continue;
-                if (node is StartNode) continue; // only one Start per graph — never paste another
+                if (node is StartNode || node is EndNode) continue; // one Start/End per graph — never paste another
                 if (!string.IsNullOrEmpty(cn.data)) JsonUtility.FromJsonOverwrite(cn.data, node);
                 string newId = Guid.NewGuid().ToString("N");
                 node.Id = newId;

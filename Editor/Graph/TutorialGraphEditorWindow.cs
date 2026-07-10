@@ -17,7 +17,9 @@ namespace TutorialKit.Editor
         private NodeInspectorView _inspector;
         private TutorialGraph _graph;
         private Label _statusLabel;
-        private ToolbarToggle _verticalToggle;
+        private ToolbarButton _layoutButton;
+        private Image _layoutIcon;
+        private Label _layoutLabel;
         private bool _subscribed;
         private bool _attach = true;
 
@@ -98,7 +100,7 @@ namespace TutorialKit.Editor
             bar.AddToClassList("tk-ribbon");
 
             // ---- Manage: pick / save / run a tutorial ----
-            var manage = Section(bar, "Manage");
+            var manage = Section(bar);
             var menu = new ToolbarMenu { text = "Tutorials" };
             foreach (var guid in AssetDatabase.FindAssets("t:TutorialGraph"))
             {
@@ -116,26 +118,27 @@ namespace TutorialKit.Editor
             manage.Add(IconButton("Test", "PlayButton", "Enter Play mode and run this tutorial", TestInPlay));
 
             // ---- Layout: arrange & orient the graph ----
-            var layout = Section(bar, "Layout");
+            var layout = Section(bar);
             layout.Add(IconButton("Auto Layout", "ScaleTool", "Tidy the graph (respects the layout direction)",
                 () => _graphView?.AutoLayout()));
             layout.Add(IconButton("Frame", "ViewToolZoom", "Frame all nodes (A)", () => _graphView?.FrameAll()));
-            _verticalToggle = new ToolbarToggle
+
+            // Layout-direction toggle: one button that flips horizontal ↔ vertical and shows the current one.
+            _layoutButton = new ToolbarButton(() =>
             {
-                text = "Vertical",
-                value = TutorialGraphView.DefaultVertical,
-                tooltip = "Flow THIS graph top → bottom (VFX-graph style). Saved on the graph; new graphs " +
-                          "follow the project default in Settings.",
-            };
-            _verticalToggle.RegisterValueChangedCallback(e =>
-            {
-                _graphView?.SetVertical(e.newValue);
-                if (_graphView != null) _verticalToggle.SetValueWithoutNotify(_graphView.Vertical);
+                if (_graphView == null) return;
+                _graphView.SetVertical(!_graphView.Vertical);
+                UpdateLayoutButton();
             });
-            layout.Add(_verticalToggle);
+            _layoutButton.AddToClassList("tk-toolbar-btn");
+            _layoutIcon = new Image();
+            _layoutLabel = new Label();
+            _layoutButton.Add(_layoutIcon);
+            _layoutButton.Add(_layoutLabel);
+            layout.Add(_layoutButton);
 
             // ---- View: panels & live-attach ----
-            var view = Section(bar, "View");
+            var view = Section(bar);
             view.Add(new ToolbarButton(() => _graphView?.ToggleBlackboard()) { text = "Blackboard" });
             view.Add(new ToolbarButton(() => _graphView?.ToggleMinimap()) { text = "Minimap" });
             var attachToggle = new ToolbarToggle { text = "Attach", value = _attach, tooltip = "Auto-follow the running tutorial in Play mode" };
@@ -143,24 +146,40 @@ namespace TutorialKit.Editor
             view.Add(attachToggle);
 
             // ---- Info: status (stretches to fill) ----
-            var info = Section(bar, "Info");
-            var infoWrap = info.parent;
-            infoWrap.style.flexGrow = 1;
+            var info = Section(bar);
             info.style.flexGrow = 1;
             _statusLabel = new Label(" No tutorial loaded ");
             _statusLabel.AddToClassList("tk-ribbon-status");
             info.Add(_statusLabel);
 
             // ---- Settings (far right) ----
-            var settings = Section(bar, "");
+            var settings = Section(bar);
             settings.Add(IconButton("Settings", "Settings", "TutorialKit settings & AI skill",
                 TutorialKitSettingsWindow.ShowWindow));
 
             rootVisualElement.Add(bar);
+            UpdateLayoutButton();
         }
 
-        // A ribbon section: a row of controls with a small caption beneath, preceded by a divider.
-        private static VisualElement Section(VisualElement bar, string title)
+        // Reflect the current graph's layout direction on the toggle button (icon + label + tooltip).
+        private void UpdateLayoutButton()
+        {
+            if (_layoutButton == null) return;
+            bool v = _graphView != null && _graphView.Vertical;
+            _layoutIcon.image = ToolbarIcon(v ? "VerticalLayoutGroup Icon" : "HorizontalLayoutGroup Icon");
+            _layoutLabel.text = v ? "Vertical" : "Horizontal";
+            _layoutButton.tooltip = v
+                ? "Layout: Vertical (top → bottom). Click to switch to Horizontal."
+                : "Layout: Horizontal (left → right). Click to switch to Vertical.";
+        }
+
+        private static Texture ToolbarIcon(string iconName)
+        {
+            try { return EditorGUIUtility.IconContent(iconName)?.image; } catch { return null; }
+        }
+
+        // A ribbon section: an inline group of controls, preceded by a divider (no caption).
+        private static VisualElement Section(VisualElement bar)
         {
             if (bar.childCount > 0)
             {
@@ -168,16 +187,9 @@ namespace TutorialKit.Editor
                 sep.AddToClassList("tk-ribbon-sep");
                 bar.Add(sep);
             }
-            var wrap = new VisualElement();
-            wrap.AddToClassList("tk-ribbon-section");
             var row = new VisualElement();
-            row.AddToClassList("tk-ribbon-row");
-            wrap.Add(row);
-            var label = new Label(title ?? "");
-            label.AddToClassList("tk-ribbon-label");
-            if (string.IsNullOrEmpty(title)) label.style.visibility = Visibility.Hidden;
-            wrap.Add(label);
-            bar.Add(wrap);
+            row.AddToClassList("tk-ribbon-section");
+            bar.Add(row);
             return row;
         }
 
@@ -199,7 +211,7 @@ namespace TutorialKit.Editor
             if (_graphView == null) return;
             _graphView.LoadGraph(graph);
             _graphView.FrameAll();
-            _verticalToggle?.SetValueWithoutNotify(_graphView.Vertical); // reflect this graph's saved direction
+            UpdateLayoutButton(); // reflect this graph's saved direction on the toggle button
             if (_statusLabel != null)
                 _statusLabel.text = graph != null ? $" {graph.DisplayName}  ({graph.Nodes.Count} nodes) " : " No tutorial loaded ";
         }

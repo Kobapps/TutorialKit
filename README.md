@@ -46,8 +46,8 @@ example graphs (highlight, pointer, text, waits, commands, dynamic targets).
 
 1. Add a **Tutorial Graph**: `Assets ▸ Create ▸ TutorialKit ▸ Tutorial Graph`.
 2. Open it: double-click the asset, or `Window ▸ TutorialKit ▸ Tutorial Graph Editor`.
-   Every graph has one built-in **Start** node (the entry — it can't be deleted or duplicated).
-   Right-click the canvas ▸ **Add Node** to build a flow out from Start.
+   Every graph has a built-in **Start** and **End** node (the fixed entry and exit — they can't be
+   deleted or duplicated). Right-click the canvas ▸ **Add Node** to build the flow between them.
 3. Mark game elements: add a **Tutorial Target** component to any UI element or world object and
    give it an id (e.g. `play_button`). Reference that id from `Show Vignette` / `Show Pointer` nodes.
 4. Start it from a **Tutorial Trigger** component (On Start / On Signal / Manual), or from code:
@@ -137,11 +137,12 @@ Export any graph to JSON from its inspector (**Export JSON…**) and edit/host i
 **Window ▸ TutorialKit ▸ Tutorial Graph Editor** — a draggable/collapsible **minimap**, a
 **blackboard** panel for typed variables, node **groups**, copy/paste & duplicate, full **undo/redo**,
 one-click **Auto Layout**, an **inspector** for the selected node (with field tooltips), an animated
-pulse on the live node during **▶ Test in Play**, a **sectioned toolbar** (Manage / Layout / View /
-Info), and right-click **Add Node** search.
+pulse on the live node during **▶ Test in Play**, a **grouped toolbar** (manage / layout / view /
+info), and right-click **Add Node** search.
 
-Toggle **Vertical** in the toolbar to flow the graph **top → bottom** (VFX-graph style: flow ports move
-to the top/bottom of each node, data ports stay on the sides); Auto Layout follows the chosen direction.
+The toolbar's **layout** button flips the graph between left → right and **top → bottom** (VFX-graph
+style: flow ports move to the top/bottom of each node, data ports stay on the sides); Auto Layout
+follows the chosen direction.
 The choice is **saved per graph**, and graphs left on *Use Default* follow the project-wide default you
 pick in **Settings ▸ Tools ▸ Default graph layout**.
 

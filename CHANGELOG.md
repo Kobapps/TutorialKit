@@ -2,6 +2,16 @@
 
 All notable changes to TutorialKit are documented here.
 
+## [0.15.0] — 2026-07-10
+
+### Changed
+- **The End node is now mandatory too** — symmetric with Start. Every graph keeps exactly one End (the
+  editor adds one, wiring loose branches to it, and merges any extras); it can't be deleted or
+  duplicated and is hidden from the Add-Node menu.
+- **Graph toolbar cleanup.** Removed the section captions (Manage/Layout/View/Info) — the toolbar is now
+  a single row of grouped buttons with dividers. The layout direction is a **single toggle button** with
+  a horizontal/vertical icon that flips the graph and shows the current direction.
+
 ## [0.14.0] — 2026-07-10
 
 ### Changed
