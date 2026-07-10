@@ -31,6 +31,8 @@ namespace TutorialKit.Editor
 
             DrawAiSkillSection();
             EditorGUILayout.Space(12);
+            DrawPointerArtSection();
+            EditorGUILayout.Space(12);
             DrawToolsSection();
             EditorGUILayout.Space(12);
             DrawProgressSection();
@@ -80,6 +82,117 @@ namespace TutorialKit.Editor
                         TutorialSkillGenerator.SkillName + ". Re-run Update after adding custom nodes.",
                         MessageType.Info);
             }
+        }
+
+        private SerializedObject _settingsSO;
+
+        private const string PointerArtDir = "Packages/com.tutorialkit/Runtime/Resources/TutorialKit/Pointers/";
+        private static readonly (string field, string sprite, string label)[] PointerFields =
+        {
+            ("pointerHand", "hand_point", "Hand (point / tap)"),
+            ("pointerHandOpen", "hand_open", "Hand — open (drag)"),
+            ("pointerHandClosed", "hand_closed", "Hand — closed (grab)"),
+            ("pointerArrow", "arrow", "Arrow"),
+        };
+
+        private void DrawPointerArtSection()
+        {
+            using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+            {
+                GUILayout.Label("Default Pointer Art", EditorStyles.boldLabel);
+                EditorGUILayout.LabelField(
+                    "Sprites the pointer nodes use by default. Replace any to re-skin the hand/arrow " +
+                    "project-wide; leave one empty to use the bundled default (CC0, Kenney).", WrapLabel);
+
+                var settings = LoadSettings();
+                if (settings == null)
+                {
+                    EditorGUILayout.Space(4);
+                    EditorGUILayout.LabelField("No settings asset yet.", EditorStyles.miniLabel);
+                    GUI.backgroundColor = new Color(0.4f, 0.7f, 1f);
+                    if (GUILayout.Button("Create Settings Asset (with generic defaults)", GUILayout.Height(26)))
+                    {
+                        Selection.activeObject = CreateSettings();
+                        _settingsSO = null;
+                    }
+                    GUI.backgroundColor = Color.white;
+                    return;
+                }
+
+                if (_settingsSO == null || _settingsSO.targetObject != settings)
+                    _settingsSO = new SerializedObject(settings);
+
+                _settingsSO.Update();
+                EditorGUI.BeginChangeCheck();
+                foreach (var (field, _, label) in PointerFields)
+                {
+                    var prop = _settingsSO.FindProperty(field);
+                    if (prop != null) EditorGUILayout.PropertyField(prop, new GUIContent(label));
+                }
+                if (EditorGUI.EndChangeCheck())
+                {
+                    _settingsSO.ApplyModifiedProperties();
+                    EditorUtility.SetDirty(settings);
+                    TutorialSpriteFactory.ClearCache();
+                }
+
+                EditorGUILayout.Space(4);
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    if (GUILayout.Button("Reset to bundled defaults"))
+                    {
+                        AssignDefaults(settings);
+                        _settingsSO = null;
+                        TutorialSpriteFactory.ClearCache();
+                    }
+                    if (GUILayout.Button("Ping asset", GUILayout.Width(100)))
+                        EditorGUIUtility.PingObject(settings);
+                }
+                EditorGUILayout.HelpBox(
+                    "Play-mode preview updates immediately. Sprites should be imported as Sprite (2D and UI).",
+                    MessageType.None);
+            }
+        }
+
+        private static TutorialKitSettings LoadSettings()
+        {
+            var s = Resources.Load<TutorialKitSettings>(TutorialKitSettings.ResourceName);
+            if (s != null) return s;
+            foreach (var guid in AssetDatabase.FindAssets("t:TutorialKitSettings"))
+                return AssetDatabase.LoadAssetAtPath<TutorialKitSettings>(AssetDatabase.GUIDToAssetPath(guid));
+            return null;
+        }
+
+        private static TutorialKitSettings CreateSettings()
+        {
+            if (!AssetDatabase.IsValidFolder("Assets/TutorialKit"))
+                AssetDatabase.CreateFolder("Assets", "TutorialKit");
+            if (!AssetDatabase.IsValidFolder("Assets/TutorialKit/Resources"))
+                AssetDatabase.CreateFolder("Assets/TutorialKit", "Resources");
+
+            var s = ScriptableObject.CreateInstance<TutorialKitSettings>();
+            AssetDatabase.CreateAsset(s, "Assets/TutorialKit/Resources/" + TutorialKitSettings.ResourceName + ".asset");
+            AssignDefaults(s);
+            AssetDatabase.SaveAssets();
+            TutorialKitSettings.ClearCache();
+            TutorialSpriteFactory.ClearCache();
+            UnityEngine.Debug.Log("[TutorialKit] Created settings asset at Assets/TutorialKit/Resources/" +
+                                  TutorialKitSettings.ResourceName + ".asset");
+            return s;
+        }
+
+        // Fill the sprite fields with the bundled pointer art so they're visible and easy to swap.
+        private static void AssignDefaults(TutorialKitSettings s)
+        {
+            var so = new SerializedObject(s);
+            foreach (var (field, sprite, _) in PointerFields)
+            {
+                var prop = so.FindProperty(field);
+                if (prop != null)
+                    prop.objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>(PointerArtDir + sprite + ".png");
+            }
+            so.ApplyModifiedPropertiesWithoutUndo();
+            EditorUtility.SetDirty(s);
         }
 
         private void DrawToolsSection()

@@ -18,13 +18,27 @@ namespace TutorialKit
         private const string ArtPath = "TutorialKit/Pointers/";
         private static Sprite Art(string name) => Resources.Load<Sprite>(ArtPath + name);
 
+        // Priority for each pointer: project-settings override → bundled art → procedural shape.
+        private static Sprite Setting(System.Func<TutorialKitSettings, Sprite> pick)
+        {
+            var s = TutorialKitSettings.Instance;
+            return s != null ? pick(s) : null;
+        }
+
         public static Sprite RoundedPanel => _panel ??= BuildRoundedRect(96, 26);
-        public static Sprite Hand => _hand ??= Art("hand_point") ?? BuildHand(128);
-        public static Sprite HandOpen => _handOpen ??= Art("hand_open") ?? BuildHand(128);
-        public static Sprite HandClosed => _handClosed ??= Art("hand_closed") ?? BuildHand(128);
-        public static Sprite Arrow => _arrow ??= Art("arrow") ?? BuildArrow(128);
+        public static Sprite Hand => _hand ??= Setting(s => s.PointerHand) ?? Art("hand_point") ?? BuildHand(128);
+        public static Sprite HandOpen => _handOpen ??= Setting(s => s.PointerHandOpen) ?? Art("hand_open") ?? BuildHand(128);
+        public static Sprite HandClosed => _handClosed ??= Setting(s => s.PointerHandClosed) ?? Art("hand_closed") ?? BuildHand(128);
+        public static Sprite Arrow => _arrow ??= Setting(s => s.PointerArrow) ?? Art("arrow") ?? BuildArrow(128);
         public static Sprite Ring => _ring ??= BuildRing(128, 0.16f);
         public static Sprite Dot => _dot ??= BuildCircle(64);
+
+        /// <summary>Drops cached sprites (and the settings lookup) so overrides re-resolve. Editor use.</summary>
+        public static void ClearCache()
+        {
+            _hand = _handOpen = _handClosed = _arrow = null;
+            TutorialKitSettings.ClearCache();
+        }
 
         private static Sprite MakeSprite(Texture2D tex, Vector4 border = default)
         {

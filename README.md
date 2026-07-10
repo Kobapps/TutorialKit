@@ -138,6 +138,9 @@ Export any graph to JSON from its inspector (**Export JSON…**) and edit/host i
 one-click **Auto Layout**, an **inspector** for the selected node (with field tooltips), an animated
 pulse on the live node during **▶ Test in Play**, icon toolbar, and right-click **Add Node** search.
 
+Toggle **Vertical** in the toolbar to flow the graph **top → bottom** (VFX-graph style: flow ports move
+to the top/bottom of each node, data ports stay on the sides); Auto Layout follows the chosen direction.
+
 Connections: an output port can **fan out to several nodes** — those branches run concurrently and
 join. Many nodes may also converge into one input. Use `Condition` (True/False) for either/or branches.
 
@@ -158,6 +161,11 @@ traversed edges, showing live blackboard values (`→ value`), and reporting `�
 teaches an AI assistant (Claude Code, etc.) how to author, configure, test, and debug tutorials in
 your project. Its node reference is generated live from your project, so **custom nodes are documented
 automatically**. Re-run *Update* after adding new node types.
+
+The same window has a **Default Pointer Art** section: create a `TutorialKitSettings` asset (pre-filled
+with the bundled CC0 art) and swap the hand/arrow sprites to re-skin every pointer project-wide. The
+asset lives in a `Resources` folder so runtime and builds pick it up; an empty field falls back to the
+bundled default. Per-tutorial art can still be assigned on the pointer view.
 
 ## Custom nodes
 

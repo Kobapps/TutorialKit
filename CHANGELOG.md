@@ -2,6 +2,19 @@
 
 All notable changes to TutorialKit are documented here.
 
+## [0.10.0] — 2026-07-10
+
+### Added
+- **Settings for default pointer art.** New `TutorialKitSettings` asset (created/edited from
+  **Window ▸ TutorialKit ▸ Settings ▸ Default Pointer Art**) exposes the four pointer sprites
+  (hand, open, closed, arrow). It's pre-filled with the bundled generic art and lives in a `Resources`
+  folder so runtime/builds read it; replace any sprite to re-skin pointers project-wide, or clear one
+  to fall back to the bundled default → procedural shape.
+- **Vertical graph layout.** A **Vertical** toolbar toggle flows the graph **top → bottom** like the
+  VFX Graph editor: flow ports move to the top/bottom of each node (data ports stay on the sides) and
+  Auto Layout arranges by the chosen direction (barycenter placement, providers in a left gutter). The
+  choice is remembered per-editor.
+
 ## [0.9.0] — 2026-07-10
 
 ### Added

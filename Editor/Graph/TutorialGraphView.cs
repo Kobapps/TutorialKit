@@ -29,6 +29,21 @@ namespace TutorialKit.Editor
         private bool _minimapPlaced;
         private string _activeNodeId;
 
+        private const string VerticalPrefKey = "TutorialKit.Graph.Vertical";
+        private bool _vertical = EditorPrefs.GetBool(VerticalPrefKey, false);
+
+        /// <summary>Whether the graph flows top→bottom (VFX-style) instead of left→right.</summary>
+        public bool Vertical => _vertical;
+
+        /// <summary>Switch flow orientation, rebuild the node views with the new port layout, re-lay out.</summary>
+        public void SetVertical(bool vertical)
+        {
+            if (_vertical == vertical) return;
+            _vertical = vertical;
+            EditorPrefs.SetBool(VerticalPrefKey, vertical);
+            if (Graph != null) { Reload(); AutoLayout(); }
+        }
+
         public TutorialGraphView(EditorWindow window)
         {
             _window = window;
@@ -119,7 +134,7 @@ namespace TutorialKit.Editor
         private TutorialNodeView CreateNodeView(TutorialNode node)
         {
             var info = NodeTypeRegistry.Get(node.GetType());
-            var view = new TutorialNodeView(node, SerializedGraph, info);
+            var view = new TutorialNodeView(node, SerializedGraph, info, _vertical);
             view.NodeSelected += OnNodeSelected;
             AddElement(view);
             _nodeViews[node.Id] = view;
@@ -426,11 +441,13 @@ namespace TutorialKit.Editor
             if (Graph == null || Graph.Nodes.Count == 0) return;
             Undo.RegisterCompleteObjectUndo(Graph, "Auto Layout");
 
-            const float rowGap = 150f;   // vertical distance between rows
-            const float colStep = 300f;  // horizontal distance between adjacent columns
-            const float laneGap = 300f;  // extra space reserved before a column that has provider nodes
+            bool vert = _vertical;
+            const float laneGap = 300f;             // gutter before a consumer for its provider nodes
+            const float provGap = 150f;             // vertical spacing between stacked providers
+            float crossStep = vert ? 260f : 150f;   // spacing between siblings (X if vertical, else Y)
+            float mainStep = vert ? 190f : 300f;    // spacing between depth layers (Y if vertical, else X)
 
-            // 1. Longest-path column assignment (flow nodes only).
+            // 1. Longest-path depth assignment (flow nodes only).
             var col = new Dictionary<string, int>();
             var queue = new Queue<string>();
             string entry = Graph.EntryNode != null ? Graph.EntryNode.Id : Graph.Nodes[0].Id;
@@ -476,19 +493,27 @@ namespace TutorialKit.Editor
                     colHasProviders.Add(c);
             }
 
-            // 4. Column X positions — reserve a lane only before columns that have providers.
-            var colX = new Dictionary<int, float>();
-            float cursor = 0f;
-            for (int c = 0; c <= maxCol; c++)
+            // 4. Depth positions. Horizontal reserves a gutter before provider columns; vertical keeps
+            //    depth uniform (providers sit to the side, on the cross axis, in both orientations).
+            var depthPos = new Dictionary<int, float>();
+            if (vert)
             {
-                if (colHasProviders.Contains(c)) cursor += laneGap;
-                colX[c] = cursor;
-                cursor += colStep;
+                for (int c = 0; c <= maxCol; c++) depthPos[c] = c * mainStep;
+            }
+            else
+            {
+                float cursor = 0f;
+                for (int c = 0; c <= maxCol; c++)
+                {
+                    if (colHasProviders.Contains(c)) cursor += laneGap;
+                    depthPos[c] = cursor;
+                    cursor += mainStep;
+                }
             }
 
-            // 5. Vertical placement: barycenter of parents, column by column (aligns chains, spreads branches).
+            // 5. Barycenter cross placement, layer by layer (aligns chains, spreads branches, centres joins).
             var pos = new Dictionary<string, Vector2>();
-            var yOf = new Dictionary<string, float>();
+            var crossOf = new Dictionary<string, float>();
             var byCol = new Dictionary<int, List<string>>();
             foreach (var n in Graph.Nodes)
             {
@@ -505,24 +530,24 @@ namespace TutorialKit.Editor
                 {
                     float sum = 0f; int cnt = 0;
                     if (parents.TryGetValue(id, out var ps))
-                        foreach (var p in ps) if (yOf.TryGetValue(p, out var py)) { sum += py; cnt++; }
+                        foreach (var p in ps) if (crossOf.TryGetValue(p, out var pc)) { sum += pc; cnt++; }
                     desired[id] = cnt > 0 ? sum / cnt : 0f;
                 }
                 ids.Sort((a, b) => desired[a].CompareTo(desired[b]));
                 float prev = float.NegativeInfinity;
                 foreach (var id in ids)
                 {
-                    float yy = Mathf.Max(desired[id], prev + rowGap);
-                    yOf[id] = yy;
-                    prev = yy;
-                    pos[id] = new Vector2(colX[c], yy);
+                    float cc = Mathf.Max(desired[id], prev + crossStep);
+                    crossOf[id] = cc;
+                    prev = cc;
+                    pos[id] = vert ? new Vector2(cc, depthPos[c]) : new Vector2(depthPos[c], cc);
                 }
             }
+            float graphBottom = 0f; foreach (var kv in pos) if (kv.Value.y > graphBottom) graphBottom = kv.Value.y;
 
-            // 6. Providers: stacked strictly BELOW their consumer in the consumer's reserved lane,
-            //    ordered to match the consumer's input-port order. This keeps every data edge rising
-            //    up-right to an input port — it never routes back up through the flow band or under
-            //    another node (which is what happened when providers were centred on the consumer's Y).
+            // 6. Providers sit to the LEFT of their consumer (data ports stay on the node's left edge in
+            //    both orientations), stacked downward and ordered by the consumer's input-port order, so
+            //    each data edge rises cleanly to its port instead of routing under a node.
             var providersByConsumer = new Dictionary<string, List<(string id, int portIdx)>>();
             var dangling = new List<string>();
             foreach (var n in Graph.Nodes)
@@ -532,7 +557,7 @@ namespace TutorialKit.Editor
                 foreach (var de in Graph.DataEdges)
                     if (de.FromNodeId == n.Id) { consumerId = de.ToNodeId; toPort = de.ToPort; break; }
 
-                if (consumerId != null && col.ContainsKey(consumerId) && yOf.ContainsKey(consumerId))
+                if (consumerId != null && pos.ContainsKey(consumerId))
                 {
                     if (!providersByConsumer.TryGetValue(consumerId, out var list))
                     { list = new List<(string, int)>(); providersByConsumer[consumerId] = list; }
@@ -541,32 +566,37 @@ namespace TutorialKit.Editor
                 else dangling.Add(n.Id);
             }
 
-            // Pack lanes top-to-bottom, left-to-right so shared lanes stay collision-free & stable.
+            // Pack gutters left-to-right, top-to-bottom so providers sharing a gutter stay collision-free.
             var laneUsed = new Dictionary<int, HashSet<int>>();
             var consumerOrder = new List<string>(providersByConsumer.Keys);
-            consumerOrder.Sort((a, b) => col[a] != col[b] ? col[a].CompareTo(col[b]) : yOf[a].CompareTo(yOf[b]));
+            consumerOrder.Sort((a, b) =>
+            {
+                Vector2 pa = pos[a], pb = pos[b];
+                return Mathf.Abs(pa.x - pb.x) > 0.5f ? pa.x.CompareTo(pb.x) : pa.y.CompareTo(pb.y);
+            });
             foreach (var consumerId in consumerOrder)
             {
-                int cc = col[consumerId];
-                if (!laneUsed.TryGetValue(cc, out var used)) { used = new HashSet<int>(); laneUsed[cc] = used; }
+                Vector2 cp = pos[consumerId];
+                float laneX = cp.x - laneGap;
+                int laneKey = Mathf.RoundToInt(laneX / 4f);
+                if (!laneUsed.TryGetValue(laneKey, out var used)) { used = new HashSet<int>(); laneUsed[laneKey] = used; }
                 var list = providersByConsumer[consumerId];
                 list.Sort((a, b) => a.portIdx.CompareTo(b.portIdx));
-                int bucket = Mathf.RoundToInt(yOf[consumerId] / rowGap) + 1; // start one row below the consumer
+                int bucket = Mathf.RoundToInt(cp.y / provGap) + 1; // start one row below the consumer
                 foreach (var (id, _) in list)
                 {
                     while (used.Contains(bucket)) bucket++;
                     used.Add(bucket);
-                    pos[id] = new Vector2(colX[cc] - laneGap, bucket * rowGap);
+                    pos[id] = new Vector2(laneX, bucket * provGap);
                     bucket++;
                 }
             }
 
-            float bottom = 0f; foreach (var kv in yOf) if (kv.Value > bottom) bottom = kv.Value;
-            float danglingY = bottom + rowGap * 2f;
+            float danglingY = graphBottom + provGap * 2f;
             foreach (var id in dangling)
             {
                 pos[id] = new Vector2(0f, danglingY);
-                danglingY += rowGap * 0.9f;
+                danglingY += provGap * 0.9f;
             }
 
             // 7. Apply.

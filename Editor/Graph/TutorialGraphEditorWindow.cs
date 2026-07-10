@@ -94,8 +94,16 @@ namespace TutorialKit.Editor
 
             toolbar.Add(IconButton("Save", "SaveActive", "Save all assets (Ctrl+S)",
                 () => { if (_graph != null) AssetDatabase.SaveAssets(); }));
-            toolbar.Add(IconButton("Auto Layout", "ScaleTool", "Arrange nodes left → right",
+            toolbar.Add(IconButton("Auto Layout", "ScaleTool", "Tidy the graph (respects the layout direction)",
                 () => _graphView?.AutoLayout()));
+            var verticalToggle = new ToolbarToggle
+            {
+                text = "Vertical",
+                value = EditorPrefs.GetBool("TutorialKit.Graph.Vertical", false),
+                tooltip = "Flow the graph top → bottom (VFX-graph style) instead of left → right",
+            };
+            verticalToggle.RegisterValueChangedCallback(e => _graphView?.SetVertical(e.newValue));
+            toolbar.Add(verticalToggle);
             toolbar.Add(IconButton("Frame", "ViewToolZoom", "Frame all nodes (A)",
                 () => _graphView?.FrameAll()));
             toolbar.Add(IconButton("Test in Play", "PlayButton", "Enter Play mode and run this tutorial",

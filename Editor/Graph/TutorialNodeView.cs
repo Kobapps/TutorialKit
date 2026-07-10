@@ -23,6 +23,8 @@ namespace TutorialKit.Editor
 
         private readonly VisualElement _entryBadge;
         private readonly Label _summary;
+        private readonly bool _vertical;
+        private VisualElement _topStrip, _bottomStrip;
         private Label _visitedBadge;
         private IVisualElementScheduledItem _pulse;
         private double _pulseStart;
@@ -30,10 +32,15 @@ namespace TutorialKit.Editor
         private bool _active;
 
         public TutorialNodeView(TutorialNode node, SerializedObject serializedGraph, NodeTypeInfo info)
+            : this(node, serializedGraph, info, false) { }
+
+        public TutorialNodeView(TutorialNode node, SerializedObject serializedGraph, NodeTypeInfo info, bool vertical)
         {
             Node = node;
+            _vertical = vertical;
             title = node.DisplayName;
             AddToClassList("tk-node");
+            if (vertical) AddToClassList("tk-node-vertical");
             if (info != null && !string.IsNullOrEmpty(info.Description))
                 tooltip = info.Description;
 
@@ -46,20 +53,24 @@ namespace TutorialKit.Editor
             chip.style.backgroundColor = new StyleColor(accent);
             titleContainer.Insert(0, chip);
 
+            // Flow ports: vertical (top in / bottom out, VFX-style) or horizontal (left in / right out).
+            var flowOrient = vertical ? Orientation.Vertical : Orientation.Horizontal;
+            bool multiOut = node.OutputPorts.Count > 1;
+
             // Input (many may converge).
             if (node.HasInput)
             {
-                InputPort = InstantiatePort(Orientation.Horizontal, Direction.Input, Port.Capacity.Multi, typeof(bool));
-                InputPort.portName = "In";
-                inputContainer.Add(InputPort);
+                InputPort = InstantiatePort(flowOrient, Direction.Input, Port.Capacity.Multi, typeof(bool));
+                InputPort.portName = vertical ? "" : "In";
+                (vertical ? TopStrip() : inputContainer).Add(InputPort);
             }
 
             // Outputs (each may fan out to several nodes).
             foreach (var portName in node.OutputPorts)
             {
-                var p = InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Multi, typeof(bool));
-                p.portName = portName;
-                outputContainer.Add(p);
+                var p = InstantiatePort(flowOrient, Direction.Output, Port.Capacity.Multi, typeof(bool));
+                p.portName = vertical && !multiOut ? "" : portName; // keep True/False labels when branching
+                (vertical ? BottomStrip() : outputContainer).Add(p);
                 OutputPorts[portName] = p;
             }
 
@@ -212,6 +223,38 @@ namespace TutorialKit.Editor
             }
             return null;
         }
+
+        // Vertical-mode port strips: a centered row of connectors along the node's top / bottom edge.
+        private VisualElement TopStrip()
+        {
+            if (_topStrip == null)
+            {
+                _topStrip = MakeStrip("tk-top-ports");
+                mainContainer.Insert(0, _topStrip);
+            }
+            return _topStrip;
+        }
+
+        private VisualElement BottomStrip()
+        {
+            if (_bottomStrip == null)
+            {
+                _bottomStrip = MakeStrip("tk-bottom-ports");
+                mainContainer.Add(_bottomStrip);
+            }
+            return _bottomStrip;
+        }
+
+        private static VisualElement MakeStrip(string name) => new VisualElement
+        {
+            name = name,
+            style =
+            {
+                flexDirection = FlexDirection.Row,
+                justifyContent = Justify.Center,
+                alignItems = Align.Center,
+            },
+        };
 
         // A tinted header: blend the accent toward the dark node body so it reads as a coloured banner.
         private static Color Dim(Color c) => Color.Lerp(c, new Color(0.17f, 0.18f, 0.21f), 0.42f);
