@@ -1,0 +1,60 @@
+{
+    "tutorialId": "BranchingTutorial",
+    "displayName": "BranchingTutorial",
+    "description": "",
+    "entry": "45bc39ca2df54f9681c48229c2275d60",
+    "nodes": [
+        {
+            "type": "SetFlagNode",
+            "id": "45bc39ca2df54f9681c48229c2275d60",
+            "data": "{\"id\":\"45bc39ca2df54f9681c48229c2275d60\",\"editorPosition\":{\"x\":0.0,\"y\":0.0},\"Key\":\"vip\",\"Value\":true}"
+        },
+        {
+            "type": "ConditionNode",
+            "id": "a3dba394554f485e95258abae15476bd",
+            "data": "{\"id\":\"a3dba394554f485e95258abae15476bd\",\"editorPosition\":{\"x\":0.0,\"y\":0.0},\"Kind\":0,\"Key\":\"vip\",\"TutorialId\":\"\"}"
+        },
+        {
+            "type": "ShowTextBoxNode",
+            "id": "b9e6475461f6492b990855d6612c10a9",
+            "data": "{\"id\":\"b9e6475461f6492b990855d6612c10a9\",\"editorPosition\":{\"x\":0.0,\"y\":0.0},\"BoxId\":\"main\",\"PrefabKey\":\"\",\"Title\":\"VIP Path\",\"Body\":\"The flag was true, so we branched here.\",\"Placement\":2,\"NormalizedPosition\":{\"x\":0.5,\"y\":0.20000000298023225},\"Target\":{\"TargetId\":\"\"},\"ShowContinueButton\":true,\"ContinueLabel\":\"Next\",\"WaitForDismiss\":true,\"Typewriter\":true,\"TypewriterCps\":45.0}"
+        },
+        {
+            "type": "ShowTextBoxNode",
+            "id": "8100483d10a34f22a90ac0fabcc9b9a3",
+            "data": "{\"id\":\"8100483d10a34f22a90ac0fabcc9b9a3\",\"editorPosition\":{\"x\":0.0,\"y\":0.0},\"BoxId\":\"main\",\"PrefabKey\":\"\",\"Title\":\"Normal Path\",\"Body\":\"The flag was false.\",\"Placement\":2,\"NormalizedPosition\":{\"x\":0.5,\"y\":0.20000000298023225},\"Target\":{\"TargetId\":\"\"},\"ShowContinueButton\":true,\"ContinueLabel\":\"Next\",\"WaitForDismiss\":true,\"Typewriter\":true,\"TypewriterCps\":45.0}"
+        },
+        {
+            "type": "EndNode",
+            "id": "a842d32f0c814bb3ae806979c08810ba",
+            "data": "{\"id\":\"a842d32f0c814bb3ae806979c08810ba\",\"editorPosition\":{\"x\":0.0,\"y\":0.0}}"
+        }
+    ],
+    "edges": [
+        {
+            "from": "45bc39ca2df54f9681c48229c2275d60",
+            "port": "Out",
+            "to": "a3dba394554f485e95258abae15476bd"
+        },
+        {
+            "from": "a3dba394554f485e95258abae15476bd",
+            "port": "True",
+            "to": "b9e6475461f6492b990855d6612c10a9"
+        },
+        {
+            "from": "a3dba394554f485e95258abae15476bd",
+            "port": "False",
+            "to": "8100483d10a34f22a90ac0fabcc9b9a3"
+        },
+        {
+            "from": "b9e6475461f6492b990855d6612c10a9",
+            "port": "Out",
+            "to": "a842d32f0c814bb3ae806979c08810ba"
+        },
+        {
+            "from": "8100483d10a34f22a90ac0fabcc9b9a3",
+            "port": "Out",
+            "to": "a842d32f0c814bb3ae806979c08810ba"
+        }
+    ]
+}

@@ -1,0 +1,20 @@
+{
+    "name": "TutorialKit.Runtime",
+    "rootNamespace": "TutorialKit",
+    "references": [
+        "UniTask",
+        "DOTween.Modules",
+        "UnityEngine.UI",
+        "Unity.TextMeshPro",
+        "Unity.InputSystem"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

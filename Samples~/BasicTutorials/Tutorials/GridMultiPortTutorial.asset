@@ -1,0 +1,172 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 435c891f3b7b155409f338341f7ac4da, type: 3}
+  m_Name: GridMultiPortTutorial
+  m_EditorClassIdentifier: TutorialKit.Runtime::TutorialKit.TutorialGraph
+  tutorialId: 
+  displayName: 
+  description: 
+  entryNodeId: 02951bbea8c047f7bcef7063cfc3d52d
+  nodes:
+  - rid: 3850508646222397903
+  - rid: 3850508646222397904
+  - rid: 3850508646222397905
+  - rid: 3850508646222397906
+  - rid: 3850508646222397907
+  - rid: 3850508646222397908
+  - rid: 3850508646222397909
+  - rid: 3850508646222397910
+  - rid: 3850508646222397911
+  - rid: 3850508646222397912
+  edges:
+  - FromNodeId: 02951bbea8c047f7bcef7063cfc3d52d
+    FromPort: Out
+    ToNodeId: e3948ce637cb4e07876f6d3d8921fed5
+  - FromNodeId: e3948ce637cb4e07876f6d3d8921fed5
+    FromPort: Out
+    ToNodeId: fab283b3402c465e8d87fafb9ad03e6f
+  - FromNodeId: fab283b3402c465e8d87fafb9ad03e6f
+    FromPort: Out
+    ToNodeId: 79c83def7ba14d3384344d8b0efd8c37
+  - FromNodeId: 79c83def7ba14d3384344d8b0efd8c37
+    FromPort: Out
+    ToNodeId: 4c4a4cfc2eaf4277ae23a7bc0a732b1b
+  - FromNodeId: 4c4a4cfc2eaf4277ae23a7bc0a732b1b
+    FromPort: Out
+    ToNodeId: 1087472ca1b44551807e001a2e203557
+  - FromNodeId: 1087472ca1b44551807e001a2e203557
+    FromPort: Out
+    ToNodeId: 7a8d893d71df4739b913da5234e26610
+  dataEdges:
+  - FromNodeId: 6ec33d09acde45a38fc1588297f3824f
+    FromPort: Target
+    ToNodeId: e3948ce637cb4e07876f6d3d8921fed5
+    ToPort: Target
+  - FromNodeId: 2c0a4951e9eb48e99e5cdd1bf81fa851
+    FromPort: Target
+    ToNodeId: e3948ce637cb4e07876f6d3d8921fed5
+    ToPort: Target
+  - FromNodeId: c979f96517064416ade6b5982818ab24
+    FromPort: Target
+    ToNodeId: e3948ce637cb4e07876f6d3d8921fed5
+    ToPort: Target
+  groups: []
+  blackboard: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 3850508646222397903
+      type: {class: ShowTextBoxNode, ns: TutorialKit, asm: TutorialKit.Runtime}
+      data:
+        id: 02951bbea8c047f7bcef7063cfc3d52d
+        editorPosition: {x: 0, y: 0}
+        BoxId: main
+        PrefabKey: 
+        Title: Custom targets
+        Body: A custom node finds tiles at runtime and highlights several at once.
+          Tap Next.
+        Placement: 1
+        NormalizedPosition: {x: 0.5, y: 0.2}
+        Target:
+          TargetId: 
+        ShowContinueButton: 1
+        ContinueLabel: Next
+        WaitForDismiss: 1
+        Typewriter: 1
+        TypewriterCps: 45
+    - rid: 3850508646222397904
+      type: {class: ShowVignetteNode, ns: TutorialKit, asm: TutorialKit.Runtime}
+      data:
+        id: e3948ce637cb4e07876f6d3d8921fed5
+        editorPosition: {x: 0, y: 0}
+        Target:
+          TargetId: 
+        AdditionalTargets: []
+        Shape: 1
+        Softness: 0.15
+        Padding: 6
+        CornerRadius: 16
+        FadeDuration: 0.25
+        OverlayColor: {r: 0, g: 0, b: 0, a: 0.78}
+        BlockRaycastsOutsideHole: 1
+        AllowClicksThroughHoles: 0
+    - rid: 3850508646222397905
+      type: {class: GridTileTargetNode, ns: TutorialKitDemo, asm: TutorialKitDemo}
+      data:
+        id: 6ec33d09acde45a38fc1588297f3824f
+        editorPosition: {x: 0, y: 0}
+        TileIndex: 2
+    - rid: 3850508646222397906
+      type: {class: GridTileTargetNode, ns: TutorialKitDemo, asm: TutorialKitDemo}
+      data:
+        id: 2c0a4951e9eb48e99e5cdd1bf81fa851
+        editorPosition: {x: 0, y: 0}
+        TileIndex: 8
+    - rid: 3850508646222397907
+      type: {class: GridTileTargetNode, ns: TutorialKitDemo, asm: TutorialKitDemo}
+      data:
+        id: c979f96517064416ade6b5982818ab24
+        editorPosition: {x: 0, y: 0}
+        TileIndex: 13
+    - rid: 3850508646222397908
+      type: {class: ShowTextBoxNode, ns: TutorialKit, asm: TutorialKit.Runtime}
+      data:
+        id: fab283b3402c465e8d87fafb9ad03e6f
+        editorPosition: {x: 0, y: 0}
+        BoxId: hint
+        PrefabKey: 
+        Title: 
+        Body: Three tiles, found by a custom Tile Target node, wired into one vignette.
+          Tap Next.
+        Placement: 3
+        NormalizedPosition: {x: 0.5, y: 0.2}
+        Target:
+          TargetId: 
+        ShowContinueButton: 1
+        ContinueLabel: Next
+        WaitForDismiss: 1
+        Typewriter: 1
+        TypewriterCps: 45
+    - rid: 3850508646222397909
+      type: {class: HideTextBoxNode, ns: TutorialKit, asm: TutorialKit.Runtime}
+      data:
+        id: 79c83def7ba14d3384344d8b0efd8c37
+        editorPosition: {x: 0, y: 0}
+        BoxId: hint
+    - rid: 3850508646222397910
+      type: {class: HideVignetteNode, ns: TutorialKit, asm: TutorialKit.Runtime}
+      data:
+        id: 4c4a4cfc2eaf4277ae23a7bc0a732b1b
+        editorPosition: {x: 0, y: 0}
+    - rid: 3850508646222397911
+      type: {class: ShowTextBoxNode, ns: TutorialKit, asm: TutorialKit.Runtime}
+      data:
+        id: 1087472ca1b44551807e001a2e203557
+        editorPosition: {x: 0, y: 0}
+        BoxId: main
+        PrefabKey: 
+        Title: Nice!
+        Body: "Multiple target ports + custom target nodes. \U0001F389"
+        Placement: 2
+        NormalizedPosition: {x: 0.5, y: 0.2}
+        Target:
+          TargetId: 
+        ShowContinueButton: 1
+        ContinueLabel: Next
+        WaitForDismiss: 1
+        Typewriter: 1
+        TypewriterCps: 45
+    - rid: 3850508646222397912
+      type: {class: EndNode, ns: TutorialKit, asm: TutorialKit.Runtime}
+      data:
+        id: 7a8d893d71df4739b913da5234e26610
+        editorPosition: {x: 0, y: 0}

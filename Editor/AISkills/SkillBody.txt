@@ -1,0 +1,110 @@
+# Authoring TutorialKit tutorials
+
+You are helping author, configure, test, and debug **TutorialKit** tutorial sequences in this Unity
+project. TutorialKit plays branching, multi-step onboarding flows: dim/highlight (vignette), animated
+hand/arrow pointers, styled text boxes, input gating, custom game commands, and persistent progress.
+It talks to the game only through adapters, and scene elements are addressed by **string ids**.
+
+Follow this workflow.
+
+## 1. Discover the game's features
+
+- **Targets** — anything a tutorial highlights or points at needs a `TutorialTarget` component with a
+  stable `Id` (falls back to the GameObject name). Find existing ones by searching the project for
+  `TutorialTarget`, or add them to the buttons/objects the flow touches. Note the ids you'll reference.
+  For elements created/selected at **runtime** (e.g. spawned grid cells), register **dynamic targets**
+  from game code — no scene component needed:
+  `TutorialTargets.RegisterDynamic("cell_a", () => FindMyCell())` (a resolver found by game logic each
+  frame), or `TutorialTargets.RegisterRect("id", () => someScreenRect)` to control position/size
+  directly. Highlights and pointers then follow whatever the resolver returns.
+- **Signals** — game code raises named signals via `TutorialDirector.Current.Signals.Emit("id")` or a
+  `TutorialSignalEmitter`. `Wait For Signal` nodes await them. Grep for `.Emit(` / `TutorialSignalEmitter`.
+- **Commands** — game code registers async commands via `Commands.Register("id", ...)`. `Game Command`
+  nodes invoke them. Grep for `Commands.Register(`.
+- **Persistence / input-lock** — defaults exist; a game may install custom adapters (`SetPersistence`,
+  `SetInputLock`). Not usually needed for authoring.
+
+## 2. Author the tutorial
+
+Two equivalent ways — pick one:
+
+### A. Build a `TutorialGraph` asset (recommended for editing later)
+Use the Unity MCP `script-execute` tool to run C# that constructs the graph and saves it as an asset.
+Nodes are plain C# objects with public fields; chain them with edges on the `"Out"` port (branch nodes
+use their own port names). Example:
+
+```csharp
+using UnityEngine; using UnityEditor; using TutorialKit;
+public static class MakeTut {
+  public static void Run() {
+    var g = ScriptableObject.CreateInstance<TutorialGraph>();
+    var t1 = new ShowTextBoxNode { Title="Hi", Body="Tap the shop.", Placement=TextBoxPlacement.Top };
+    var v1 = new ShowVignetteNode { Target=new TutorialTargetRef("shop_button"), Shape=HighlightShape.Circle };
+    var p1 = new ShowPointerNode { Gesture=PointerGesture.Tap, Target=new TutorialTargetRef("shop_button") };
+    var w1 = new WaitInputNode { Kind=WaitInputKind.TapOnTarget, Target=new TutorialTargetRef("shop_button") };
+    var end = new EndNode();
+    foreach (var n in new TutorialNode[]{t1,v1,p1,w1,end}) { n.EnsureId(); g.AddNode(n); }
+    g.SetEdge(t1.Id,"Out",v1.Id); g.SetEdge(v1.Id,"Out",p1.Id);
+    g.SetEdge(p1.Id,"Out",w1.Id); g.SetEdge(w1.Id,"Out",end.Id);
+    g.EntryNodeId = t1.Id;
+    AssetDatabase.CreateAsset(g, "Assets/Tutorials/Shop.asset"); AssetDatabase.SaveAssets();
+  }
+}
+```
+After creating the asset, run `Auto Layout` in the graph editor (Window ▸ TutorialKit ▸ Tutorial Graph
+Editor) so it's readable.
+
+### B. Write the remote JSON format
+The type-tagged JSON round-trips every node (including custom ones):
+```json
+{ "tutorialId":"shop", "displayName":"Shop", "entry":"<nodeId>",
+  "nodes":[ { "type":"ShowTextBoxNode", "id":"n1", "data":"{...JsonUtility fields...}" } ],
+  "edges":[ { "from":"n1", "port":"Out", "to":"n2" } ] }
+```
+`data` is `JsonUtility.ToJson(node)` (escaped). Load at runtime with
+`RemoteTutorialLoader.LoadFromJson(json)` or `LoadFromUrlAsync(url)`. The easiest way to produce a
+correct JSON file is to build the graph in code (A) and call `TutorialJson.ToJson(graph)`.
+
+## 3. Configure it to run
+
+Add a `TutorialTrigger` component in the scene, assign the graph, and set When = On Start / On Signal /
+Manual, plus gating (only-if-not-completed, conditions). Or start from code:
+`TutorialDirector.EnsureExists().Play(graph);`
+
+## 4. Test it (via Unity MCP)
+
+1. Make sure the scene has the referenced `TutorialTarget` ids and a trigger (or a controller that calls
+   `Play`). Save the scene.
+2. `assets-refresh` to compile. Wait for `Library/ScriptAssemblies/*.dll`; check `Logs/Editor.log`
+   (strip `\r`) for `error CS`.
+3. Enter play: `editor-application-set-state {"isPlaying":true}`; poll `editor-application-get-state`
+   until `IsPlaying:true`.
+4. Screenshot with `screenshot-game-view` to see the overlay.
+5. To advance blocking text boxes/taps in a headless run, invoke the continue button or simulate input
+   via `script-execute`, then screenshot again.
+
+## 5. Debug it
+
+- Open **Window ▸ TutorialKit ▸ Tutorial Graph Editor**, load the graph, press **▶ Test in Play** — the
+  currently-executing node pulses in the graph.
+- `console-get-logs` shows warnings like unknown target ids / missing commands.
+
+## Environment gotchas (important)
+
+- **TMP text renders blank** until *TMP Essential Resources* are imported (Window ▸ TextMeshPro).
+- The Editor **throttles the play loop when its window is unfocused** (headless MCP driving), so
+  animations/typewriters freeze. Set `Application.runInBackground = true` via `script-execute` to make
+  them advance for screenshots.
+- `console-get-logs` returns a **rolling buffer across all play sessions** — always check each entry's
+  `Timestamp`; don't assume a log is from the current run.
+- An output port may fan out to **several** nodes: those branches run **concurrently** and the flow
+  joins when all finish (`graph.AddEdge` for extra connections; `SetEdge` replaces). Use a
+  `ConditionNode` (`True`/`False` ports) for either/or branching. Many nodes may converge into one input.
+- **Blackboard**: declare variables in the graph editor's Blackboard panel (or `graph.SetBlackboard`).
+  Their defaults seed `ctx.Blackboard` at runtime; `SetFlagNode`/`ConditionNode` read & write them by key.
+- **Target ports** (teal data ports): a target provider node (`TargetByIdNode`, `TargetByPositionNode`,
+  or your own `TargetNodeBase` subclass with game logic) has a `Target` OUTPUT. Wire it into the optional
+  `Target` INPUT of a vignette / pointer / text box / wait node to inject the target from a node instead
+  of a fixed field. In code: `graph.AddDataEdge(providerNodeId, "Target", consumerNodeId, "Target")`.
+
+## Node reference (auto-generated from this project, includes custom nodes)

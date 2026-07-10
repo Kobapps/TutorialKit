@@ -1,0 +1,110 @@
+{
+    "tutorialId": "GridMultiPortTutorial",
+    "displayName": "GridMultiPortTutorial",
+    "description": "",
+    "entry": "02951bbea8c047f7bcef7063cfc3d52d",
+    "nodes": [
+        {
+            "type": "ShowTextBoxNode",
+            "id": "02951bbea8c047f7bcef7063cfc3d52d",
+            "data": "{\"id\":\"02951bbea8c047f7bcef7063cfc3d52d\",\"editorPosition\":{\"x\":0.0,\"y\":0.0},\"BoxId\":\"main\",\"PrefabKey\":\"\",\"Title\":\"Custom targets\",\"Body\":\"A custom node finds tiles at runtime and highlights several at once. Tap Next.\",\"Placement\":1,\"NormalizedPosition\":{\"x\":0.5,\"y\":0.20000000298023225},\"Target\":{\"TargetId\":\"\"},\"ShowContinueButton\":true,\"ContinueLabel\":\"Next\",\"WaitForDismiss\":true,\"Typewriter\":true,\"TypewriterCps\":45.0}"
+        },
+        {
+            "type": "ShowVignetteNode",
+            "id": "e3948ce637cb4e07876f6d3d8921fed5",
+            "data": "{\"id\":\"e3948ce637cb4e07876f6d3d8921fed5\",\"editorPosition\":{\"x\":0.0,\"y\":0.0},\"Target\":{\"TargetId\":\"\"},\"AdditionalTargets\":[],\"Shape\":1,\"Softness\":0.15000000596046449,\"Padding\":6.0,\"CornerRadius\":16.0,\"FadeDuration\":0.25,\"OverlayColor\":{\"r\":0.0,\"g\":0.0,\"b\":0.0,\"a\":0.7799999713897705},\"BlockRaycastsOutsideHole\":true,\"AllowClicksThroughHoles\":false}"
+        },
+        {
+            "type": "GridTileTargetNode",
+            "id": "6ec33d09acde45a38fc1588297f3824f",
+            "data": "{\"id\":\"6ec33d09acde45a38fc1588297f3824f\",\"editorPosition\":{\"x\":0.0,\"y\":0.0},\"TileIndex\":2}"
+        },
+        {
+            "type": "GridTileTargetNode",
+            "id": "2c0a4951e9eb48e99e5cdd1bf81fa851",
+            "data": "{\"id\":\"2c0a4951e9eb48e99e5cdd1bf81fa851\",\"editorPosition\":{\"x\":0.0,\"y\":0.0},\"TileIndex\":8}"
+        },
+        {
+            "type": "GridTileTargetNode",
+            "id": "c979f96517064416ade6b5982818ab24",
+            "data": "{\"id\":\"c979f96517064416ade6b5982818ab24\",\"editorPosition\":{\"x\":0.0,\"y\":0.0},\"TileIndex\":13}"
+        },
+        {
+            "type": "ShowTextBoxNode",
+            "id": "fab283b3402c465e8d87fafb9ad03e6f",
+            "data": "{\"id\":\"fab283b3402c465e8d87fafb9ad03e6f\",\"editorPosition\":{\"x\":0.0,\"y\":0.0},\"BoxId\":\"hint\",\"PrefabKey\":\"\",\"Title\":\"\",\"Body\":\"Three tiles, found by a custom Tile Target node, wired into one vignette. Tap Next.\",\"Placement\":3,\"NormalizedPosition\":{\"x\":0.5,\"y\":0.20000000298023225},\"Target\":{\"TargetId\":\"\"},\"ShowContinueButton\":true,\"ContinueLabel\":\"Next\",\"WaitForDismiss\":true,\"Typewriter\":true,\"TypewriterCps\":45.0}"
+        },
+        {
+            "type": "HideTextBoxNode",
+            "id": "79c83def7ba14d3384344d8b0efd8c37",
+            "data": "{\"id\":\"79c83def7ba14d3384344d8b0efd8c37\",\"editorPosition\":{\"x\":0.0,\"y\":0.0},\"BoxId\":\"hint\"}"
+        },
+        {
+            "type": "HideVignetteNode",
+            "id": "4c4a4cfc2eaf4277ae23a7bc0a732b1b",
+            "data": "{\"id\":\"4c4a4cfc2eaf4277ae23a7bc0a732b1b\",\"editorPosition\":{\"x\":0.0,\"y\":0.0}}"
+        },
+        {
+            "type": "ShowTextBoxNode",
+            "id": "1087472ca1b44551807e001a2e203557",
+            "data": "{\"id\":\"1087472ca1b44551807e001a2e203557\",\"editorPosition\":{\"x\":0.0,\"y\":0.0},\"BoxId\":\"main\",\"PrefabKey\":\"\",\"Title\":\"Nice!\",\"Body\":\"Multiple target ports + custom target nodes. 🎉\",\"Placement\":2,\"NormalizedPosition\":{\"x\":0.5,\"y\":0.20000000298023225},\"Target\":{\"TargetId\":\"\"},\"ShowContinueButton\":true,\"ContinueLabel\":\"Next\",\"WaitForDismiss\":true,\"Typewriter\":true,\"TypewriterCps\":45.0}"
+        },
+        {
+            "type": "EndNode",
+            "id": "7a8d893d71df4739b913da5234e26610",
+            "data": "{\"id\":\"7a8d893d71df4739b913da5234e26610\",\"editorPosition\":{\"x\":0.0,\"y\":0.0}}"
+        }
+    ],
+    "edges": [
+        {
+            "from": "02951bbea8c047f7bcef7063cfc3d52d",
+            "port": "Out",
+            "to": "e3948ce637cb4e07876f6d3d8921fed5"
+        },
+        {
+            "from": "e3948ce637cb4e07876f6d3d8921fed5",
+            "port": "Out",
+            "to": "fab283b3402c465e8d87fafb9ad03e6f"
+        },
+        {
+            "from": "fab283b3402c465e8d87fafb9ad03e6f",
+            "port": "Out",
+            "to": "79c83def7ba14d3384344d8b0efd8c37"
+        },
+        {
+            "from": "79c83def7ba14d3384344d8b0efd8c37",
+            "port": "Out",
+            "to": "4c4a4cfc2eaf4277ae23a7bc0a732b1b"
+        },
+        {
+            "from": "4c4a4cfc2eaf4277ae23a7bc0a732b1b",
+            "port": "Out",
+            "to": "1087472ca1b44551807e001a2e203557"
+        },
+        {
+            "from": "1087472ca1b44551807e001a2e203557",
+            "port": "Out",
+            "to": "7a8d893d71df4739b913da5234e26610"
+        }
+    ],
+    "dataEdges": [
+        {
+            "from": "6ec33d09acde45a38fc1588297f3824f",
+            "fromPort": "Target",
+            "to": "e3948ce637cb4e07876f6d3d8921fed5",
+            "toPort": "Target"
+        },
+        {
+            "from": "2c0a4951e9eb48e99e5cdd1bf81fa851",
+            "fromPort": "Target",
+            "to": "e3948ce637cb4e07876f6d3d8921fed5",
+            "toPort": "Target"
+        },
+        {
+            "from": "c979f96517064416ade6b5982818ab24",
+            "fromPort": "Target",
+            "to": "e3948ce637cb4e07876f6d3d8921fed5",
+            "toPort": "Target"
+        }
+    ]
+}

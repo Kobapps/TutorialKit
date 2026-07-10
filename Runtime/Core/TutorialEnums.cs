@@ -1,0 +1,79 @@
+namespace TutorialKit
+{
+    /// <summary>Shape of a vignette highlight hole.</summary>
+    public enum HighlightShape
+    {
+        Circle = 0,
+        Rectangle = 1,
+    }
+
+    /// <summary>Visual style of the pointer.</summary>
+    public enum PointerKind
+    {
+        Hand = 0,
+        Arrow = 1,
+    }
+
+    /// <summary>Animated gesture a pointer performs.</summary>
+    public enum PointerGesture
+    {
+        /// <summary>Idle bob over a single target.</summary>
+        Point = 0,
+        /// <summary>Repeated tap/press over a single target.</summary>
+        Tap = 1,
+        /// <summary>Quick flick from A to B.</summary>
+        Swipe = 2,
+        /// <summary>Press-and-move from A to B (slower, "held").</summary>
+        Drag = 3,
+        /// <summary>Two elements moving together into one point.</summary>
+        Merge = 4,
+    }
+
+    public enum InputLockMode
+    {
+        Lock = 0,
+        Unlock = 1,
+    }
+
+    /// <summary>How a text box is positioned on screen.</summary>
+    public enum TextBoxPlacement
+    {
+        /// <summary>Use an explicit normalized screen position (0..1).</summary>
+        Custom = 0,
+        Top = 1,
+        Center = 2,
+        Bottom = 3,
+        /// <summary>Above the resolved target.</summary>
+        AboveTarget = 4,
+        /// <summary>Below the resolved target.</summary>
+        BelowTarget = 5,
+    }
+
+    /// <summary>Kinds of player input a wait node can block on.</summary>
+    public enum WaitInputKind
+    {
+        AnyInput = 0,
+        PointerDown = 1,
+        TapOnTarget = 2,
+    }
+
+    /// <summary>Lifecycle state of a running tutorial.</summary>
+    public enum TutorialStatus
+    {
+        Idle = 0,
+        Running = 1,
+        Completed = 2,
+        Skipped = 3,
+        Aborted = 4,
+        Faulted = 5,
+    }
+
+    /// <summary>When a <see cref="TutorialKit.TutorialTrigger"/> starts its graph.</summary>
+    public enum TutorialStartMode
+    {
+        OnEnable = 0,
+        OnStart = 1,
+        Manual = 2,
+        OnSignal = 3,
+    }
+}

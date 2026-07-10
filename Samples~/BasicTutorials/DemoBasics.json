@@ -1,0 +1,115 @@
+{
+    "tutorialId": "DemoBasics",
+    "displayName": "DemoBasics",
+    "description": "",
+    "entry": "3e9513e0e36240f59be97b0bec885ee8",
+    "nodes": [
+        {
+            "type": "ShowTextBoxNode",
+            "id": "3e9513e0e36240f59be97b0bec885ee8",
+            "data": "{\"id\":\"3e9513e0e36240f59be97b0bec885ee8\",\"editorPosition\":{\"x\":0.0,\"y\":0.0},\"BoxId\":\"main\",\"PrefabKey\":\"\",\"Title\":\"Welcome to TutorialKit\",\"Body\":\"This whole flow was authored as a graph. Tap Next to begin.\",\"Placement\":1,\"NormalizedPosition\":{\"x\":0.5,\"y\":0.20000000298023225},\"Target\":{\"TargetId\":\"\"},\"ShowContinueButton\":true,\"ContinueLabel\":\"Next\",\"WaitForDismiss\":true,\"Typewriter\":true,\"TypewriterCps\":45.0}"
+        },
+        {
+            "type": "ShowVignetteNode",
+            "id": "9bca84f18eaa4ea7b927357cf4b6ece9",
+            "data": "{\"id\":\"9bca84f18eaa4ea7b927357cf4b6ece9\",\"editorPosition\":{\"x\":0.0,\"y\":0.0},\"Target\":{\"TargetId\":\"play_button\"},\"Shape\":0,\"Softness\":0.25,\"Padding\":20.0,\"CornerRadius\":24.0,\"FadeDuration\":0.25,\"OverlayColor\":{\"r\":0.0,\"g\":0.0,\"b\":0.0,\"a\":0.7799999713897705},\"BlockRaycastsOutsideHole\":true}"
+        },
+        {
+            "type": "ShowPointerNode",
+            "id": "3545eb175be44f52b429fa14605844e5",
+            "data": "{\"id\":\"3545eb175be44f52b429fa14605844e5\",\"editorPosition\":{\"x\":0.0,\"y\":0.0},\"Kind\":0,\"Gesture\":1,\"Target\":{\"TargetId\":\"play_button\"},\"SecondaryTarget\":{\"TargetId\":\"\"},\"ScreenOffset\":{\"x\":0.0,\"y\":0.0},\"Speed\":1.0}"
+        },
+        {
+            "type": "ShowTextBoxNode",
+            "id": "ed1741cfa75049de9547c759af528a55",
+            "data": "{\"id\":\"ed1741cfa75049de9547c759af528a55\",\"editorPosition\":{\"x\":0.0,\"y\":0.0},\"BoxId\":\"main\",\"PrefabKey\":\"\",\"Title\":\"\",\"Body\":\"Now tap the highlighted PLAY button.\",\"Placement\":3,\"NormalizedPosition\":{\"x\":0.5,\"y\":0.20000000298023225},\"Target\":{\"TargetId\":\"\"},\"ShowContinueButton\":false,\"ContinueLabel\":\"Next\",\"WaitForDismiss\":false,\"Typewriter\":true,\"TypewriterCps\":45.0}"
+        },
+        {
+            "type": "WaitInputNode",
+            "id": "201e7ebe72a046e5968f0636c8b87546",
+            "data": "{\"id\":\"201e7ebe72a046e5968f0636c8b87546\",\"editorPosition\":{\"x\":0.0,\"y\":0.0},\"Kind\":2,\"Target\":{\"TargetId\":\"play_button\"}}"
+        },
+        {
+            "type": "HideVignetteNode",
+            "id": "2f8631ca15344433aa3a8255bb11f9c2",
+            "data": "{\"id\":\"2f8631ca15344433aa3a8255bb11f9c2\",\"editorPosition\":{\"x\":0.0,\"y\":0.0}}"
+        },
+        {
+            "type": "HidePointerNode",
+            "id": "b0e92d8c264c4d4fb1c61abf481886e7",
+            "data": "{\"id\":\"b0e92d8c264c4d4fb1c61abf481886e7\",\"editorPosition\":{\"x\":0.0,\"y\":0.0}}"
+        },
+        {
+            "type": "HideTextBoxNode",
+            "id": "d13913d1d1634e3bbcb4a95f27691516",
+            "data": "{\"id\":\"d13913d1d1634e3bbcb4a95f27691516\",\"editorPosition\":{\"x\":0.0,\"y\":0.0},\"BoxId\":\"main\"}"
+        },
+        {
+            "type": "DemoConfettiNode",
+            "id": "520d7f3fe9324939b620874c916a1292",
+            "data": "{\"id\":\"520d7f3fe9324939b620874c916a1292\",\"editorPosition\":{\"x\":0.0,\"y\":0.0},\"burst\":40}"
+        },
+        {
+            "type": "ShowTextBoxNode",
+            "id": "7b6f4d4766cd4de4a9a959fead62a75f",
+            "data": "{\"id\":\"7b6f4d4766cd4de4a9a959fead62a75f\",\"editorPosition\":{\"x\":0.0,\"y\":0.0},\"BoxId\":\"main\",\"PrefabKey\":\"\",\"Title\":\"Nice work!\",\"Body\":\"You finished the sample tutorial. 🎉\",\"Placement\":2,\"NormalizedPosition\":{\"x\":0.5,\"y\":0.20000000298023225},\"Target\":{\"TargetId\":\"\"},\"ShowContinueButton\":true,\"ContinueLabel\":\"Next\",\"WaitForDismiss\":true,\"Typewriter\":true,\"TypewriterCps\":45.0}"
+        },
+        {
+            "type": "EndNode",
+            "id": "83751fe2b9ae4b50a0c74099813f46fc",
+            "data": "{\"id\":\"83751fe2b9ae4b50a0c74099813f46fc\",\"editorPosition\":{\"x\":0.0,\"y\":0.0}}"
+        }
+    ],
+    "edges": [
+        {
+            "from": "3e9513e0e36240f59be97b0bec885ee8",
+            "port": "Out",
+            "to": "9bca84f18eaa4ea7b927357cf4b6ece9"
+        },
+        {
+            "from": "9bca84f18eaa4ea7b927357cf4b6ece9",
+            "port": "Out",
+            "to": "3545eb175be44f52b429fa14605844e5"
+        },
+        {
+            "from": "3545eb175be44f52b429fa14605844e5",
+            "port": "Out",
+            "to": "ed1741cfa75049de9547c759af528a55"
+        },
+        {
+            "from": "ed1741cfa75049de9547c759af528a55",
+            "port": "Out",
+            "to": "201e7ebe72a046e5968f0636c8b87546"
+        },
+        {
+            "from": "201e7ebe72a046e5968f0636c8b87546",
+            "port": "Out",
+            "to": "2f8631ca15344433aa3a8255bb11f9c2"
+        },
+        {
+            "from": "2f8631ca15344433aa3a8255bb11f9c2",
+            "port": "Out",
+            "to": "b0e92d8c264c4d4fb1c61abf481886e7"
+        },
+        {
+            "from": "b0e92d8c264c4d4fb1c61abf481886e7",
+            "port": "Out",
+            "to": "d13913d1d1634e3bbcb4a95f27691516"
+        },
+        {
+            "from": "d13913d1d1634e3bbcb4a95f27691516",
+            "port": "Out",
+            "to": "520d7f3fe9324939b620874c916a1292"
+        },
+        {
+            "from": "520d7f3fe9324939b620874c916a1292",
+            "port": "Out",
+            "to": "7b6f4d4766cd4de4a9a959fead62a75f"
+        },
+        {
+            "from": "7b6f4d4766cd4de4a9a959fead62a75f",
+            "port": "Out",
+            "to": "83751fe2b9ae4b50a0c74099813f46fc"
+        }
+    ]
+}

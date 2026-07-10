@@ -1,0 +1,168 @@
+/* TutorialKit graph editor styling */
+
+.tk-node {
+    min-width: 190px;
+    border-radius: 7px;
+    border-width: 1px;
+    border-color: rgba(0, 0, 0, 0.35);
+}
+
+.tk-node > #node-border {
+    border-radius: 7px;
+}
+
+.tk-node #title {
+    border-top-left-radius: 7px;
+    border-top-right-radius: 7px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
+
+.tk-node #title-label {
+    font-size: 12px;
+    -unity-font-style: bold;
+    margin-left: 2px;
+}
+
+.tk-node-icon {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    margin-left: 6px;
+    margin-right: 2px;
+    align-self: center;
+}
+
+.tk-node-summary {
+    font-size: 10px;
+    color: rgb(178, 185, 199);
+    white-space: normal;
+    margin: 3px 8px 5px 8px;
+    max-width: 220px;
+}
+
+/* Right-hand inspector */
+.tk-inspector {
+    width: 304px;
+    min-width: 250px;
+    background-color: rgb(44, 45, 49);
+    border-left-width: 1px;
+    border-left-color: rgba(0, 0, 0, 0.45);
+    padding: 0;
+}
+
+.tk-inspector-header {
+    flex-direction: row;
+    align-items: center;
+    padding: 11px 12px 11px 12px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(0, 0, 0, 0.35);
+    /* background-color set from code (the node's accent colour) */
+}
+
+.tk-inspector-chip {
+    width: 13px;
+    height: 13px;
+    border-radius: 4px;
+    margin-right: 9px;
+    flex-shrink: 0;
+}
+
+.tk-inspector-title {
+    font-size: 15px;
+    -unity-font-style: bold;
+    white-space: normal;
+    flex-grow: 1;
+}
+
+.tk-inspector-type {
+    font-size: 10px;
+    color: rgb(150, 156, 168);
+    -unity-font-style: italic;
+    margin: 8px 12px 0 12px;
+}
+
+.tk-inspector-desc {
+    font-size: 11px;
+    color: rgb(176, 182, 194);
+    white-space: normal;
+    margin: 5px 12px 4px 12px;
+}
+
+.tk-inspector-empty {
+    color: rgb(138, 143, 154);
+    white-space: normal;
+    -unity-font-style: italic;
+    font-size: 12px;
+    margin: 18px 14px 14px 14px;
+}
+
+.tk-inspector-card {
+    background-color: rgba(0, 0, 0, 0.18);
+    border-radius: 7px;
+    border-width: 1px;
+    border-color: rgba(0, 0, 0, 0.25);
+    margin: 8px 10px 12px 10px;
+    padding: 9px 9px 5px 9px;
+}
+
+.tk-inspector-card PropertyField {
+    margin-bottom: 5px;
+}
+
+.tk-inspector-card Label {
+    color: rgb(202, 206, 214);
+}
+
+/* Floating panel (blackboard) */
+.tk-panel {
+    background-color: rgba(40, 42, 48, 0.96);
+    border-radius: 8px;
+    border-width: 1px;
+    border-color: rgba(0, 0, 0, 0.5);
+    min-width: 210px;
+}
+
+.tk-panel-header {
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(60, 64, 74, 0.98);
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    padding: 4px 6px 4px 8px;
+}
+
+.tk-panel-title {
+    -unity-font-style: bold;
+    font-size: 12px;
+    flex-grow: 1;
+}
+
+.tk-panel-body {
+    padding: 6px;
+}
+
+.tk-bb-row {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 3px;
+}
+
+.tk-chip {
+    border-radius: 3px;
+    padding: 1px 5px 1px 5px;
+    margin-right: 4px;
+    font-size: 10px;
+}
+
+/* Toolbar */
+.tk-toolbar-btn {
+    flex-direction: row;
+    align-items: center;
+}
+
+.tk-toolbar-btn Image {
+    width: 15px;
+    height: 15px;
+    margin-right: 3px;
+}

@@ -1,0 +1,75 @@
+{
+    "tutorialId": "MultiHighlightTutorial",
+    "displayName": "MultiHighlightTutorial",
+    "description": "",
+    "entry": "bdb58b767987462daabc7756799720ef",
+    "nodes": [
+        {
+            "type": "ShowTextBoxNode",
+            "id": "bdb58b767987462daabc7756799720ef",
+            "data": "{\"id\":\"bdb58b767987462daabc7756799720ef\",\"editorPosition\":{\"x\":0.0,\"y\":0.0},\"BoxId\":\"main\",\"PrefabKey\":\"\",\"Title\":\"Multiple highlights\",\"Body\":\"TutorialKit can highlight several things at once. Tap Next.\",\"Placement\":1,\"NormalizedPosition\":{\"x\":0.5,\"y\":0.20000000298023225},\"Target\":{\"TargetId\":\"\"},\"ShowContinueButton\":true,\"ContinueLabel\":\"Next\",\"WaitForDismiss\":true,\"Typewriter\":true,\"TypewriterCps\":45.0}"
+        },
+        {
+            "type": "ShowVignetteNode",
+            "id": "be486cf7649a4f84baf8b326d5ff0f90",
+            "data": "{\"id\":\"be486cf7649a4f84baf8b326d5ff0f90\",\"editorPosition\":{\"x\":0.0,\"y\":0.0},\"Target\":{\"TargetId\":\"play_button\"},\"AdditionalTargets\":[{\"TargetId\":\"settings_button\"}],\"Shape\":0,\"Softness\":0.25,\"Padding\":18.0,\"CornerRadius\":24.0,\"FadeDuration\":0.25,\"OverlayColor\":{\"r\":0.0,\"g\":0.0,\"b\":0.0,\"a\":0.7799999713897705},\"BlockRaycastsOutsideHole\":true,\"AllowClicksThroughHoles\":false}"
+        },
+        {
+            "type": "ShowTextBoxNode",
+            "id": "cd3789834f7940d0b3d49c0596c820b9",
+            "data": "{\"id\":\"cd3789834f7940d0b3d49c0596c820b9\",\"editorPosition\":{\"x\":0.0,\"y\":0.0},\"BoxId\":\"hint\",\"PrefabKey\":\"\",\"Title\":\"\",\"Body\":\"Both Play and Settings are highlighted together. Tap Next to finish.\",\"Placement\":3,\"NormalizedPosition\":{\"x\":0.5,\"y\":0.20000000298023225},\"Target\":{\"TargetId\":\"\"},\"ShowContinueButton\":true,\"ContinueLabel\":\"Next\",\"WaitForDismiss\":true,\"Typewriter\":true,\"TypewriterCps\":45.0}"
+        },
+        {
+            "type": "HideTextBoxNode",
+            "id": "bbd809a69c6145a5b88127077ef0af25",
+            "data": "{\"id\":\"bbd809a69c6145a5b88127077ef0af25\",\"editorPosition\":{\"x\":0.0,\"y\":0.0},\"BoxId\":\"hint\"}"
+        },
+        {
+            "type": "HideVignetteNode",
+            "id": "d5fa78e0821e4e2c8923f7e386201913",
+            "data": "{\"id\":\"d5fa78e0821e4e2c8923f7e386201913\",\"editorPosition\":{\"x\":0.0,\"y\":0.0}}"
+        },
+        {
+            "type": "ShowTextBoxNode",
+            "id": "c68e4bba88524adc8fb4cc4a221a6fac",
+            "data": "{\"id\":\"c68e4bba88524adc8fb4cc4a221a6fac\",\"editorPosition\":{\"x\":0.0,\"y\":0.0},\"BoxId\":\"main\",\"PrefabKey\":\"\",\"Title\":\"Nice!\",\"Body\":\"That's multi-highlight. 🎉\",\"Placement\":2,\"NormalizedPosition\":{\"x\":0.5,\"y\":0.20000000298023225},\"Target\":{\"TargetId\":\"\"},\"ShowContinueButton\":true,\"ContinueLabel\":\"Next\",\"WaitForDismiss\":true,\"Typewriter\":true,\"TypewriterCps\":45.0}"
+        },
+        {
+            "type": "EndNode",
+            "id": "0ea056296d8e4f8d88d196fda2924bab",
+            "data": "{\"id\":\"0ea056296d8e4f8d88d196fda2924bab\",\"editorPosition\":{\"x\":0.0,\"y\":0.0}}"
+        }
+    ],
+    "edges": [
+        {
+            "from": "bdb58b767987462daabc7756799720ef",
+            "port": "Out",
+            "to": "be486cf7649a4f84baf8b326d5ff0f90"
+        },
+        {
+            "from": "be486cf7649a4f84baf8b326d5ff0f90",
+            "port": "Out",
+            "to": "cd3789834f7940d0b3d49c0596c820b9"
+        },
+        {
+            "from": "cd3789834f7940d0b3d49c0596c820b9",
+            "port": "Out",
+            "to": "bbd809a69c6145a5b88127077ef0af25"
+        },
+        {
+            "from": "bbd809a69c6145a5b88127077ef0af25",
+            "port": "Out",
+            "to": "d5fa78e0821e4e2c8923f7e386201913"
+        },
+        {
+            "from": "d5fa78e0821e4e2c8923f7e386201913",
+            "port": "Out",
+            "to": "c68e4bba88524adc8fb4cc4a221a6fac"
+        },
+        {
+            "from": "c68e4bba88524adc8fb4cc4a221a6fac",
+            "port": "Out",
+            "to": "0ea056296d8e4f8d88d196fda2924bab"
+        }
+    ]
+}

@@ -1,0 +1,180 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 435c891f3b7b155409f338341f7ac4da, type: 3}
+  m_Name: DemoBasics
+  m_EditorClassIdentifier: TutorialKit.Runtime::TutorialKit.TutorialGraph
+  tutorialId: 
+  displayName: 
+  description: 
+  entryNodeId: main
+  nodes:
+  - rid: 3850508646222397707
+  - rid: 3850508646222397708
+  - rid: 3850508646222397709
+  - rid: 3850508646222397710
+  - rid: 3850508646222397711
+  - rid: 3850508646222397712
+  - rid: 3850508646222397713
+  - rid: 3850508646222397714
+  - rid: 3850508646222397715
+  - rid: 3850508646222397716
+  - rid: 3850508646222397717
+  edges:
+  - FromNodeId: c6b5ae57150c4f06988923f3215cd185
+    FromPort: Out
+    ToNodeId: 39497adffaf34da88edab02a81d930df
+  - FromNodeId: 39497adffaf34da88edab02a81d930df
+    FromPort: Out
+    ToNodeId: 8e44f07fa9fa46768933870eda3c4215
+  - FromNodeId: 8e44f07fa9fa46768933870eda3c4215
+    FromPort: Out
+    ToNodeId: 95435ecffc79474e84c73e5ee064f363
+  - FromNodeId: 95435ecffc79474e84c73e5ee064f363
+    FromPort: Out
+    ToNodeId: bd6e7c9f97fa4e418099c25b4a87c46e
+  - FromNodeId: bd6e7c9f97fa4e418099c25b4a87c46e
+    FromPort: Out
+    ToNodeId: cd5606c762bc4d82bddad2d1cb1a5815
+  - FromNodeId: cd5606c762bc4d82bddad2d1cb1a5815
+    FromPort: Out
+    ToNodeId: 4f891fee723f4a7da24174c8f720d0f2
+  - FromNodeId: 4f891fee723f4a7da24174c8f720d0f2
+    FromPort: Out
+    ToNodeId: 6a4da873eec84a6ebaaa0baa7cf245d2
+  - FromNodeId: 6a4da873eec84a6ebaaa0baa7cf245d2
+    FromPort: Out
+    ToNodeId: 2c9cda7b2aae41fc860e7fd06c5d8a2f
+  - FromNodeId: 2c9cda7b2aae41fc860e7fd06c5d8a2f
+    FromPort: Out
+    ToNodeId: 0c9b0f149146434ca40566f91ce85b95
+  - FromNodeId: 0c9b0f149146434ca40566f91ce85b95
+    FromPort: Out
+    ToNodeId: 628fa09f5a2a4586a26f2395e352e14e
+  references:
+    version: 2
+    RefIds:
+    - rid: 3850508646222397707
+      type: {class: ShowTextBoxNode, ns: TutorialKit, asm: TutorialKit.Runtime}
+      data:
+        id: c6b5ae57150c4f06988923f3215cd185
+        editorPosition: {x: 0, y: 0}
+        Id: main
+        PrefabKey: 
+        Title: Welcome to TutorialKit
+        Body: This whole flow was authored as a graph. Tap Next to begin.
+        Placement: 1
+        NormalizedPosition: {x: 0.5, y: 0.2}
+        Target:
+          TargetId: 
+        ShowContinueButton: 1
+        ContinueLabel: Next
+        WaitForDismiss: 1
+        Typewriter: 1
+        TypewriterCps: 45
+    - rid: 3850508646222397708
+      type: {class: ShowVignetteNode, ns: TutorialKit, asm: TutorialKit.Runtime}
+      data:
+        id: 39497adffaf34da88edab02a81d930df
+        editorPosition: {x: 0, y: 0}
+        Target:
+          TargetId: play_button
+        Shape: 0
+        Softness: 0.25
+        Padding: 20
+        CornerRadius: 24
+        FadeDuration: 0.25
+        OverlayColor: {r: 0, g: 0, b: 0, a: 0.78}
+        BlockRaycastsOutsideHole: 1
+    - rid: 3850508646222397709
+      type: {class: ShowPointerNode, ns: TutorialKit, asm: TutorialKit.Runtime}
+      data:
+        id: 8e44f07fa9fa46768933870eda3c4215
+        editorPosition: {x: 0, y: 0}
+        Kind: 0
+        Gesture: 1
+        Target:
+          TargetId: play_button
+        SecondaryTarget:
+          TargetId: 
+        ScreenOffset: {x: 0, y: 0}
+        Speed: 1
+    - rid: 3850508646222397710
+      type: {class: ShowTextBoxNode, ns: TutorialKit, asm: TutorialKit.Runtime}
+      data:
+        id: 95435ecffc79474e84c73e5ee064f363
+        editorPosition: {x: 0, y: 0}
+        Id: main
+        PrefabKey: 
+        Title: 
+        Body: Now tap the highlighted PLAY button.
+        Placement: 3
+        NormalizedPosition: {x: 0.5, y: 0.2}
+        Target:
+          TargetId: 
+        ShowContinueButton: 0
+        ContinueLabel: Next
+        WaitForDismiss: 0
+        Typewriter: 1
+        TypewriterCps: 45
+    - rid: 3850508646222397711
+      type: {class: WaitInputNode, ns: TutorialKit, asm: TutorialKit.Runtime}
+      data:
+        id: bd6e7c9f97fa4e418099c25b4a87c46e
+        editorPosition: {x: 0, y: 0}
+        Kind: 2
+        Target:
+          TargetId: play_button
+    - rid: 3850508646222397712
+      type: {class: HideVignetteNode, ns: TutorialKit, asm: TutorialKit.Runtime}
+      data:
+        id: cd5606c762bc4d82bddad2d1cb1a5815
+        editorPosition: {x: 0, y: 0}
+    - rid: 3850508646222397713
+      type: {class: HidePointerNode, ns: TutorialKit, asm: TutorialKit.Runtime}
+      data:
+        id: 4f891fee723f4a7da24174c8f720d0f2
+        editorPosition: {x: 0, y: 0}
+    - rid: 3850508646222397714
+      type: {class: HideTextBoxNode, ns: TutorialKit, asm: TutorialKit.Runtime}
+      data:
+        id: 6a4da873eec84a6ebaaa0baa7cf245d2
+        editorPosition: {x: 0, y: 0}
+        Id: main
+    - rid: 3850508646222397715
+      type: {class: DemoConfettiNode, ns: TutorialKitDemo, asm: TutorialKitDemo}
+      data:
+        id: 2c9cda7b2aae41fc860e7fd06c5d8a2f
+        editorPosition: {x: 0, y: 0}
+        burst: 40
+    - rid: 3850508646222397716
+      type: {class: ShowTextBoxNode, ns: TutorialKit, asm: TutorialKit.Runtime}
+      data:
+        id: 0c9b0f149146434ca40566f91ce85b95
+        editorPosition: {x: 0, y: 0}
+        Id: main
+        PrefabKey: 
+        Title: Nice work!
+        Body: "You finished the sample tutorial. \U0001F389"
+        Placement: 2
+        NormalizedPosition: {x: 0.5, y: 0.2}
+        Target:
+          TargetId: 
+        ShowContinueButton: 1
+        ContinueLabel: Next
+        WaitForDismiss: 1
+        Typewriter: 1
+        TypewriterCps: 45
+    - rid: 3850508646222397717
+      type: {class: EndNode, ns: TutorialKit, asm: TutorialKit.Runtime}
+      data:
+        id: 628fa09f5a2a4586a26f2395e352e14e
+        editorPosition: {x: 0, y: 0}

@@ -1,0 +1,163 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 435c891f3b7b155409f338341f7ac4da, type: 3}
+  m_Name: GridDynamicTutorial
+  m_EditorClassIdentifier: TutorialKit.Runtime::TutorialKit.TutorialGraph
+  tutorialId: 
+  displayName: 
+  description: 
+  entryNodeId: 5d91e6d7be7e4445947bbae4d2ca6a74
+  nodes:
+  - rid: 3850508646222397869
+  - rid: 3850508646222397870
+  - rid: 3850508646222397871
+  - rid: 3850508646222397872
+  - rid: 3850508646222397873
+  - rid: 3850508646222397874
+  - rid: 3850508646222397875
+  - rid: 3850508646222397876
+  - rid: 3850508646222397877
+  edges:
+  - FromNodeId: 5d91e6d7be7e4445947bbae4d2ca6a74
+    FromPort: Out
+    ToNodeId: 9caf113188384d81894e9a9935f19c04
+  - FromNodeId: 9caf113188384d81894e9a9935f19c04
+    FromPort: Out
+    ToNodeId: 089ed84b328949708bc525ee7cd4f77e
+  - FromNodeId: 089ed84b328949708bc525ee7cd4f77e
+    FromPort: Out
+    ToNodeId: 55a87c368e3f4892b16c358e5df6a279
+  - FromNodeId: 55a87c368e3f4892b16c358e5df6a279
+    FromPort: Out
+    ToNodeId: 71bb3f00c19042f8aca5fb0c69556e02
+  - FromNodeId: 71bb3f00c19042f8aca5fb0c69556e02
+    FromPort: Out
+    ToNodeId: 88c7345885b8454faf768ed4ef0bf321
+  - FromNodeId: 88c7345885b8454faf768ed4ef0bf321
+    FromPort: Out
+    ToNodeId: 1a3c45c40f6542caa3dde4aedee389a4
+  - FromNodeId: 1a3c45c40f6542caa3dde4aedee389a4
+    FromPort: Out
+    ToNodeId: 2e64d21c25f34d188392718ab43249a0
+  - FromNodeId: 2e64d21c25f34d188392718ab43249a0
+    FromPort: Out
+    ToNodeId: aa541d3fc2c04042b6c23194cadf282f
+  groups: []
+  blackboard: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 3850508646222397869
+      type: {class: ShowTextBoxNode, ns: TutorialKit, asm: TutorialKit.Runtime}
+      data:
+        id: 5d91e6d7be7e4445947bbae4d2ca6a74
+        editorPosition: {x: 0, y: 0}
+        BoxId: main
+        PrefabKey: 
+        Title: Match the pair
+        Body: Two matching tiles are highlighted. Watch the hint.
+        Placement: 1
+        NormalizedPosition: {x: 0.5, y: 0.2}
+        Target:
+          TargetId: 
+        ShowContinueButton: 1
+        ContinueLabel: Next
+        WaitForDismiss: 1
+        Typewriter: 1
+        TypewriterCps: 45
+    - rid: 3850508646222397870
+      type: {class: ShowVignetteNode, ns: TutorialKit, asm: TutorialKit.Runtime}
+      data:
+        id: 9caf113188384d81894e9a9935f19c04
+        editorPosition: {x: 0, y: 0}
+        Target:
+          TargetId: grid_a
+        AdditionalTargets:
+        - TargetId: grid_b
+        Shape: 1
+        Softness: 0.15
+        Padding: 8
+        CornerRadius: 18
+        FadeDuration: 0.25
+        OverlayColor: {r: 0, g: 0, b: 0, a: 0.78}
+        BlockRaycastsOutsideHole: 1
+        AllowClicksThroughHoles: 0
+    - rid: 3850508646222397871
+      type: {class: ShowPointerNode, ns: TutorialKit, asm: TutorialKit.Runtime}
+      data:
+        id: 089ed84b328949708bc525ee7cd4f77e
+        editorPosition: {x: 0, y: 0}
+        Kind: 0
+        Gesture: 4
+        Target:
+          TargetId: grid_a
+        SecondaryTarget:
+          TargetId: grid_b
+        ScreenOffset: {x: 0, y: 0}
+        Speed: 1
+    - rid: 3850508646222397872
+      type: {class: ShowTextBoxNode, ns: TutorialKit, asm: TutorialKit.Runtime}
+      data:
+        id: 55a87c368e3f4892b16c358e5df6a279
+        editorPosition: {x: 0, y: 0}
+        BoxId: hint
+        PrefabKey: 
+        Title: 
+        Body: Swap these two together to match. Tap Next.
+        Placement: 3
+        NormalizedPosition: {x: 0.5, y: 0.2}
+        Target:
+          TargetId: 
+        ShowContinueButton: 1
+        ContinueLabel: Next
+        WaitForDismiss: 1
+        Typewriter: 1
+        TypewriterCps: 45
+    - rid: 3850508646222397873
+      type: {class: HidePointerNode, ns: TutorialKit, asm: TutorialKit.Runtime}
+      data:
+        id: 71bb3f00c19042f8aca5fb0c69556e02
+        editorPosition: {x: 0, y: 0}
+    - rid: 3850508646222397874
+      type: {class: HideVignetteNode, ns: TutorialKit, asm: TutorialKit.Runtime}
+      data:
+        id: 88c7345885b8454faf768ed4ef0bf321
+        editorPosition: {x: 0, y: 0}
+    - rid: 3850508646222397875
+      type: {class: HideTextBoxNode, ns: TutorialKit, asm: TutorialKit.Runtime}
+      data:
+        id: 1a3c45c40f6542caa3dde4aedee389a4
+        editorPosition: {x: 0, y: 0}
+        BoxId: hint
+    - rid: 3850508646222397876
+      type: {class: ShowTextBoxNode, ns: TutorialKit, asm: TutorialKit.Runtime}
+      data:
+        id: 2e64d21c25f34d188392718ab43249a0
+        editorPosition: {x: 0, y: 0}
+        BoxId: main
+        PrefabKey: 
+        Title: Nice!
+        Body: "Those tiles were found dynamically at runtime. \U0001F389"
+        Placement: 2
+        NormalizedPosition: {x: 0.5, y: 0.2}
+        Target:
+          TargetId: 
+        ShowContinueButton: 1
+        ContinueLabel: Next
+        WaitForDismiss: 1
+        Typewriter: 1
+        TypewriterCps: 45
+    - rid: 3850508646222397877
+      type: {class: EndNode, ns: TutorialKit, asm: TutorialKit.Runtime}
+      data:
+        id: aa541d3fc2c04042b6c23194cadf282f
+        editorPosition: {x: 0, y: 0}

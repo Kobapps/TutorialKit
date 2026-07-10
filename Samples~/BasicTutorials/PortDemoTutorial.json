@@ -1,0 +1,88 @@
+{
+    "tutorialId": "PortDemoTutorial",
+    "displayName": "PortDemoTutorial",
+    "description": "",
+    "entry": "7b1185d0732f4541b388287ce01c66b9",
+    "nodes": [
+        {
+            "type": "ShowTextBoxNode",
+            "id": "7b1185d0732f4541b388287ce01c66b9",
+            "data": "{\"id\":\"7b1185d0732f4541b388287ce01c66b9\",\"editorPosition\":{\"x\":0.0,\"y\":0.0},\"BoxId\":\"main\",\"PrefabKey\":\"\",\"Title\":\"Target ports\",\"Body\":\"This highlight's target comes from a Target node. Tap Next.\",\"Placement\":1,\"NormalizedPosition\":{\"x\":0.5,\"y\":0.20000000298023225},\"Target\":{\"TargetId\":\"\"},\"ShowContinueButton\":true,\"ContinueLabel\":\"Next\",\"WaitForDismiss\":true,\"Typewriter\":true,\"TypewriterCps\":45.0}"
+        },
+        {
+            "type": "TargetByPositionNode",
+            "id": "9cf2bb76e65340b1ac0128958ce20b94",
+            "data": "{\"id\":\"9cf2bb76e65340b1ac0128958ce20b94\",\"editorPosition\":{\"x\":0.0,\"y\":0.0},\"NormalizedPosition\":{\"x\":0.5,\"y\":0.5},\"PixelSize\":{\"x\":220.0,\"y\":220.0}}"
+        },
+        {
+            "type": "ShowVignetteNode",
+            "id": "a8424a4bb08149ddb9d73d483771fdef",
+            "data": "{\"id\":\"a8424a4bb08149ddb9d73d483771fdef\",\"editorPosition\":{\"x\":0.0,\"y\":0.0},\"Target\":{\"TargetId\":\"\"},\"AdditionalTargets\":[],\"Shape\":0,\"Softness\":0.25,\"Padding\":8.0,\"CornerRadius\":24.0,\"FadeDuration\":0.25,\"OverlayColor\":{\"r\":0.0,\"g\":0.0,\"b\":0.0,\"a\":0.7799999713897705},\"BlockRaycastsOutsideHole\":true,\"AllowClicksThroughHoles\":false}"
+        },
+        {
+            "type": "ShowTextBoxNode",
+            "id": "bd22d13500c8473299b60fda3305b12d",
+            "data": "{\"id\":\"bd22d13500c8473299b60fda3305b12d\",\"editorPosition\":{\"x\":0.0,\"y\":0.0},\"BoxId\":\"hint\",\"PrefabKey\":\"\",\"Title\":\"\",\"Body\":\"The highlight is driven by a 'Target: Position' node wired to the vignette. Tap Next.\",\"Placement\":3,\"NormalizedPosition\":{\"x\":0.5,\"y\":0.20000000298023225},\"Target\":{\"TargetId\":\"\"},\"ShowContinueButton\":true,\"ContinueLabel\":\"Next\",\"WaitForDismiss\":true,\"Typewriter\":true,\"TypewriterCps\":45.0}"
+        },
+        {
+            "type": "HideTextBoxNode",
+            "id": "3ec60117227d4fc9ad01a785d3c14b32",
+            "data": "{\"id\":\"3ec60117227d4fc9ad01a785d3c14b32\",\"editorPosition\":{\"x\":0.0,\"y\":0.0},\"BoxId\":\"hint\"}"
+        },
+        {
+            "type": "HideVignetteNode",
+            "id": "b668b98ac2d641328bcfd1f34054d75d",
+            "data": "{\"id\":\"b668b98ac2d641328bcfd1f34054d75d\",\"editorPosition\":{\"x\":0.0,\"y\":0.0}}"
+        },
+        {
+            "type": "ShowTextBoxNode",
+            "id": "5aa47924c1604766ad61094dc4a254af",
+            "data": "{\"id\":\"5aa47924c1604766ad61094dc4a254af\",\"editorPosition\":{\"x\":0.0,\"y\":0.0},\"BoxId\":\"main\",\"PrefabKey\":\"\",\"Title\":\"Nice!\",\"Body\":\"Nodes can inject targets through ports. 🎉\",\"Placement\":2,\"NormalizedPosition\":{\"x\":0.5,\"y\":0.20000000298023225},\"Target\":{\"TargetId\":\"\"},\"ShowContinueButton\":true,\"ContinueLabel\":\"Next\",\"WaitForDismiss\":true,\"Typewriter\":true,\"TypewriterCps\":45.0}"
+        },
+        {
+            "type": "EndNode",
+            "id": "a6c36583f7474bd7bc97700e2544d214",
+            "data": "{\"id\":\"a6c36583f7474bd7bc97700e2544d214\",\"editorPosition\":{\"x\":0.0,\"y\":0.0}}"
+        }
+    ],
+    "edges": [
+        {
+            "from": "7b1185d0732f4541b388287ce01c66b9",
+            "port": "Out",
+            "to": "a8424a4bb08149ddb9d73d483771fdef"
+        },
+        {
+            "from": "a8424a4bb08149ddb9d73d483771fdef",
+            "port": "Out",
+            "to": "bd22d13500c8473299b60fda3305b12d"
+        },
+        {
+            "from": "bd22d13500c8473299b60fda3305b12d",
+            "port": "Out",
+            "to": "3ec60117227d4fc9ad01a785d3c14b32"
+        },
+        {
+            "from": "3ec60117227d4fc9ad01a785d3c14b32",
+            "port": "Out",
+            "to": "b668b98ac2d641328bcfd1f34054d75d"
+        },
+        {
+            "from": "b668b98ac2d641328bcfd1f34054d75d",
+            "port": "Out",
+            "to": "5aa47924c1604766ad61094dc4a254af"
+        },
+        {
+            "from": "5aa47924c1604766ad61094dc4a254af",
+            "port": "Out",
+            "to": "a6c36583f7474bd7bc97700e2544d214"
+        }
+    ],
+    "dataEdges": [
+        {
+            "from": "9cf2bb76e65340b1ac0128958ce20b94",
+            "fromPort": "Target",
+            "to": "a8424a4bb08149ddb9d73d483771fdef",
+            "toPort": "Target"
+        }
+    ]
+}

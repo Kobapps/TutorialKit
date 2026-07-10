@@ -1,0 +1,37 @@
+{
+  "name": "com.tutorialkit",
+  "version": "0.8.3",
+  "displayName": "TutorialKit",
+  "description": "AAA-quality, adapter-based framework for authoring and playing tutorial sequences: vignette highlights, animated pointers, styled text boxes, input gating, custom game commands, persistent progress, a GraphView authoring editor, and remote JSON loading.",
+  "unity": "6000.0",
+  "keywords": [
+    "tutorial",
+    "onboarding",
+    "ftue",
+    "graph",
+    "ux"
+  ],
+  "author": {
+    "name": "Kobapps",
+    "url": "https://github.com/Kobapps"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Kobapps/TutorialKit.git"
+  },
+  "documentationUrl": "https://github.com/Kobapps/TutorialKit#readme",
+  "changelogUrl": "https://github.com/Kobapps/TutorialKit/blob/main/CHANGELOG.md",
+  "licensesUrl": "https://github.com/Kobapps/TutorialKit/blob/main/LICENSE.md",
+  "dependencies": {
+    "com.unity.ugui": "2.0.0",
+    "com.unity.inputsystem": "1.7.0"
+  },
+  "samples": [
+    {
+      "displayName": "Basic Tutorials",
+      "description": "A sample scene with example tutorial graphs (highlight, pointer, text, waits, commands).",
+      "path": "Samples~/BasicTutorials"
+    }
+  ]
+}

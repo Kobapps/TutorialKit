@@ -1,0 +1,95 @@
+{
+    "tutorialId": "GridDynamicTutorial",
+    "displayName": "GridDynamicTutorial",
+    "description": "",
+    "entry": "5d91e6d7be7e4445947bbae4d2ca6a74",
+    "nodes": [
+        {
+            "type": "ShowTextBoxNode",
+            "id": "5d91e6d7be7e4445947bbae4d2ca6a74",
+            "data": "{\"id\":\"5d91e6d7be7e4445947bbae4d2ca6a74\",\"editorPosition\":{\"x\":0.0,\"y\":0.0},\"BoxId\":\"main\",\"PrefabKey\":\"\",\"Title\":\"Match the pair\",\"Body\":\"Two matching tiles are highlighted. Watch the hint.\",\"Placement\":1,\"NormalizedPosition\":{\"x\":0.5,\"y\":0.20000000298023225},\"Target\":{\"TargetId\":\"\"},\"ShowContinueButton\":true,\"ContinueLabel\":\"Next\",\"WaitForDismiss\":true,\"Typewriter\":true,\"TypewriterCps\":45.0}"
+        },
+        {
+            "type": "ShowVignetteNode",
+            "id": "9caf113188384d81894e9a9935f19c04",
+            "data": "{\"id\":\"9caf113188384d81894e9a9935f19c04\",\"editorPosition\":{\"x\":0.0,\"y\":0.0},\"Target\":{\"TargetId\":\"grid_a\"},\"AdditionalTargets\":[{\"TargetId\":\"grid_b\"}],\"Shape\":1,\"Softness\":0.15000000596046449,\"Padding\":8.0,\"CornerRadius\":18.0,\"FadeDuration\":0.25,\"OverlayColor\":{\"r\":0.0,\"g\":0.0,\"b\":0.0,\"a\":0.7799999713897705},\"BlockRaycastsOutsideHole\":true,\"AllowClicksThroughHoles\":false}"
+        },
+        {
+            "type": "ShowPointerNode",
+            "id": "089ed84b328949708bc525ee7cd4f77e",
+            "data": "{\"id\":\"089ed84b328949708bc525ee7cd4f77e\",\"editorPosition\":{\"x\":0.0,\"y\":0.0},\"Kind\":0,\"Gesture\":4,\"Target\":{\"TargetId\":\"grid_a\"},\"SecondaryTarget\":{\"TargetId\":\"grid_b\"},\"ScreenOffset\":{\"x\":0.0,\"y\":0.0},\"Speed\":1.0}"
+        },
+        {
+            "type": "ShowTextBoxNode",
+            "id": "55a87c368e3f4892b16c358e5df6a279",
+            "data": "{\"id\":\"55a87c368e3f4892b16c358e5df6a279\",\"editorPosition\":{\"x\":0.0,\"y\":0.0},\"BoxId\":\"hint\",\"PrefabKey\":\"\",\"Title\":\"\",\"Body\":\"Swap these two together to match. Tap Next.\",\"Placement\":3,\"NormalizedPosition\":{\"x\":0.5,\"y\":0.20000000298023225},\"Target\":{\"TargetId\":\"\"},\"ShowContinueButton\":true,\"ContinueLabel\":\"Next\",\"WaitForDismiss\":true,\"Typewriter\":true,\"TypewriterCps\":45.0}"
+        },
+        {
+            "type": "HidePointerNode",
+            "id": "71bb3f00c19042f8aca5fb0c69556e02",
+            "data": "{\"id\":\"71bb3f00c19042f8aca5fb0c69556e02\",\"editorPosition\":{\"x\":0.0,\"y\":0.0}}"
+        },
+        {
+            "type": "HideVignetteNode",
+            "id": "88c7345885b8454faf768ed4ef0bf321",
+            "data": "{\"id\":\"88c7345885b8454faf768ed4ef0bf321\",\"editorPosition\":{\"x\":0.0,\"y\":0.0}}"
+        },
+        {
+            "type": "HideTextBoxNode",
+            "id": "1a3c45c40f6542caa3dde4aedee389a4",
+            "data": "{\"id\":\"1a3c45c40f6542caa3dde4aedee389a4\",\"editorPosition\":{\"x\":0.0,\"y\":0.0},\"BoxId\":\"hint\"}"
+        },
+        {
+            "type": "ShowTextBoxNode",
+            "id": "2e64d21c25f34d188392718ab43249a0",
+            "data": "{\"id\":\"2e64d21c25f34d188392718ab43249a0\",\"editorPosition\":{\"x\":0.0,\"y\":0.0},\"BoxId\":\"main\",\"PrefabKey\":\"\",\"Title\":\"Nice!\",\"Body\":\"Those tiles were found dynamically at runtime. 🎉\",\"Placement\":2,\"NormalizedPosition\":{\"x\":0.5,\"y\":0.20000000298023225},\"Target\":{\"TargetId\":\"\"},\"ShowContinueButton\":true,\"ContinueLabel\":\"Next\",\"WaitForDismiss\":true,\"Typewriter\":true,\"TypewriterCps\":45.0}"
+        },
+        {
+            "type": "EndNode",
+            "id": "aa541d3fc2c04042b6c23194cadf282f",
+            "data": "{\"id\":\"aa541d3fc2c04042b6c23194cadf282f\",\"editorPosition\":{\"x\":0.0,\"y\":0.0}}"
+        }
+    ],
+    "edges": [
+        {
+            "from": "5d91e6d7be7e4445947bbae4d2ca6a74",
+            "port": "Out",
+            "to": "9caf113188384d81894e9a9935f19c04"
+        },
+        {
+            "from": "9caf113188384d81894e9a9935f19c04",
+            "port": "Out",
+            "to": "089ed84b328949708bc525ee7cd4f77e"
+        },
+        {
+            "from": "089ed84b328949708bc525ee7cd4f77e",
+            "port": "Out",
+            "to": "55a87c368e3f4892b16c358e5df6a279"
+        },
+        {
+            "from": "55a87c368e3f4892b16c358e5df6a279",
+            "port": "Out",
+            "to": "71bb3f00c19042f8aca5fb0c69556e02"
+        },
+        {
+            "from": "71bb3f00c19042f8aca5fb0c69556e02",
+            "port": "Out",
+            "to": "88c7345885b8454faf768ed4ef0bf321"
+        },
+        {
+            "from": "88c7345885b8454faf768ed4ef0bf321",
+            "port": "Out",
+            "to": "1a3c45c40f6542caa3dde4aedee389a4"
+        },
+        {
+            "from": "1a3c45c40f6542caa3dde4aedee389a4",
+            "port": "Out",
+            "to": "2e64d21c25f34d188392718ab43249a0"
+        },
+        {
+            "from": "2e64d21c25f34d188392718ab43249a0",
+            "port": "Out",
+            "to": "aa541d3fc2c04042b6c23194cadf282f"
+        }
+    ]
+}

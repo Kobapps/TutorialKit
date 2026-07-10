@@ -1,0 +1,150 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 435c891f3b7b155409f338341f7ac4da, type: 3}
+  m_Name: PortDemoTutorial
+  m_EditorClassIdentifier: TutorialKit.Runtime::TutorialKit.TutorialGraph
+  tutorialId: 
+  displayName: 
+  description: 
+  entryNodeId: 7b1185d0732f4541b388287ce01c66b9
+  nodes:
+  - rid: 3850508646222397884
+  - rid: 3850508646222397885
+  - rid: 3850508646222397886
+  - rid: 3850508646222397887
+  - rid: 3850508646222397888
+  - rid: 3850508646222397889
+  - rid: 3850508646222397890
+  - rid: 3850508646222397891
+  edges:
+  - FromNodeId: 7b1185d0732f4541b388287ce01c66b9
+    FromPort: Out
+    ToNodeId: a8424a4bb08149ddb9d73d483771fdef
+  - FromNodeId: a8424a4bb08149ddb9d73d483771fdef
+    FromPort: Out
+    ToNodeId: bd22d13500c8473299b60fda3305b12d
+  - FromNodeId: bd22d13500c8473299b60fda3305b12d
+    FromPort: Out
+    ToNodeId: 3ec60117227d4fc9ad01a785d3c14b32
+  - FromNodeId: 3ec60117227d4fc9ad01a785d3c14b32
+    FromPort: Out
+    ToNodeId: b668b98ac2d641328bcfd1f34054d75d
+  - FromNodeId: b668b98ac2d641328bcfd1f34054d75d
+    FromPort: Out
+    ToNodeId: 5aa47924c1604766ad61094dc4a254af
+  - FromNodeId: 5aa47924c1604766ad61094dc4a254af
+    FromPort: Out
+    ToNodeId: a6c36583f7474bd7bc97700e2544d214
+  dataEdges:
+  - FromNodeId: 9cf2bb76e65340b1ac0128958ce20b94
+    FromPort: Target
+    ToNodeId: a8424a4bb08149ddb9d73d483771fdef
+    ToPort: Target
+  groups: []
+  blackboard: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 3850508646222397884
+      type: {class: ShowTextBoxNode, ns: TutorialKit, asm: TutorialKit.Runtime}
+      data:
+        id: 7b1185d0732f4541b388287ce01c66b9
+        editorPosition: {x: 0, y: 0}
+        BoxId: main
+        PrefabKey: 
+        Title: Target ports
+        Body: This highlight's target comes from a Target node. Tap Next.
+        Placement: 1
+        NormalizedPosition: {x: 0.5, y: 0.2}
+        Target:
+          TargetId: 
+        ShowContinueButton: 1
+        ContinueLabel: Next
+        WaitForDismiss: 1
+        Typewriter: 1
+        TypewriterCps: 45
+    - rid: 3850508646222397885
+      type: {class: TargetByPositionNode, ns: TutorialKit, asm: TutorialKit.Runtime}
+      data:
+        id: 9cf2bb76e65340b1ac0128958ce20b94
+        editorPosition: {x: 0, y: 0}
+        NormalizedPosition: {x: 0.5, y: 0.5}
+        PixelSize: {x: 220, y: 220}
+    - rid: 3850508646222397886
+      type: {class: ShowVignetteNode, ns: TutorialKit, asm: TutorialKit.Runtime}
+      data:
+        id: a8424a4bb08149ddb9d73d483771fdef
+        editorPosition: {x: 0, y: 0}
+        Target:
+          TargetId: 
+        AdditionalTargets: []
+        Shape: 0
+        Softness: 0.25
+        Padding: 8
+        CornerRadius: 24
+        FadeDuration: 0.25
+        OverlayColor: {r: 0, g: 0, b: 0, a: 0.78}
+        BlockRaycastsOutsideHole: 1
+        AllowClicksThroughHoles: 0
+    - rid: 3850508646222397887
+      type: {class: ShowTextBoxNode, ns: TutorialKit, asm: TutorialKit.Runtime}
+      data:
+        id: bd22d13500c8473299b60fda3305b12d
+        editorPosition: {x: 0, y: 0}
+        BoxId: hint
+        PrefabKey: 
+        Title: 
+        Body: 'The highlight is driven by a ''Target: Position'' node wired to the
+          vignette. Tap Next.'
+        Placement: 3
+        NormalizedPosition: {x: 0.5, y: 0.2}
+        Target:
+          TargetId: 
+        ShowContinueButton: 1
+        ContinueLabel: Next
+        WaitForDismiss: 1
+        Typewriter: 1
+        TypewriterCps: 45
+    - rid: 3850508646222397888
+      type: {class: HideTextBoxNode, ns: TutorialKit, asm: TutorialKit.Runtime}
+      data:
+        id: 3ec60117227d4fc9ad01a785d3c14b32
+        editorPosition: {x: 0, y: 0}
+        BoxId: hint
+    - rid: 3850508646222397889
+      type: {class: HideVignetteNode, ns: TutorialKit, asm: TutorialKit.Runtime}
+      data:
+        id: b668b98ac2d641328bcfd1f34054d75d
+        editorPosition: {x: 0, y: 0}
+    - rid: 3850508646222397890
+      type: {class: ShowTextBoxNode, ns: TutorialKit, asm: TutorialKit.Runtime}
+      data:
+        id: 5aa47924c1604766ad61094dc4a254af
+        editorPosition: {x: 0, y: 0}
+        BoxId: main
+        PrefabKey: 
+        Title: Nice!
+        Body: "Nodes can inject targets through ports. \U0001F389"
+        Placement: 2
+        NormalizedPosition: {x: 0.5, y: 0.2}
+        Target:
+          TargetId: 
+        ShowContinueButton: 1
+        ContinueLabel: Next
+        WaitForDismiss: 1
+        Typewriter: 1
+        TypewriterCps: 45
+    - rid: 3850508646222397891
+      type: {class: EndNode, ns: TutorialKit, asm: TutorialKit.Runtime}
+      data:
+        id: a6c36583f7474bd7bc97700e2544d214
+        editorPosition: {x: 0, y: 0}

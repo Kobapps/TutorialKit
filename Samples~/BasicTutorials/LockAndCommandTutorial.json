@@ -1,0 +1,55 @@
+{
+    "tutorialId": "LockAndCommandTutorial",
+    "displayName": "LockAndCommandTutorial",
+    "description": "",
+    "entry": "592f70e0f79e4239ba61d2bead5db265",
+    "nodes": [
+        {
+            "type": "SetInputLockNode",
+            "id": "592f70e0f79e4239ba61d2bead5db265",
+            "data": "{\"id\":\"592f70e0f79e4239ba61d2bead5db265\",\"editorPosition\":{\"x\":0.0,\"y\":0.0},\"Mode\":0,\"Group\":\"\"}"
+        },
+        {
+            "type": "ShowTextBoxNode",
+            "id": "7dc1fd6626f24a2380e7ff397a30448a",
+            "data": "{\"id\":\"7dc1fd6626f24a2380e7ff397a30448a\",\"editorPosition\":{\"x\":0.0,\"y\":0.0},\"BoxId\":\"main\",\"PrefabKey\":\"\",\"Title\":\"Input Locked\",\"Body\":\"Game interaction is locked during this step.\",\"Placement\":3,\"NormalizedPosition\":{\"x\":0.5,\"y\":0.20000000298023225},\"Target\":{\"TargetId\":\"\"},\"ShowContinueButton\":true,\"ContinueLabel\":\"Next\",\"WaitForDismiss\":true,\"Typewriter\":true,\"TypewriterCps\":45.0}"
+        },
+        {
+            "type": "GameCommandNode",
+            "id": "6811ebdf6b2c4649828bfb264e555cbc",
+            "data": "{\"id\":\"6811ebdf6b2c4649828bfb264e555cbc\",\"editorPosition\":{\"x\":0.0,\"y\":0.0},\"CommandId\":\"demo.confetti\",\"Argument\":\"60\",\"WaitForCompletion\":true}"
+        },
+        {
+            "type": "SetInputLockNode",
+            "id": "c7bae1312f9144baaa56a4322f0696ba",
+            "data": "{\"id\":\"c7bae1312f9144baaa56a4322f0696ba\",\"editorPosition\":{\"x\":0.0,\"y\":0.0},\"Mode\":1,\"Group\":\"\"}"
+        },
+        {
+            "type": "EndNode",
+            "id": "42975b358abd4154a8d5dc9fe406335c",
+            "data": "{\"id\":\"42975b358abd4154a8d5dc9fe406335c\",\"editorPosition\":{\"x\":0.0,\"y\":0.0}}"
+        }
+    ],
+    "edges": [
+        {
+            "from": "592f70e0f79e4239ba61d2bead5db265",
+            "port": "Out",
+            "to": "7dc1fd6626f24a2380e7ff397a30448a"
+        },
+        {
+            "from": "7dc1fd6626f24a2380e7ff397a30448a",
+            "port": "Out",
+            "to": "6811ebdf6b2c4649828bfb264e555cbc"
+        },
+        {
+            "from": "6811ebdf6b2c4649828bfb264e555cbc",
+            "port": "Out",
+            "to": "c7bae1312f9144baaa56a4322f0696ba"
+        },
+        {
+            "from": "c7bae1312f9144baaa56a4322f0696ba",
+            "port": "Out",
+            "to": "42975b358abd4154a8d5dc9fe406335c"
+        }
+    ]
+}

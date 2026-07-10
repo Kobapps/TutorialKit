@@ -1,0 +1,55 @@
+{
+    "tutorialId": "SwipeTutorial",
+    "displayName": "SwipeTutorial",
+    "description": "",
+    "entry": "dd97e243cf2142b38cfd0858c6de1df3",
+    "nodes": [
+        {
+            "type": "ShowTextBoxNode",
+            "id": "dd97e243cf2142b38cfd0858c6de1df3",
+            "data": "{\"id\":\"dd97e243cf2142b38cfd0858c6de1df3\",\"editorPosition\":{\"x\":0.0,\"y\":0.0},\"BoxId\":\"main\",\"PrefabKey\":\"\",\"Title\":\"Gestures\",\"Body\":\"Watch the hand swipe from Play to Settings.\",\"Placement\":1,\"NormalizedPosition\":{\"x\":0.5,\"y\":0.20000000298023225},\"Target\":{\"TargetId\":\"\"},\"ShowContinueButton\":true,\"ContinueLabel\":\"Next\",\"WaitForDismiss\":true,\"Typewriter\":true,\"TypewriterCps\":45.0}"
+        },
+        {
+            "type": "ShowPointerNode",
+            "id": "d6c8bed6615041fb906a4c2c11c07136",
+            "data": "{\"id\":\"d6c8bed6615041fb906a4c2c11c07136\",\"editorPosition\":{\"x\":0.0,\"y\":0.0},\"Kind\":0,\"Gesture\":2,\"Target\":{\"TargetId\":\"play_button\"},\"SecondaryTarget\":{\"TargetId\":\"settings_button\"},\"ScreenOffset\":{\"x\":0.0,\"y\":0.0},\"Speed\":1.0}"
+        },
+        {
+            "type": "WaitTimeNode",
+            "id": "4cc5ce62931d4367a0cee092b012af58",
+            "data": "{\"id\":\"4cc5ce62931d4367a0cee092b012af58\",\"editorPosition\":{\"x\":0.0,\"y\":0.0},\"Seconds\":3.5,\"RealTime\":true}"
+        },
+        {
+            "type": "HidePointerNode",
+            "id": "5774bcf11ef244d78137baa546a327fd",
+            "data": "{\"id\":\"5774bcf11ef244d78137baa546a327fd\",\"editorPosition\":{\"x\":0.0,\"y\":0.0}}"
+        },
+        {
+            "type": "EndNode",
+            "id": "c5320fe6fb294652b6280e460f199810",
+            "data": "{\"id\":\"c5320fe6fb294652b6280e460f199810\",\"editorPosition\":{\"x\":0.0,\"y\":0.0}}"
+        }
+    ],
+    "edges": [
+        {
+            "from": "dd97e243cf2142b38cfd0858c6de1df3",
+            "port": "Out",
+            "to": "d6c8bed6615041fb906a4c2c11c07136"
+        },
+        {
+            "from": "d6c8bed6615041fb906a4c2c11c07136",
+            "port": "Out",
+            "to": "4cc5ce62931d4367a0cee092b012af58"
+        },
+        {
+            "from": "4cc5ce62931d4367a0cee092b012af58",
+            "port": "Out",
+            "to": "5774bcf11ef244d78137baa546a327fd"
+        },
+        {
+            "from": "5774bcf11ef244d78137baa546a327fd",
+            "port": "Out",
+            "to": "c5320fe6fb294652b6280e460f199810"
+        }
+    ]
+}
