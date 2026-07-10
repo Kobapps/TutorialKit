@@ -205,6 +205,13 @@ namespace TutorialKit.Editor
                     if (GUILayout.Button("Open Graph Editor")) TutorialGraphEditorWindow.ShowWindow();
                     if (GUILayout.Button("Open Tutorial Browser")) TutorialBrowserWindow.ShowWindow();
                 }
+
+                EditorGUILayout.Space(4);
+                bool auto = EditorGUILayout.ToggleLeft(
+                    new GUIContent("Auto-open the graph editor when a tutorial plays",
+                        "In Play mode, open and live-attach the graph editor to whichever tutorial starts."),
+                    TutorialGraphAutoOpen.Enabled);
+                if (auto != TutorialGraphAutoOpen.Enabled) TutorialGraphAutoOpen.Enabled = auto;
             }
         }
 

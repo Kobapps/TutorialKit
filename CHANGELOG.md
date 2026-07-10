@@ -2,6 +2,14 @@
 
 All notable changes to TutorialKit are documented here.
 
+## [0.11.0] — 2026-07-10
+
+### Added
+- **Auto-open the live view.** When a tutorial starts in Play mode, the graph editor now opens (or
+  focuses) itself on that tutorial and live-attaches automatically — no need to open the window first.
+  Works for asset and code-built graphs (new static `TutorialDirector.AnyStarted` hook). Toggle it in
+  **Settings ▸ Tools ▸ "Auto-open the graph editor when a tutorial plays"** (on by default).
+
 ## [0.10.0] — 2026-07-10
 
 ### Added

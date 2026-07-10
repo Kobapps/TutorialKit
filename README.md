@@ -151,9 +151,11 @@ runs. `Set Flag` and `Condition` nodes read/write them by key, and any flag they
 to the panel automatically. Live values are shown next to each variable during Play.
 
 ### Live debugger
-In Play mode the editor **auto-attaches to the running tutorial** (toggle with **Attach**) — loading
-its graph (even code-built ones), pulsing the active node, marking the visited-node trail and the
-traversed edges, showing live blackboard values (`→ value`), and reporting `▶ Running` / `✓ Completed`.
+Start a tutorial in Play mode and the graph editor **opens automatically on it and live-attaches** — no
+need to open the window first (turn this off in **Settings ▸ Tools**). It loads the running graph (even
+code-built ones), pulses the active node, marks the visited-node trail and the traversed edges, shows
+live blackboard values (`→ value`), and reports `▶ Running` / `✓ Completed`. If the window is already
+open it just follows along; the **Attach** toolbar toggle controls whether it tracks the running run.
 
 ## Settings & AI authoring skill
 

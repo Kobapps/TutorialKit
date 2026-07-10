@@ -45,6 +45,12 @@ namespace TutorialKit
 
         /// <summary>Raised when any tutorial starts.</summary>
         public event Action<TutorialHandle> Started;
+        /// <summary>
+        /// Raised (statically, across every director) whenever a tutorial starts. The editor uses this
+        /// to auto-open the graph window on the running tutorial, even if no director instance is known
+        /// to it yet. Runtime code should prefer the instance <see cref="Started"/> event.
+        /// </summary>
+        public static event Action<TutorialHandle> AnyStarted;
         /// <summary>Raised when any tutorial finishes.</summary>
         public event Action<TutorialHandle> Finished;
         /// <summary>Raised when a node begins (graph, node). Used by the editor live debugger.</summary>
@@ -158,6 +164,7 @@ namespace TutorialKit
             _activeContext = ctx;
             handle.MarkRunning();
             Started?.Invoke(handle);
+            AnyStarted?.Invoke(handle);
 
             try
             {

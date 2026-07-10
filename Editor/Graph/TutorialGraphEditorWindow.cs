@@ -36,6 +36,22 @@ namespace TutorialKit.Editor
             w.Focus();
         }
 
+        /// <summary>
+        /// Opens (or focuses) the window on a tutorial that just started playing and attaches the live
+        /// debugger to it. Called by <see cref="TutorialGraphAutoOpen"/> when a tutorial begins.
+        /// </summary>
+        public static void ShowLive(TutorialHandle handle)
+        {
+            if (handle?.Graph == null) return;
+            var w = GetWindow<TutorialGraphEditorWindow>();
+            w.titleContent = new GUIContent("Tutorial Graph");
+            w._attach = true;
+            w.OpenGraph(handle.Graph);
+            w.Attach(handle);
+            w.TrySubscribeDebug(); // subscribe immediately so node transitions update live
+            w.Focus();
+        }
+
         [OnOpenAsset]
         public static bool OnOpenAsset(int instanceId, int line)
         {
@@ -290,6 +306,40 @@ namespace TutorialKit.Editor
             if (graph == null) return;
 
             TutorialDirector.EnsureExists().Play(graph, force: true);
+        }
+    }
+
+    /// <summary>
+    /// When enabled (default), auto-opens the graph editor on whichever tutorial starts playing and
+    /// live-attaches it — no need to open the window first. Listens to the static
+    /// <see cref="TutorialDirector.AnyStarted"/> hook so it works for asset and code-built graphs alike.
+    /// </summary>
+    [InitializeOnLoad]
+    internal static class TutorialGraphAutoOpen
+    {
+        public const string PrefKey = "TutorialKit.AutoOpenOnPlay";
+
+        public static bool Enabled
+        {
+            get => EditorPrefs.GetBool(PrefKey, true);
+            set => EditorPrefs.SetBool(PrefKey, value);
+        }
+
+        static TutorialGraphAutoOpen()
+        {
+            TutorialDirector.AnyStarted -= OnAnyStarted;
+            TutorialDirector.AnyStarted += OnAnyStarted;
+        }
+
+        private static void OnAnyStarted(TutorialHandle handle)
+        {
+            if (!Enabled || handle?.Graph == null) return;
+            var h = handle;
+            // Defer one tick: opening an editor window from inside the runtime start callback is safest next frame.
+            EditorApplication.delayCall += () =>
+            {
+                if (h?.Graph != null) TutorialGraphEditorWindow.ShowLive(h);
+            };
         }
     }
 }
