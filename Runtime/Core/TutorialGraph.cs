@@ -21,9 +21,17 @@ namespace TutorialKit
         [SerializeField] private List<TutorialDataEdge> dataEdges = new List<TutorialDataEdge>();
         [SerializeField] private List<TutorialGroupData> groups = new List<TutorialGroupData>();
         [SerializeField] private List<TutorialBlackboardVar> blackboard = new List<TutorialBlackboardVar>();
+        [SerializeField, HideInInspector] private TutorialLayoutDirection layoutDirection = TutorialLayoutDirection.UseDefault;
 
         public IReadOnlyList<TutorialGroupData> Groups => groups;
         public IReadOnlyList<TutorialBlackboardVar> Blackboard => blackboard;
+
+        /// <summary>This graph's preferred editor flow direction. <c>UseDefault</c> follows the project setting.</summary>
+        public TutorialLayoutDirection LayoutDirection
+        {
+            get => layoutDirection;
+            set => layoutDirection = value;
+        }
 
         /// <summary>Stable id used for persistence and remote lookup. Falls back to the asset name.</summary>
         public string TutorialId => string.IsNullOrEmpty(tutorialId) ? name : tutorialId;

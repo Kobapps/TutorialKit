@@ -29,19 +29,43 @@ namespace TutorialKit.Editor
         private bool _minimapPlaced;
         private string _activeNodeId;
 
-        private const string VerticalPrefKey = "TutorialKit.Graph.Vertical";
-        private bool _vertical = EditorPrefs.GetBool(VerticalPrefKey, false);
+        private const string DefaultVerticalPrefKey = "TutorialKit.Graph.DefaultVertical";
+        private bool _vertical;
 
-        /// <summary>Whether the graph flows top→bottom (VFX-style) instead of left→right.</summary>
+        /// <summary>Project default flow direction for graphs left on <c>UseDefault</c> (a Settings toggle).</summary>
+        public static bool DefaultVertical
+        {
+            get => EditorPrefs.GetBool(DefaultVerticalPrefKey, false);
+            set => EditorPrefs.SetBool(DefaultVerticalPrefKey, value);
+        }
+
+        /// <summary>Whether the loaded graph currently flows top→bottom (VFX-style) instead of left→right.</summary>
         public bool Vertical => _vertical;
 
-        /// <summary>Switch flow orientation, rebuild the node views with the new port layout, re-lay out.</summary>
+        // A graph's own preference wins; UseDefault falls back to the project setting.
+        private static bool ResolveVertical(TutorialGraph g)
+        {
+            if (g == null) return DefaultVertical;
+            switch (g.LayoutDirection)
+            {
+                case TutorialLayoutDirection.Horizontal: return false;
+                case TutorialLayoutDirection.Vertical: return true;
+                default: return DefaultVertical;
+            }
+        }
+
+        /// <summary>Set the CURRENT graph's preferred flow direction (saved on the asset) and re-lay out.</summary>
         public void SetVertical(bool vertical)
         {
-            if (_vertical == vertical) return;
+            if (Graph == null) return;
+            var dir = vertical ? TutorialLayoutDirection.Vertical : TutorialLayoutDirection.Horizontal;
+            if (Graph.LayoutDirection == dir && _vertical == vertical) return;
+            Undo.RegisterCompleteObjectUndo(Graph, "Set Layout Direction");
+            Graph.LayoutDirection = dir;
+            EditorUtility.SetDirty(Graph);
             _vertical = vertical;
-            EditorPrefs.SetBool(VerticalPrefKey, vertical);
-            if (Graph != null) { Reload(); AutoLayout(); }
+            Reload();
+            AutoLayout();
         }
 
         public TutorialGraphView(EditorWindow window)
@@ -104,6 +128,7 @@ namespace TutorialKit.Editor
             foreach (var el in toRemove) RemoveElement(el);
 
             Graph = graph;
+            _vertical = ResolveVertical(graph); // must be set before node views are built (drives port layout)
             if (graph != null)
             {
                 graph.Validate();

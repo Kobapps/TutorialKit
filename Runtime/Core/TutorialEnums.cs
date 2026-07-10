@@ -14,6 +14,17 @@ namespace TutorialKit
         Arrow = 1,
     }
 
+    /// <summary>A tutorial's preferred graph-editor flow direction (editor-only; stored per graph).</summary>
+    public enum TutorialLayoutDirection
+    {
+        /// <summary>Follow the project default (Settings ▸ TutorialKit).</summary>
+        UseDefault = 0,
+        /// <summary>Flow left → right.</summary>
+        Horizontal = 1,
+        /// <summary>Flow top → bottom (VFX-graph style).</summary>
+        Vertical = 2,
+    }
+
     /// <summary>Animated gesture a pointer performs.</summary>
     public enum PointerGesture
     {

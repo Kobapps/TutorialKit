@@ -25,13 +25,17 @@ namespace TutorialKit
             return s != null ? pick(s) : null;
         }
 
-        public static Sprite RoundedPanel => _panel ??= BuildRoundedRect(96, 26);
-        public static Sprite Hand => _hand ??= Setting(s => s.PointerHand) ?? Art("hand_point") ?? BuildHand(128);
-        public static Sprite HandOpen => _handOpen ??= Setting(s => s.PointerHandOpen) ?? Art("hand_open") ?? BuildHand(128);
-        public static Sprite HandClosed => _handClosed ??= Setting(s => s.PointerHandClosed) ?? Art("hand_closed") ?? BuildHand(128);
-        public static Sprite Arrow => _arrow ??= Setting(s => s.PointerArrow) ?? Art("arrow") ?? BuildArrow(128);
-        public static Sprite Ring => _ring ??= BuildRing(128, 0.16f);
-        public static Sprite Dot => _dot ??= BuildCircle(64);
+        // NOTE: use Unity's "== null" (not C# ??=) so a cached sprite whose procedural texture was
+        // unloaded (Unity reports it destroyed, but the C# reference is non-null) is rebuilt rather
+        // than handed back dead — a dead sprite renders as a white square. Generated textures/sprites
+        // are also flagged HideAndDontSave so they survive Resources.UnloadUnusedAssets / scene loads.
+        public static Sprite RoundedPanel { get { if (_panel == null) _panel = BuildRoundedRect(96, 26); return _panel; } }
+        public static Sprite Hand { get { if (_hand == null) _hand = Setting(s => s.PointerHand) ?? Art("hand_point") ?? BuildHand(128); return _hand; } }
+        public static Sprite HandOpen { get { if (_handOpen == null) _handOpen = Setting(s => s.PointerHandOpen) ?? Art("hand_open") ?? BuildHand(128); return _handOpen; } }
+        public static Sprite HandClosed { get { if (_handClosed == null) _handClosed = Setting(s => s.PointerHandClosed) ?? Art("hand_closed") ?? BuildHand(128); return _handClosed; } }
+        public static Sprite Arrow { get { if (_arrow == null) _arrow = Setting(s => s.PointerArrow) ?? Art("arrow") ?? BuildArrow(128); return _arrow; } }
+        public static Sprite Ring { get { if (_ring == null) _ring = BuildRing(128, 0.16f); return _ring; } }
+        public static Sprite Dot { get { if (_dot == null) _dot = BuildCircle(64); return _dot; } }
 
         /// <summary>Drops cached sprites (and the settings lookup) so overrides re-resolve. Editor use.</summary>
         public static void ClearCache()
@@ -45,13 +49,16 @@ namespace TutorialKit
             tex.wrapMode = TextureWrapMode.Clamp;
             tex.filterMode = FilterMode.Bilinear;
             tex.Apply();
-            return Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height),
+            var sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height),
                 new Vector2(0.5f, 0.5f), 100f, 0, SpriteMeshType.FullRect, border);
+            sprite.hideFlags = HideFlags.HideAndDontSave;
+            return sprite;
         }
 
         private static Texture2D NewTex(int size)
         {
-            var t = new Texture2D(size, size, TextureFormat.RGBA32, false, true) { name = "TK_Generated" };
+            var t = new Texture2D(size, size, TextureFormat.RGBA32, false, true)
+                { name = "TK_Generated", hideFlags = HideFlags.HideAndDontSave };
             var clear = new Color32(255, 255, 255, 0);
             var px = new Color32[size * size];
             for (int i = 0; i < px.Length; i++) px[i] = clear;

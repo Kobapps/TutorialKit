@@ -212,6 +212,15 @@ namespace TutorialKit.Editor
                         "In Play mode, open and live-attach the graph editor to whichever tutorial starts."),
                     TutorialGraphAutoOpen.Enabled);
                 if (auto != TutorialGraphAutoOpen.Enabled) TutorialGraphAutoOpen.Enabled = auto;
+
+                EditorGUILayout.Space(2);
+                int dir = TutorialGraphView.DefaultVertical ? 1 : 0;
+                int newDir = EditorGUILayout.Popup(
+                    new GUIContent("Default graph layout",
+                        "Flow direction for graphs set to 'Use Default'. Each graph can override this with the " +
+                        "Vertical toggle in the graph editor toolbar."),
+                    dir, new[] { "Horizontal (left → right)", "Vertical (top → bottom)" });
+                if (newDir != dir) TutorialGraphView.DefaultVertical = newDir == 1;
             }
         }
 

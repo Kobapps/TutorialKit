@@ -18,6 +18,11 @@ namespace TutorialKit
         [SerializeField] private Color tint = Color.white;
         [SerializeField] private float pointerSize = 110f;
 
+        [Header("Hotspot offset (fraction of size) so the finger/arrow tip — not the sprite centre —")]
+        [Tooltip("sits at the target, leaving the target (e.g. a button's label) visible.")]
+        [SerializeField] private Vector2 handHotspot = new Vector2(0.40f, -0.42f);
+        [SerializeField] private Vector2 arrowHotspot = new Vector2(0f, -0.45f);
+
         private TutorialOverlay _overlay;
         private RectTransform _follow;   // moved to the target
         private RectTransform _inner;    // animated relative to _follow
@@ -84,6 +89,11 @@ namespace TutorialKit
             _pointerImage.sprite = request.Kind == PointerKind.Arrow
                 ? (arrowSprite != null ? arrowSprite : TutorialSpriteFactory.Arrow)
                 : (handSprite != null ? handSprite : TutorialSpriteFactory.Hand);
+
+            // Offset the sprite so its tip (not its centre) is the hotspot at the target; the ring stays
+            // centred so the tap ripples from the fingertip while the palm/arrow body clears the target.
+            Vector2 hot = request.Kind == PointerKind.Arrow ? arrowHotspot : handHotspot;
+            _pointerImage.rectTransform.anchoredPosition = hot * pointerSize;
 
             gameObject.SetActive(true);
             IsVisible = true;

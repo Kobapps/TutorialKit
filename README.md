@@ -140,6 +140,8 @@ pulse on the live node during **▶ Test in Play**, icon toolbar, and right-clic
 
 Toggle **Vertical** in the toolbar to flow the graph **top → bottom** (VFX-graph style: flow ports move
 to the top/bottom of each node, data ports stay on the sides); Auto Layout follows the chosen direction.
+The choice is **saved per graph**, and graphs left on *Use Default* follow the project-wide default you
+pick in **Settings ▸ Tools ▸ Default graph layout**.
 
 Connections: an output port can **fan out to several nodes** — those branches run concurrently and
 join. Many nodes may also converge into one input. Use `Condition` (True/False) for either/or branches.

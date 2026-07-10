@@ -17,6 +17,7 @@ namespace TutorialKit.Editor
         private NodeInspectorView _inspector;
         private TutorialGraph _graph;
         private Label _statusLabel;
+        private ToolbarToggle _verticalToggle;
         private bool _subscribed;
         private bool _attach = true;
 
@@ -112,14 +113,19 @@ namespace TutorialKit.Editor
                 () => { if (_graph != null) AssetDatabase.SaveAssets(); }));
             toolbar.Add(IconButton("Auto Layout", "ScaleTool", "Tidy the graph (respects the layout direction)",
                 () => _graphView?.AutoLayout()));
-            var verticalToggle = new ToolbarToggle
+            _verticalToggle = new ToolbarToggle
             {
                 text = "Vertical",
-                value = EditorPrefs.GetBool("TutorialKit.Graph.Vertical", false),
-                tooltip = "Flow the graph top → bottom (VFX-graph style) instead of left → right",
+                value = TutorialGraphView.DefaultVertical,
+                tooltip = "Flow THIS graph top → bottom (VFX-graph style). Saved on the graph; new graphs " +
+                          "follow the project default in Settings.",
             };
-            verticalToggle.RegisterValueChangedCallback(e => _graphView?.SetVertical(e.newValue));
-            toolbar.Add(verticalToggle);
+            _verticalToggle.RegisterValueChangedCallback(e =>
+            {
+                _graphView?.SetVertical(e.newValue);
+                if (_graphView != null) _verticalToggle.SetValueWithoutNotify(_graphView.Vertical);
+            });
+            toolbar.Add(_verticalToggle);
             toolbar.Add(IconButton("Frame", "ViewToolZoom", "Frame all nodes (A)",
                 () => _graphView?.FrameAll()));
             toolbar.Add(IconButton("Test in Play", "PlayButton", "Enter Play mode and run this tutorial",
@@ -162,6 +168,7 @@ namespace TutorialKit.Editor
             if (_graphView == null) return;
             _graphView.LoadGraph(graph);
             _graphView.FrameAll();
+            _verticalToggle?.SetValueWithoutNotify(_graphView.Vertical); // reflect this graph's saved direction
             if (_statusLabel != null)
                 _statusLabel.text = graph != null ? $" {graph.DisplayName}  ({graph.Nodes.Count} nodes) " : " No tutorial loaded ";
         }

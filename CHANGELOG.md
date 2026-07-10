@@ -2,6 +2,23 @@
 
 All notable changes to TutorialKit are documented here.
 
+## [0.12.0] — 2026-07-10
+
+### Added
+- **Per-graph layout direction.** Each tutorial remembers its own horizontal/vertical preference (the
+  toolbar **Vertical** toggle now saves onto the graph). Graphs left on *Use Default* follow a new
+  project-wide **Default graph layout** picker in **Settings ▸ Tools**.
+
+### Changed
+- **Pointer no longer covers its target.** The hand/arrow is offset so its finger/arrow *tip* — not the
+  sprite centre — sits at the target, leaving a button's label visible; the tap ring still ripples from
+  the tip. Tunable via the pointer view's hotspot fields.
+
+### Fixed
+- **Tap indicator showed a white square.** The procedural tap ring/dot sprites could be unloaded and
+  the `??=` cache handed back the destroyed (Unity-null) sprite, which renders as a white box. Generated
+  sprites/textures are now `HideAndDontSave` and the cache rebuilds any that were destroyed.
+
 ## [0.11.0] — 2026-07-10
 
 ### Added
