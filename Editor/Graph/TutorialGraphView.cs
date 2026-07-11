@@ -116,15 +116,14 @@ namespace TutorialKit.Editor
         }
 
         /// <summary>
-        /// A soft dot-grid canvas background. Draws faint dots that pan and zoom with the graph (reading
-        /// the view transform), instead of Unity's hard line grid. Theme-aware; purely decorative.
+        /// A soft dot-grid canvas background. Renders faint dots as a repeating background image (GPU
+        /// tiled — no mesh geometry, so it never hits the vertex limit) that pans and zooms with the
+        /// graph via the view transform. Theme-aware; purely decorative.
         /// </summary>
         private sealed class DotGridBackground : VisualElement
         {
             private readonly GraphView _view;
             private const float BaseSpacing = 26f;
-            private const float BaseRadius = 1.5f;
-            private readonly Color _dotColor;
 
             public DotGridBackground(GraphView view)
             {
@@ -134,37 +133,53 @@ namespace TutorialKit.Editor
 
                 bool dark = EditorGUIUtility.isProSkin;
                 style.backgroundColor = dark ? new Color(0.16f, 0.165f, 0.19f) : new Color(0.76f, 0.77f, 0.79f);
-                _dotColor = dark ? new Color(1f, 1f, 1f, 0.075f) : new Color(0f, 0f, 0f, 0.09f);
+                var dotColor = dark ? new Color(1f, 1f, 1f, 0.10f) : new Color(0f, 0f, 0f, 0.11f);
 
-                generateVisualContent += OnGenerate;
-                _view.viewTransformChanged += _ => MarkDirtyRepaint();
-                RegisterCallback<GeometryChangedEvent>(_ => MarkDirtyRepaint());
+                style.backgroundImage = new StyleBackground(BuildDotTile(dotColor));
+                style.backgroundRepeat = new StyleBackgroundRepeat(new BackgroundRepeat(Repeat.Repeat, Repeat.Repeat));
+
+                _view.viewTransformChanged += _ => UpdateTiling();
+                RegisterCallback<GeometryChangedEvent>(_ => UpdateTiling());
+                UpdateTiling();
             }
 
-            private void OnGenerate(MeshGenerationContext mgc)
+            // Match the tile size + offset to the graph's zoom/pan so the dots track the nodes.
+            private void UpdateTiling()
             {
-                float w = resolvedStyle.width, h = resolvedStyle.height;
-                if (w <= 1f || h <= 1f || _view == null) return;
-
+                if (_view == null) return;
                 var t = _view.viewTransform;
                 float scale = Mathf.Max(0.0001f, t.scale.x);
-                float spacing = BaseSpacing * scale;
-                if (spacing < 9f) return; // zoomed too far out — drop the dots so it stays clean
+                float size = BaseSpacing * scale;
+                style.backgroundSize = new StyleBackgroundSize(new BackgroundSize(new Length(size), new Length(size)));
+                style.backgroundPositionX = new StyleBackgroundPosition(
+                    new BackgroundPosition(BackgroundPositionKeyword.Left, new Length(Mathf.Repeat(t.position.x, size))));
+                style.backgroundPositionY = new StyleBackgroundPosition(
+                    new BackgroundPosition(BackgroundPositionKeyword.Top, new Length(Mathf.Repeat(t.position.y, size))));
+            }
 
-                float radius = BaseRadius * Mathf.Clamp(scale, 0.65f, 1.5f);
-                float startX = Mathf.Repeat(t.position.x, spacing);
-                float startY = Mathf.Repeat(t.position.y, spacing);
-
-                var p = mgc.painter2D;
-                p.fillColor = _dotColor;
-                p.BeginPath();
-                for (float x = startX; x <= w; x += spacing)
-                    for (float y = startY; y <= h; y += spacing)
-                    {
-                        p.MoveTo(new Vector2(x + radius, y));
-                        p.Arc(new Vector2(x, y), radius, new Angle(0f, AngleUnit.Degree), new Angle(360f, AngleUnit.Degree));
-                    }
-                p.Fill();
+            // A small tile holding one soft (anti-aliased) dot in the centre; tiled to make the grid.
+            private static Texture2D BuildDotTile(Color dot)
+            {
+                const int s = 32;
+                float radius = 1.7f;
+                var tex = new Texture2D(s, s, TextureFormat.RGBA32, false, false)
+                {
+                    hideFlags = HideFlags.HideAndDontSave,
+                    wrapMode = TextureWrapMode.Repeat,
+                    filterMode = FilterMode.Bilinear,
+                };
+                var px = new Color[s * s];
+                var c = new Vector2(s * 0.5f, s * 0.5f);
+                for (int y = 0; y < s; y++)
+                for (int x = 0; x < s; x++)
+                {
+                    float d = Vector2.Distance(new Vector2(x + 0.5f, y + 0.5f), c) - radius;
+                    float cov = Mathf.Clamp01(0.5f - d); // signed-distance anti-aliasing
+                    px[y * s + x] = new Color(dot.r, dot.g, dot.b, dot.a * cov);
+                }
+                tex.SetPixels(px);
+                tex.Apply();
+                return tex;
             }
         }
 

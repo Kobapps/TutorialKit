@@ -2,6 +2,14 @@
 
 All notable changes to TutorialKit are documented here.
 
+## [0.17.1] — 2026-07-10
+
+### Fixed
+- **Dot-grid background no longer overflows the mesh vertex limit** (it threw
+  `ArgumentOutOfRangeException: … exceeds the limit of 65535` and made the editor sluggish). The dots
+  are now drawn as a GPU-tiled repeating background image instead of per-dot mesh geometry — no vertex
+  cost, still soft and still panning/zooming with the graph.
+
 ## [0.17.0] — 2026-07-10
 
 ### Changed
