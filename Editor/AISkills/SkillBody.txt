@@ -102,6 +102,11 @@ Add a `TutorialTrigger` component in the scene, assign the graph, and set When =
 Manual, plus gating (only-if-not-completed, conditions). Or start from code:
 `TutorialDirector.EnsureExists().Play(graph);`
 
+For a **recurring** tutorial that should play *every time* it's triggered (a hint that isn't a one-time
+onboarding step), set the graph's **Repeatable** flag (`graph.Repeatable = true`, or the toggle in the
+graph's inspector). Repeatable tutorials are never written to persistence, so they ignore the
+only-once / only-if-not-completed gating.
+
 ## 4. Test it (via Unity MCP)
 
 1. Make sure the scene has the referenced `TutorialTarget` ids and a trigger (or a controller that calls

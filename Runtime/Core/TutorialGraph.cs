@@ -23,8 +23,19 @@ namespace TutorialKit
         [SerializeField] private List<TutorialBlackboardVar> blackboard = new List<TutorialBlackboardVar>();
         [SerializeField, HideInInspector] private TutorialLayoutDirection layoutDirection = TutorialLayoutDirection.UseDefault;
 
+        [Tooltip("If on, this tutorial is never written to persistence — it plays again every time it's " +
+                 "triggered (e.g. recurring hints), instead of only once.")]
+        [SerializeField] private bool repeatable;
+
         public IReadOnlyList<TutorialGroupData> Groups => groups;
         public IReadOnlyList<TutorialBlackboardVar> Blackboard => blackboard;
+
+        /// <summary>If true, completion is never stored — the tutorial replays every time it's triggered.</summary>
+        public bool Repeatable
+        {
+            get => repeatable;
+            set => repeatable = value;
+        }
 
         /// <summary>This graph's preferred editor flow direction. <c>UseDefault</c> follows the project setting.</summary>
         public TutorialLayoutDirection LayoutDirection

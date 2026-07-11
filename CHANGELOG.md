@@ -2,6 +2,14 @@
 
 All notable changes to TutorialKit are documented here.
 
+## [0.21.0] — 2026-07-10
+
+### Added
+- **Repeatable tutorials.** A new **Repeatable** flag on a `TutorialGraph` (`graph.Repeatable`) makes a
+  tutorial play *every time* it's triggered instead of once: its completion is never written to
+  persistence, and it bypasses the only-once / only-if-not-completed gating in `TutorialDirector.Play`
+  and `TutorialTrigger`. Good for recurring hints.
+
 ## [0.20.0] — 2026-07-10
 
 ### Added

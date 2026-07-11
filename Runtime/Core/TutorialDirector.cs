@@ -121,7 +121,7 @@ namespace TutorialKit
             if (graph == null) { Debug.LogWarning("[TutorialKit] Play called with a null graph."); return null; }
             EnsureInitialized();
 
-            if (!force && _persistence.IsTutorialCompleted(graph.TutorialId))
+            if (!force && !graph.Repeatable && _persistence.IsTutorialCompleted(graph.TutorialId))
             {
                 var done = new TutorialHandle(graph, new CancellationTokenSource());
                 done.Complete(TutorialStatus.Completed);
@@ -169,14 +169,14 @@ namespace TutorialKit
             try
             {
                 await player.RunAsync(graph, ctx, cts.Token);
-                _persistence.SetTutorialCompleted(graph.TutorialId, true);
+                if (!graph.Repeatable) _persistence.SetTutorialCompleted(graph.TutorialId, true);
                 handle.Complete(TutorialStatus.Completed);
             }
             catch (OperationCanceledException)
             {
                 if (handle.SkipRequested)
                 {
-                    _persistence.SetTutorialCompleted(graph.TutorialId, true);
+                    if (!graph.Repeatable) _persistence.SetTutorialCompleted(graph.TutorialId, true);
                     handle.Complete(TutorialStatus.Skipped);
                 }
                 else handle.Complete(TutorialStatus.Aborted);

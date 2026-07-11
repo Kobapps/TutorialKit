@@ -77,7 +77,8 @@ namespace TutorialKit
 
             var director = TutorialDirector.EnsureExists();
 
-            if (!forceReplay && onlyIfNotCompleted && director.Persistence.IsTutorialCompleted(graph.TutorialId))
+            if (!forceReplay && onlyIfNotCompleted && !graph.Repeatable &&
+                director.Persistence.IsTutorialCompleted(graph.TutorialId))
                 return null;
 
             for (int i = 0; i < conditions.Count; i++)

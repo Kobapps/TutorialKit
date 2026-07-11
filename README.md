@@ -77,6 +77,10 @@ await handle.Completion;          // UniTask
 | `TutorialTargets` | Register **dynamic** targets from code — `RegisterDynamic(id, () => FindElement())` for runtime-found elements, or `RegisterRect(id, () => rect)` for an explicit position/size. |
 | `TutorialTrigger` | Starts a graph from a trigger, gated by conditions. |
 
+By default a tutorial plays **once** (completion is saved to persistence). Turn on a graph's
+**Repeatable** flag (in its inspector, or `graph.Repeatable = true`) for a recurring tutorial/hint that
+**plays every time it's triggered** — it's never written to persistence and ignores the only-once gate.
+
 ## Adapters (the game boundary)
 
 The runtime references **no game types**. Provide your own implementations before the first
