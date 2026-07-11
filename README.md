@@ -5,7 +5,8 @@ Author branching, multi-step flows in a visual **graph editor**; play them at ru
 UI, point with animated hands, show styled text, gate input, run custom game commands, and persist
 progress — all decoupled from your game through small **adapters**.
 
-- **Async** via [UniTask]; **tweens** via [DOTween].
+- **Async** via [UniTask]; **animations** through a swappable backend (a dependency-free built-in one,
+  or DOTween, or your own — pick it in Settings).
 - **Standalone** package — drop it in, wire ~4 adapters, ship.
 - **Remote-updatable** — load/patch tutorials from JSON without a client rebuild.
 
@@ -32,7 +33,9 @@ Pin a version by appending a tag, e.g. `…/TutorialKit.git#v0.8.3`.
 ### Dependencies
 
 - **UniTask** — add `https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask` as a git-URL package.
-- **DOTween** — import from the [Asset Store][DOTween] and run its setup panel once.
+- **DOTween** — *optional*. Animations use a built-in, dependency-free backend by default. To use DOTween
+  instead, install it and pick it in **Settings ▸ Animation Backend** (that adds a `TUTORIALKIT_DOTWEEN`
+  define; the adapter uses only DOTween's core API, so it doesn't need the DOTween module setup).
 - `com.unity.ugui` (TextMeshPro) and `com.unity.inputsystem` come in automatically as declared dependencies.
 
 ### Samples

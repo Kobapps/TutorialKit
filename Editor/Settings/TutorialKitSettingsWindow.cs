@@ -1,4 +1,8 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
+using UnityEditor.Build;
 using UnityEngine;
 
 namespace TutorialKit.Editor
@@ -30,6 +34,8 @@ namespace TutorialKit.Editor
             EditorGUILayout.Space(10);
 
             DrawAiSkillSection();
+            EditorGUILayout.Space(12);
+            DrawAnimationSection();
             EditorGUILayout.Space(12);
             DrawPointerArtSection();
             EditorGUILayout.Space(12);
@@ -193,6 +199,83 @@ namespace TutorialKit.Editor
             }
             so.ApplyModifiedPropertiesWithoutUndo();
             EditorUtility.SetDirty(s);
+        }
+
+        private const string DOTweenDefine = "TUTORIALKIT_DOTWEEN";
+
+        private void DrawAnimationSection()
+        {
+            using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+            {
+                GUILayout.Label("Animation Backend", EditorStyles.boldLabel);
+                EditorGUILayout.LabelField(
+                    "Which tween engine the overlays use. The built-in runner needs no dependencies. DOTween " +
+                    "is optional — selecting it adds the " + DOTweenDefine + " scripting define (only enable it " +
+                    "when DOTween is installed). Plug in your own via TutorialTween.Register.", WrapLabel);
+
+                var settings = LoadSettings();
+                string current = settings != null ? settings.TweenAdapterId : TutorialTween.NativeId;
+                bool isDo = string.Equals(current, DOTweenRunnerId, StringComparison.OrdinalIgnoreCase);
+
+                EditorGUILayout.Space(4);
+                int sel = isDo ? 1 : 0;
+                int next = EditorGUILayout.Popup(new GUIContent("Adapter"), sel,
+                    new[] { "Built-in (native)", "DOTween" });
+                if (next != sel)
+                {
+                    var s = settings != null ? settings : CreateSettings();
+                    if (next == 1) { SetDefine(DOTweenDefine, true); SetTweenId(s, DOTweenRunnerId); }
+                    else SetTweenId(s, TutorialTween.NativeId);
+                }
+
+                if (next == 1 || isDo)
+                {
+                    bool defineOn = HasDefine(DOTweenDefine);
+                    bool registered = TutorialTween.IsAvailable(DOTweenRunnerId);
+                    if (!defineOn)
+                        EditorGUILayout.HelpBox("Enabling DOTween — Unity will recompile with " + DOTweenDefine + ".", MessageType.Info);
+                    else if (!registered)
+                        EditorGUILayout.HelpBox(DOTweenDefine + " is set but the DOTween adapter isn't compiled/registered " +
+                            "yet (recompiling, or DOTween isn't installed). Overlays use the built-in runner until it is.",
+                            MessageType.Warning);
+                    else
+                        EditorGUILayout.HelpBox("DOTween adapter active.", MessageType.None);
+
+                    using (new EditorGUI.DisabledScope(!defineOn))
+                        if (GUILayout.Button("Remove " + DOTweenDefine + " define"))
+                            SetDefine(DOTweenDefine, false);
+                }
+            }
+        }
+
+        private const string DOTweenRunnerId = "dotween";
+
+        private static bool HasDefine(string symbol)
+        {
+            var nbt = NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.selectedBuildTargetGroup);
+            return PlayerSettings.GetScriptingDefineSymbols(nbt)
+                .Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Contains(symbol);
+        }
+
+        private static void SetDefine(string symbol, bool on)
+        {
+            var nbt = NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.selectedBuildTargetGroup);
+            var list = PlayerSettings.GetScriptingDefineSymbols(nbt)
+                .Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+            if (on == list.Contains(symbol)) return;
+            if (on) list.Add(symbol); else list.Remove(symbol);
+            PlayerSettings.SetScriptingDefineSymbols(nbt, string.Join(";", list));
+        }
+
+        private static void SetTweenId(TutorialKitSettings s, string id)
+        {
+            if (s == null) return;
+            var so = new SerializedObject(s);
+            var prop = so.FindProperty("tweenAdapterId");
+            if (prop != null) prop.stringValue = id;
+            so.ApplyModifiedPropertiesWithoutUndo();
+            EditorUtility.SetDirty(s);
+            TutorialKitSettings.ClearCache();
         }
 
         private void DrawToolsSection()

@@ -2,6 +2,22 @@
 
 All notable changes to TutorialKit are documented here.
 
+## [0.19.0] — 2026-07-10
+
+### Changed
+- **Animations now go through a swappable backend, and DOTween is optional.** The overlays animate via
+  a small `ITutorialTweenRunner` abstraction (`TutorialTween`). Two backends ship: a **built-in,
+  dependency-free** runner (the default, UniTask-driven) and a **DOTween adapter**. The package no
+  longer hard-depends on DOTween, so **it compiles and runs even if DOTween isn't installed**.
+- Pick the backend in **Settings ▸ Animation Backend** (or set `TutorialKitSettings.TweenAdapterId`);
+  register your own with `TutorialTween.Register`. Selecting DOTween adds the `TUTORIALKIT_DOTWEEN`
+  scripting define that compiles the adapter assembly.
+
+### Fixed
+- **DOTween module fragility.** The DOTween adapter uses only DOTween's *core* API (`DOTween.To`), never
+  the extension "modules" (`DOFade`/`DOMove`/…), so it no longer requires the DOTween module setup and
+  can't break on a partial DOTween install.
+
 ## [0.18.0] — 2026-07-10
 
 ### Added

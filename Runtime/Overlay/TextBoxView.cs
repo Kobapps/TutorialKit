@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -40,18 +39,19 @@ namespace TutorialKit
             Position(box, request);
 
             // Slide up + fade in.
+            box.KillTweens();
             var panel = box.Panel;
             Vector2 target = panel.anchoredPosition;
-            panel.DOKill();
-            panel.anchoredPosition = target + new Vector2(0f, -28f);
-            panel.DOAnchorPos(target, 0.24f).SetEase(Ease.OutCubic).SetUpdate(true);
+            Vector2 from = target + new Vector2(0f, -28f);
+            panel.anchoredPosition = from;
+            box.SlideTween = TutorialTween.Animate(0.24f, TutorialEase.OutCubic,
+                p => panel.anchoredPosition = Vector2.LerpUnclamped(from, target, p));
 
             var group = box.CanvasGroup;
             if (group != null)
             {
                 group.alpha = 0f;
-                group.DOKill();
-                group.DOFade(1f, 0.2f).SetUpdate(true);
+                box.FadeTween = TutorialTween.Animate(0.2f, TutorialEase.Linear, p => group.alpha = p);
             }
 
             if (request.Typewriter && box.BodyLabel != null)
@@ -89,11 +89,13 @@ namespace TutorialKit
         {
             id = string.IsNullOrEmpty(id) ? "main" : id;
             if (!_active.TryGetValue(id, out var box) || box == null) return;
+            box.KillTweens();
             var group = box.CanvasGroup;
             if (group != null)
             {
-                group.DOKill();
-                await group.DOFade(0f, 0.15f).SetUpdate(true).ToUniTaskSafe(ct);
+                float start = group.alpha;
+                box.FadeTween = TutorialTween.Animate(0.15f, TutorialEase.Linear, p => group.alpha = Mathf.LerpUnclamped(start, 0f, p));
+                await box.FadeTween.ToUniTask(ct);
             }
             if (box != null) box.gameObject.SetActive(false);
         }
@@ -103,7 +105,7 @@ namespace TutorialKit
             foreach (var kv in _active)
                 if (kv.Value != null)
                 {
-                    kv.Value.CanvasGroup?.DOKill();
+                    kv.Value.KillTweens();
                     kv.Value.gameObject.SetActive(false);
                 }
         }

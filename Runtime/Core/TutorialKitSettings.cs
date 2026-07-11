@@ -28,6 +28,14 @@ namespace TutorialKit
         public Sprite PointerHandClosed => pointerHandClosed;
         public Sprite PointerArrow => pointerArrow;
 
+        [Header("Animation")]
+        [Tooltip("Which animation backend the overlays use. \"native\" (built-in, no dependency) or the " +
+                 "id of a registered adapter such as \"dotween\". Empty = native.")]
+        [SerializeField] private string tweenAdapterId = TutorialTween.NativeId;
+
+        /// <summary>Selected animation backend id (see <see cref="TutorialTween"/>). Empty/unknown → built-in.</summary>
+        public string TweenAdapterId => tweenAdapterId;
+
         private static TutorialKitSettings _instance;
         private static bool _looked;
 

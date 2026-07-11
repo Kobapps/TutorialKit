@@ -27,6 +27,16 @@ namespace TutorialKit
         public RectTransform Panel => panel != null ? panel : panel = transform as RectTransform;
         public TMP_Text BodyLabel => bodyLabel;
 
+        // Show/hide animation handles owned by this box (killed before a re-show or on hide).
+        internal ITutorialTween SlideTween;
+        internal ITutorialTween FadeTween;
+
+        internal void KillTweens()
+        {
+            TutorialTween.Kill(ref SlideTween);
+            TutorialTween.Kill(ref FadeTween);
+        }
+
         protected virtual void Awake()
         {
             if (continueButton != null)

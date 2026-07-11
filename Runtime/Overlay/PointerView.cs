@@ -1,6 +1,5 @@
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,7 +8,8 @@ namespace TutorialKit
     /// <summary>
     /// Shows an animated hand/arrow pointer performing a gesture (point, tap, swipe, drag, merge).
     /// The pointer root follows a moving target for point/tap; path gestures animate between two
-    /// captured endpoints. Real art can be assigned via <see cref="handSprite"/>/<see cref="arrowSprite"/>.
+    /// captured endpoints. Animations go through <see cref="TutorialTween"/> so the backend is swappable.
+    /// Real art can be assigned via <see cref="handSprite"/>/<see cref="arrowSprite"/>.
     /// </summary>
     public sealed class PointerView : MonoBehaviour, IPointerService
     {
@@ -31,7 +31,8 @@ namespace TutorialKit
         private RectTransform _secondary; // for merge
         private Image _secondaryImage;
 
-        private Sequence _sequence;
+        private ITutorialTweenSequence _sequence;
+        private ITutorialTween _hideFade;
         private PointerRequest _request;
         private bool _followTarget;
 
@@ -84,7 +85,7 @@ namespace TutorialKit
 
         public UniTask ShowAsync(PointerRequest request, CancellationToken ct)
         {
-            KillSequence();
+            KillTweens();
             _request = request;
             _pointerImage.sprite = request.Kind == PointerKind.Arrow
                 ? (arrowSprite != null ? arrowSprite : TutorialSpriteFactory.Arrow)
@@ -99,8 +100,10 @@ namespace TutorialKit
             IsVisible = true;
             _inner.anchoredPosition = Vector2.zero;
             _inner.localScale = Vector3.one;
+            _ring.rectTransform.localScale = Vector3.one;
             _secondary.gameObject.SetActive(false);
-            _ring.color = new Color(tint.r, tint.g, tint.b, 0f);
+            _pointerImage.color = tint;
+            SetRingAlpha(0f);
 
             Vector2 start = ResolvePosition(request.Target, request.ScreenOffset);
             _follow.anchoredPosition = start;
@@ -122,24 +125,26 @@ namespace TutorialKit
 
         private void BuildPoint(PointerRequest r)
         {
-            _sequence = DOTween.Sequence().SetUpdate(true).SetLoops(-1, LoopType.Restart);
             float t = 0.6f / Speed;
-            _sequence.Append(_inner.DOAnchorPosY(-18f, t).SetEase(Ease.InOutSine));
-            _sequence.Join(_inner.DOScale(1.08f, t).SetEase(Ease.InOutSine));
-            _sequence.Append(_inner.DOAnchorPosY(0f, t).SetEase(Ease.InOutSine));
-            _sequence.Join(_inner.DOScale(1f, t).SetEase(Ease.InOutSine));
+            _sequence = TutorialTween.Sequence()
+                .Append(t, TutorialEase.InOutSine, p => SetInner(Mathf.LerpUnclamped(0f, -18f, p), Mathf.LerpUnclamped(1f, 1.08f, p)))
+                .Append(t, TutorialEase.InOutSine, p => SetInner(Mathf.LerpUnclamped(-18f, 0f, p), Mathf.LerpUnclamped(1.08f, 1f, p)))
+                .SetLoops(-1)
+                .Play();
         }
 
         private void BuildTap(PointerRequest r)
         {
-            _sequence = DOTween.Sequence().SetUpdate(true).SetLoops(-1, LoopType.Restart);
             float d = 0.28f / Speed;
-            _sequence.Append(_inner.DOScale(0.82f, d).SetEase(Ease.OutQuad));
-            _sequence.Join(_ring.DOFade(0.6f, d).From(0f));
-            _sequence.Join(_ring.rectTransform.DOScale(1.4f, d * 2f).From(Vector3.one * 0.6f));
-            _sequence.Append(_inner.DOScale(1f, d).SetEase(Ease.OutBack));
-            _sequence.Join(_ring.DOFade(0f, d));
-            _sequence.AppendInterval(0.35f / Speed);
+            _sequence = TutorialTween.Sequence()
+                .Append(d, TutorialEase.OutQuad, p => SetInnerScale(Mathf.LerpUnclamped(1f, 0.82f, p)))
+                .Join(d, TutorialEase.Linear, p => SetRingAlpha(Mathf.LerpUnclamped(0f, 0.6f, p)))
+                .Join(d * 2f, TutorialEase.Linear, p => SetRingScale(Mathf.LerpUnclamped(0.6f, 1.4f, p)))
+                .Append(d, TutorialEase.OutBack, p => SetInnerScale(Mathf.LerpUnclamped(0.82f, 1f, p)))
+                .Join(d, TutorialEase.Linear, p => SetRingAlpha(Mathf.LerpUnclamped(0.6f, 0f, p)))
+                .AppendInterval(0.35f / Speed)
+                .SetLoops(-1)
+                .Play();
         }
 
         private void BuildSwipe(PointerRequest r)
@@ -148,11 +153,13 @@ namespace TutorialKit
             Vector2 end = ResolvePosition(r.SecondaryTarget, r.ScreenOffset);
             _follow.anchoredPosition = start;
             float move = 0.5f / Speed;
-            _sequence = DOTween.Sequence().SetUpdate(true).SetLoops(-1, LoopType.Restart);
-            _sequence.AppendCallback(() => { _follow.anchoredPosition = start; _pointerImage.color = tint; });
-            _sequence.Append(_follow.DOAnchorPos(end, move).SetEase(Ease.InOutQuad));
-            _sequence.Join(_pointerImage.DOFade(0f, move).SetEase(Ease.InQuad).SetDelay(move * 0.6f));
-            _sequence.AppendInterval(0.25f / Speed);
+            _sequence = TutorialTween.Sequence()
+                .AppendCallback(() => { _follow.anchoredPosition = start; _pointerImage.color = tint; })
+                .Append(move, TutorialEase.InOutQuad, p => _follow.anchoredPosition = Vector2.LerpUnclamped(start, end, p))
+                .Join(move, TutorialEase.InQuad, p => SetPointerAlpha(Mathf.LerpUnclamped(1f, 0f, p)), delay: move * 0.6f)
+                .AppendInterval(0.25f / Speed)
+                .SetLoops(-1)
+                .Play();
         }
 
         private void BuildDrag(PointerRequest r)
@@ -164,19 +171,16 @@ namespace TutorialKit
             Sprite open = handSprite != null ? handSprite : TutorialSpriteFactory.HandOpen;
             Sprite closed = handSprite != null ? handSprite : TutorialSpriteFactory.HandClosed;
             float move = 0.9f / Speed;
-            _sequence = DOTween.Sequence().SetUpdate(true).SetLoops(-1, LoopType.Restart);
-            _sequence.AppendCallback(() =>
-            {
-                _follow.anchoredPosition = start;
-                _inner.localScale = Vector3.one;
-                _pointerImage.sprite = open;   // hovering, hand open
-            });
-            _sequence.Append(_inner.DOScale(0.85f, 0.2f)); // grab
-            _sequence.AppendCallback(() => _pointerImage.sprite = closed); // fist closes
-            _sequence.Append(_follow.DOAnchorPos(end, move).SetEase(Ease.InOutSine));
-            _sequence.AppendCallback(() => _pointerImage.sprite = open);   // release, hand opens
-            _sequence.Append(_inner.DOScale(1f, 0.2f));     // release
-            _sequence.AppendInterval(0.35f / Speed);
+            _sequence = TutorialTween.Sequence()
+                .AppendCallback(() => { _follow.anchoredPosition = start; SetInnerScale(1f); _pointerImage.sprite = open; })
+                .Append(0.2f, TutorialEase.OutQuad, p => SetInnerScale(Mathf.LerpUnclamped(1f, 0.85f, p)))   // grab
+                .AppendCallback(() => _pointerImage.sprite = closed)                                          // fist closes
+                .Append(move, TutorialEase.InOutSine, p => _follow.anchoredPosition = Vector2.LerpUnclamped(start, end, p))
+                .AppendCallback(() => _pointerImage.sprite = open)                                            // release, hand opens
+                .Append(0.2f, TutorialEase.OutQuad, p => SetInnerScale(Mathf.LerpUnclamped(0.85f, 1f, p)))    // release
+                .AppendInterval(0.35f / Speed)
+                .SetLoops(-1)
+                .Play();
         }
 
         private void BuildMerge(PointerRequest r)
@@ -186,19 +190,29 @@ namespace TutorialKit
             Vector2 mid = (a + b) * 0.5f;
             _secondary.gameObject.SetActive(true);
             float move = 0.6f / Speed;
-            _sequence = DOTween.Sequence().SetUpdate(true).SetLoops(-1, LoopType.Restart);
-            _sequence.AppendCallback(() =>
-            {
-                _follow.anchoredPosition = a;
-                _secondary.anchoredPosition = b;
-                _pointerImage.color = tint;
-                _secondaryImage.color = tint;
-            });
-            _sequence.Append(_follow.DOAnchorPos(mid, move).SetEase(Ease.InOutQuad));
-            _sequence.Join(_secondary.DOAnchorPos(mid, move).SetEase(Ease.InOutQuad));
-            _sequence.Append(_inner.DOScale(1.25f, 0.15f).SetLoops(2, LoopType.Yoyo));
-            _sequence.AppendInterval(0.3f / Speed);
+            _sequence = TutorialTween.Sequence()
+                .AppendCallback(() =>
+                {
+                    _follow.anchoredPosition = a;
+                    _secondary.anchoredPosition = b;
+                    _pointerImage.color = tint;
+                    _secondaryImage.color = tint;
+                })
+                .Append(move, TutorialEase.InOutQuad, p => _follow.anchoredPosition = Vector2.LerpUnclamped(a, mid, p))
+                .Join(move, TutorialEase.InOutQuad, p => _secondary.anchoredPosition = Vector2.LerpUnclamped(b, mid, p))
+                .Append(0.15f, TutorialEase.OutQuad, p => SetInnerScale(Mathf.LerpUnclamped(1f, 1.25f, p)))   // pulse up
+                .Append(0.15f, TutorialEase.OutQuad, p => SetInnerScale(Mathf.LerpUnclamped(1.25f, 1f, p)))   // pulse down
+                .AppendInterval(0.3f / Speed)
+                .SetLoops(-1)
+                .Play();
         }
+
+        // --- value setters the animations drive ---
+        private void SetInner(float y, float scale) { _inner.anchoredPosition = new Vector2(0f, y); _inner.localScale = Vector3.one * scale; }
+        private void SetInnerScale(float s) => _inner.localScale = Vector3.one * s;
+        private void SetRingAlpha(float a) => _ring.color = new Color(tint.r, tint.g, tint.b, a);
+        private void SetRingScale(float s) => _ring.rectTransform.localScale = Vector3.one * s;
+        private void SetPointerAlpha(float a) => _pointerImage.color = new Color(tint.r, tint.g, tint.b, a);
 
         private Vector2 ResolvePosition(ITutorialTarget target, Vector2 offset)
         {
@@ -216,28 +230,27 @@ namespace TutorialKit
         public async UniTask HideAsync(CancellationToken ct)
         {
             if (!IsVisible) return;
-            KillSequence();
-            await _pointerImage.DOFade(0f, 0.15f).SetUpdate(true).ToUniTaskSafe(ct);
+            KillTweens();
+            float from = _pointerImage.color.a;
+            _hideFade = TutorialTween.Animate(0.15f, TutorialEase.Linear, p => SetPointerAlpha(Mathf.LerpUnclamped(from, 0f, p)));
+            await _hideFade.ToUniTask(ct);
             HideImmediate();
         }
 
         public void HideImmediate()
         {
-            KillSequence();
+            KillTweens();
             IsVisible = false;
             if (_pointerImage != null) _pointerImage.color = tint;
             gameObject.SetActive(false);
         }
 
-        private void KillSequence()
+        private void KillTweens()
         {
-            if (_sequence != null) { _sequence.Kill(false); _sequence = null; }
-            _inner?.DOKill();
-            _follow?.DOKill();
-            _secondary?.DOKill();
-            _ring?.DOKill();
+            if (_sequence != null) { _sequence.Kill(); _sequence = null; }
+            TutorialTween.Kill(ref _hideFade);
         }
 
-        private void OnDestroy() => KillSequence();
+        private void OnDestroy() => KillTweens();
     }
 }

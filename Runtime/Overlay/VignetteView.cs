@@ -1,6 +1,5 @@
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -33,6 +32,7 @@ namespace TutorialKit
         private bool _blockHoles;
         private bool _snapNext = true;
         private int _prevCount;
+        private ITutorialTween _fade;
 
         private readonly Vector4[] _centers = new Vector4[MaxHoles];
         private readonly Vector4[] _sizes = new Vector4[MaxHoles];
@@ -72,25 +72,33 @@ namespace TutorialKit
             IsVisible = true;
             UpdateHoles();
 
-            _image.DOKill();
+            TutorialTween.Kill(ref _fade);
             float dur = Mathf.Max(0f, request.FadeDuration);
             if (dur <= 0f) { _image.color = Color.white; return; }
-            await _image.DOFade(1f, dur).SetUpdate(true).ToUniTaskSafe(ct);
+            await Fade(1f, dur, ct);
         }
 
         public async UniTask HideAsync(CancellationToken ct)
         {
             if (!IsVisible) return;
-            _image.DOKill();
+            TutorialTween.Kill(ref _fade);
             float dur = Mathf.Max(0f, _request.FadeDuration);
-            if (dur > 0f)
-                await _image.DOFade(0f, dur).SetUpdate(true).ToUniTaskSafe(ct);
+            if (dur > 0f) await Fade(0f, dur, ct);
             HideImmediate();
         }
 
+        private UniTask Fade(float to, float dur, CancellationToken ct)
+        {
+            float from = _image.color.a;
+            _fade = TutorialTween.Animate(dur, TutorialEase.Linear, p => SetAlpha(Mathf.LerpUnclamped(from, to, p)));
+            return _fade.ToUniTask(ct);
+        }
+
+        private void SetAlpha(float a) { var c = _image.color; c.a = a; _image.color = c; }
+
         public void HideImmediate()
         {
-            _image.DOKill();
+            TutorialTween.Kill(ref _fade);
             IsVisible = false;
             _holeCount = 0;
             _prevCount = 0;

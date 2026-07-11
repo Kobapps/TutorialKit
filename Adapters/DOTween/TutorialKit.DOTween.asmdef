@@ -1,11 +1,9 @@
 {
-    "name": "TutorialKit.Runtime",
-    "rootNamespace": "TutorialKit",
+    "name": "TutorialKit.DOTween",
+    "rootNamespace": "TutorialKit.Adapters",
     "references": [
-        "UniTask",
-        "UnityEngine.UI",
-        "Unity.TextMeshPro",
-        "Unity.InputSystem"
+        "TutorialKit.Runtime",
+        "UniTask"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -13,7 +11,9 @@
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,
-    "defineConstraints": [],
+    "defineConstraints": [
+        "TUTORIALKIT_DOTWEEN"
+    ],
     "versionDefines": [],
     "noEngineReferences": false
 }
