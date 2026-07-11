@@ -86,7 +86,7 @@ namespace TutorialKit.Editor
 
         private SerializedObject _settingsSO;
 
-        private const string PointerArtDir = "Packages/com.tutorialkit/Runtime/Resources/TutorialKit/Pointers/";
+        private const string PointerArtDir = "Packages/com.kobapps.tutorialkit/Runtime/Resources/TutorialKit/Pointers/";
         private static readonly (string field, string sprite, string label)[] PointerFields =
         {
             ("pointerHand", "hand_point", "Hand (point / tap)"),

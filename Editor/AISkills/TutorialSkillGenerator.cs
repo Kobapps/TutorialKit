@@ -15,7 +15,7 @@ namespace TutorialKit.Editor
     public static class TutorialSkillGenerator
     {
         public const string SkillName = "tutorialkit-author";
-        private const string BodyAssetPath = "Packages/com.tutorialkit/Editor/AISkills/SkillBody.txt";
+        private const string BodyAssetPath = "Packages/com.kobapps.tutorialkit/Editor/AISkills/SkillBody.txt";
 
         private const string Description =
             "Author, configure, test, and debug TutorialKit tutorial sequences in this Unity project " +

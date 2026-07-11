@@ -73,7 +73,7 @@ namespace TutorialKit.Editor
             _window = window;
             style.flexGrow = 1;
 
-            var ss = AssetDatabase.LoadAssetAtPath<StyleSheet>("Packages/com.tutorialkit/Editor/Graph/TutorialGraph.uss");
+            var ss = AssetDatabase.LoadAssetAtPath<StyleSheet>("Packages/com.kobapps.tutorialkit/Editor/Graph/TutorialGraph.uss");
             if (ss != null) styleSheets.Add(ss);
 
             SetupZoom(ContentZoomer.DefaultMinScale, ContentZoomer.DefaultMaxScale);

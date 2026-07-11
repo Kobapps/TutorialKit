@@ -67,7 +67,7 @@ namespace TutorialKit.Editor
         {
             rootVisualElement.Clear();
 
-            var ss = AssetDatabase.LoadAssetAtPath<StyleSheet>("Packages/com.tutorialkit/Editor/Graph/TutorialGraph.uss");
+            var ss = AssetDatabase.LoadAssetAtPath<StyleSheet>("Packages/com.kobapps.tutorialkit/Editor/Graph/TutorialGraph.uss");
             if (ss != null) rootVisualElement.styleSheets.Add(ss);
 
             BuildToolbar();

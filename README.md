@@ -24,7 +24,7 @@ https://github.com/Kobapps/TutorialKit.git
 or add it to `Packages/manifest.json`:
 
 ```json
-"com.tutorialkit": "https://github.com/Kobapps/TutorialKit.git"
+"com.kobapps.tutorialkit": "https://github.com/Kobapps/TutorialKit.git"
 ```
 
 Pin a version by appending a tag, e.g. `…/TutorialKit.git#v0.8.3`.
