@@ -26,45 +26,75 @@ Follow this workflow.
 
 ## 2. Author the tutorial
 
-Two equivalent ways — pick one:
+**Create and edit the tutorial as a `TutorialGraph` ASSET** — never build it dynamically at runtime.
+Use the Unity MCP `script-execute` tool to run C# that authors the asset through the editor API
+`TutorialKit.Editor.TutorialGraphAuthoring`. This produces a real `.asset` (the exact thing the graph
+editor opens) with the mandatory Start/End nodes, stable ids, connections and auto-layout — no manual
+`AddNode`/`SetEdge`/`CreateAsset` plumbing, and it stays editable in the graph window.
 
-### A. Build a `TutorialGraph` asset (recommended for editing later)
-Use the Unity MCP `script-execute` tool to run C# that constructs the graph and saves it as an asset.
-Nodes are plain C# objects with public fields; chain them with edges on the `"Out"` port (branch nodes
-use their own port names). Example:
+### A. Create a new tutorial
 
 ```csharp
-using UnityEngine; using UnityEditor; using TutorialKit;
+using UnityEngine; using UnityEditor; using TutorialKit; using TutorialKit.Editor;
 public static class MakeTut {
   public static void Run() {
-    var g = ScriptableObject.CreateInstance<TutorialGraph>();
-    var s0 = new StartNode();   // every graph starts with one Start node (the entry)
-    var t1 = new ShowTextBoxNode { Title="Hi", Body="Tap the shop.", Placement=TextBoxPlacement.Top };
-    var v1 = new ShowVignetteNode { Target=new TutorialTargetRef("shop_button"), Shape=HighlightShape.Circle };
-    var p1 = new ShowPointerNode { Gesture=PointerGesture.Tap, Target=new TutorialTargetRef("shop_button") };
-    var w1 = new WaitInputNode { Kind=WaitInputKind.TapOnTarget, Target=new TutorialTargetRef("shop_button") };
-    var end = new EndNode();
-    foreach (var n in new TutorialNode[]{s0,t1,v1,p1,w1,end}) { n.EnsureId(); g.AddNode(n); }
-    g.SetEdge(s0.Id,"Out",t1.Id); g.SetEdge(t1.Id,"Out",v1.Id); g.SetEdge(v1.Id,"Out",p1.Id);
-    g.SetEdge(p1.Id,"Out",w1.Id); g.SetEdge(w1.Id,"Out",end.Id);
-    g.EntryNodeId = s0.Id;   // the Start node is the entry (it can't be deleted or duplicated in-editor)
-    AssetDatabase.CreateAsset(g, "Assets/Tutorials/Shop.asset"); AssetDatabase.SaveAssets();
+    var g = TutorialGraphAuthoring.CreateGraph("Assets/Tutorials/Shop.asset", "Shop Intro");
+    var start = TutorialGraphAuthoring.GetStart(g);
+    var end   = TutorialGraphAuthoring.GetEnd(g);
+
+    var t1 = TutorialGraphAuthoring.AddNode<ShowTextBoxNode>(g);
+    t1.Title = "Hi"; t1.Body = "Tap the shop."; t1.Placement = TextBoxPlacement.Top;
+    var v1 = TutorialGraphAuthoring.AddNode<ShowVignetteNode>(g);
+    v1.Target = new TutorialTargetRef("shop_button"); v1.Shape = HighlightShape.Circle;
+    var p1 = TutorialGraphAuthoring.AddNode<ShowPointerNode>(g);
+    p1.Gesture = PointerGesture.Tap; p1.Target = new TutorialTargetRef("shop_button");
+    var w1 = TutorialGraphAuthoring.AddNode<WaitInputNode>(g);
+    w1.Kind = WaitInputKind.TapOnTarget; w1.Target = new TutorialTargetRef("shop_button");
+
+    // wire Start → t1 → v1 → p1 → w1 → End (Chain replaces the initial Start→End edge)
+    TutorialGraphAuthoring.Chain(g, start, t1, v1, p1, w1, end);
+
+    TutorialGraphAuthoring.Layout(g);  // arrange nodes (same as Auto Layout)
+    TutorialGraphAuthoring.Save(g);    // validate + save the asset
   }
 }
 ```
-After creating the asset, run `Auto Layout` in the graph editor (Window ▸ TutorialKit ▸ Tutorial Graph
-Editor) so it's readable.
 
-### B. Write the remote JSON format
-The type-tagged JSON round-trips every node (including custom ones):
+### B. Edit an existing tutorial
+Load the asset and mutate it the same way, then re-layout + save:
+```csharp
+var g = TutorialGraphAuthoring.Load("Assets/Tutorials/Shop.asset");
+var praise = TutorialGraphAuthoring.AddNode<ShowTextBoxNode>(g); praise.Title = "Nice!";
+// re-route the flow through the new node (Connect uses a single edge, replacing on that port)
+TutorialGraphAuthoring.Connect(g, existingNode, praise);
+TutorialGraphAuthoring.Connect(g, praise, TutorialGraphAuthoring.GetEnd(g));
+TutorialGraphAuthoring.Layout(g); TutorialGraphAuthoring.Save(g);
+```
+
+### `TutorialGraphAuthoring` API (namespace `TutorialKit.Editor`)
+- `CreateGraph(path, displayName?, description?)` → new `.asset` with Start + End already wired.
+- `Load(path)` → open an existing asset to edit.
+- `AddNode<T>(g)` / `AddNode(g, "TypeId")` → add a node; **set its public fields on the returned object**
+  (see the node reference below for each node's fields).
+- `Connect(g, from, to, port?)` → one flow edge (replaces on that port; `port` defaults to the first
+  output — pass `"True"`/`"False"` for a Condition). `ConnectFanOut(...)` for concurrent branches.
+- `Chain(g, a, b, c, …)` → wire `a → b → c → …` (usually `Start … End`).
+- `ConnectData(g, provider, "Target", consumer, "Target")` → a typed target/data edge.
+- `GetStart(g)` / `GetEnd(g)`, `EnsureStartEnd(g)`, `Layout(g, vertical:false)`, `Save(g)`.
+
+Then open **Window ▸ TutorialKit ▸ Tutorial Graph Editor** to review/tweak it — it's a normal asset.
+
+### C. Remote / portable JSON (optional)
+For content loaded at runtime from a URL/file, use the type-tagged JSON that round-trips every node
+(including custom ones):
 ```json
 { "tutorialId":"shop", "displayName":"Shop", "entry":"<nodeId>",
   "nodes":[ { "type":"ShowTextBoxNode", "id":"n1", "data":"{...JsonUtility fields...}" } ],
   "edges":[ { "from":"n1", "port":"Out", "to":"n2" } ] }
 ```
 `data` is `JsonUtility.ToJson(node)` (escaped). Load at runtime with
-`RemoteTutorialLoader.LoadFromJson(json)` or `LoadFromUrlAsync(url)`. The easiest way to produce a
-correct JSON file is to build the graph in code (A) and call `TutorialJson.ToJson(graph)`.
+`RemoteTutorialLoader.LoadFromJson(json)` or `LoadFromUrlAsync(url)`. To produce a correct JSON file,
+author the asset (A) then **Export** from the graph editor toolbar, or call `TutorialJson.ToJson(graph)`.
 
 ## 3. Configure it to run
 
@@ -106,6 +136,6 @@ Manual, plus gating (only-if-not-completed, conditions). Or start from code:
 - **Target ports** (teal data ports): a target provider node (`TargetByIdNode`, `TargetByPositionNode`,
   or your own `TargetNodeBase` subclass with game logic) has a `Target` OUTPUT. Wire it into the optional
   `Target` INPUT of a vignette / pointer / text box / wait node to inject the target from a node instead
-  of a fixed field. In code: `graph.AddDataEdge(providerNodeId, "Target", consumerNodeId, "Target")`.
+  of a fixed field. In code: `TutorialGraphAuthoring.ConnectData(g, provider, "Target", consumer, "Target")`.
 
 ## Node reference (auto-generated from this project, includes custom nodes)

@@ -2,6 +2,16 @@
 
 All notable changes to TutorialKit are documented here.
 
+## [0.20.0] — 2026-07-10
+
+### Added
+- **Editor authoring API** — `TutorialKit.Editor.TutorialGraphAuthoring` for creating and editing tutorial
+  `.asset`s from code (AI tools, generators, tests): `CreateGraph` (with Start/End), `AddNode<T>` /
+  `AddNode(id)`, `Connect` / `ConnectFanOut` / `Chain`, `ConnectData`, `GetStart`/`GetEnd`, `Layout`,
+  `Save`. Auto-layout was extracted into a view-independent `TutorialGraphLayout` so it runs headless.
+- The **AI authoring skill** now has the assistant create/edit tutorial **assets** via that API instead
+  of building graphs in throwaway runtime code, so the result stays editable in the graph window.
+
 ## [0.19.0] — 2026-07-10
 
 ### Changed

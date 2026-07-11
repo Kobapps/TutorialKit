@@ -1,6 +1,6 @@
 {
   "name": "com.kobapps.tutorialkit",
-  "version": "0.19.0",
+  "version": "0.20.0",
   "displayName": "TutorialKit",
   "description": "AAA-quality, adapter-based framework for authoring and playing tutorial sequences: vignette highlights, animated pointers, styled text boxes, input gating, custom game commands, persistent progress, a GraphView authoring editor, and remote JSON loading.",
   "unity": "6000.0",

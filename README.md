@@ -171,8 +171,11 @@ open it just follows along; the **Attach** toolbar toggle controls whether it tr
 
 **Window ▸ TutorialKit ▸ Settings** installs an **AI authoring skill** — an instruction file that
 teaches an AI assistant (Claude Code, etc.) how to author, configure, test, and debug tutorials in
-your project. Its node reference is generated live from your project, so **custom nodes are documented
-automatically**. Re-run *Update* after adding new node types.
+your project. It has the assistant **create and edit tutorial `.asset`s** through the editor API
+(`TutorialKit.Editor.TutorialGraphAuthoring` — `CreateGraph` / `AddNode<T>` / `Connect` / `Chain` /
+`ConnectData` / `Layout` / `Save`) rather than building graphs in throwaway code, so the result stays
+editable in the graph window. Its node reference is generated live from your project, so **custom nodes
+are documented automatically**. Re-run *Update* after adding new node types.
 
 The same window has a **Default Pointer Art** section: create a `TutorialKitSettings` asset (pre-filled
 with the bundled CC0 art) and swap the hand/arrow sprites to re-skin every pointer project-wide. The
