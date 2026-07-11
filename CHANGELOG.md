@@ -2,6 +2,14 @@
 
 All notable changes to TutorialKit are documented here.
 
+## [0.18.0] — 2026-07-10
+
+### Added
+- **Export / Import JSON from the graph editor toolbar.** The Manage group gains **Export** (save the
+  open tutorial as a `.json`) and **Import** (bring a tutorial `.json` in as a new graph asset and open
+  it). Uses the same portable, type-tagged format as remote loading; nodes, edges, data edges and
+  positions round-trip.
+
 ## [0.17.1] — 2026-07-10
 
 ### Fixed

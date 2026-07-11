@@ -131,7 +131,8 @@ var graph = await RemoteTutorialLoader.LoadFromUrlAsync("https://cdn.example.com
 TutorialDirector.EnsureExists().Play(graph);
 ```
 
-Export any graph to JSON from its inspector (**Export JSON…**) and edit/host it externally.
+Export or import a graph as JSON from the **graph editor toolbar** (Manage ▸ **Export** / **Import**) or
+the graph's inspector — Import brings a JSON in as a new tutorial asset. Edit/host the JSON externally.
 
 ## Graph editor
 

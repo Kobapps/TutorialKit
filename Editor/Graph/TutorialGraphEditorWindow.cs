@@ -115,6 +115,8 @@ namespace TutorialKit.Editor
             manage.Add(menu);
             manage.Add(IconButton("Save", "SaveActive", "Save all assets (Ctrl+S)",
                 () => { if (_graph != null) AssetDatabase.SaveAssets(); }));
+            manage.Add(IconButton("Export", "SaveAs", "Export this tutorial to a JSON file", ExportJson));
+            manage.Add(IconButton("Import", "Import", "Import a tutorial JSON as a new graph asset", ImportJson));
             manage.Add(IconButton("Test", "PlayButton", "Enter Play mode and run this tutorial", TestInPlay));
 
             // ---- Layout: arrange & orient the graph ----
@@ -214,6 +216,50 @@ namespace TutorialKit.Editor
             UpdateLayoutButton(); // reflect this graph's saved direction on the toggle button
             if (_statusLabel != null)
                 _statusLabel.text = graph != null ? $" {graph.DisplayName}  ({graph.Nodes.Count} nodes) " : " No tutorial loaded ";
+        }
+
+        // ---- JSON export / import (the remote/portable tutorial format) ----
+
+        private void ExportJson()
+        {
+            if (_graph == null)
+            {
+                EditorUtility.DisplayDialog("TutorialKit", "Open a tutorial first.", "OK");
+                return;
+            }
+            var path = EditorUtility.SaveFilePanel("Export Tutorial JSON", Application.dataPath, _graph.TutorialId, "json");
+            if (string.IsNullOrEmpty(path)) return;
+            System.IO.File.WriteAllText(path, TutorialJson.ToJson(_graph));
+            AssetDatabase.Refresh();
+            ShowNotification(new GUIContent("Exported JSON"));
+            Debug.Log($"[TutorialKit] Exported '{_graph.TutorialId}' → {path}");
+        }
+
+        private void ImportJson()
+        {
+            var path = EditorUtility.OpenFilePanel("Import Tutorial JSON", Application.dataPath, "json");
+            if (string.IsNullOrEmpty(path)) return;
+
+            TutorialGraph graph;
+            try { graph = TutorialJson.FromJson(System.IO.File.ReadAllText(path)); }
+            catch (Exception e)
+            {
+                EditorUtility.DisplayDialog("TutorialKit", "Could not import that JSON:\n\n" + e.Message, "OK");
+                return;
+            }
+            if (graph == null) return;
+
+            string defaultName = string.IsNullOrEmpty(graph.name) ? "ImportedTutorial" : graph.name;
+            var savePath = EditorUtility.SaveFilePanelInProject(
+                "Save Imported Tutorial", defaultName, "asset", "Choose where to save the imported tutorial asset.");
+            if (string.IsNullOrEmpty(savePath)) { DestroyImmediate(graph); return; }
+
+            AssetDatabase.CreateAsset(graph, savePath);
+            AssetDatabase.SaveAssets();
+            OpenGraph(graph);
+            Selection.activeObject = graph;
+            ShowNotification(new GUIContent("Imported JSON"));
+            Debug.Log($"[TutorialKit] Imported {path} → {savePath}");
         }
 
         private void TestInPlay()
