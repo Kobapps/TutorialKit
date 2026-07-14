@@ -23,18 +23,53 @@ namespace TutorialKit
         [SerializeField] private List<TutorialBlackboardVar> blackboard = new List<TutorialBlackboardVar>();
         [SerializeField, HideInInspector] private TutorialLayoutDirection layoutDirection = TutorialLayoutDirection.UseDefault;
 
-        [Tooltip("If on, this tutorial is never written to persistence — it plays again every time it's " +
-                 "triggered (e.g. recurring hints), instead of only once.")]
-        [SerializeField] private bool repeatable;
+        [Tooltip("How this tutorial plays: how often, what happens if it's triggered while another one is " +
+                 "running, and what the game does while it plays.")]
+        [SerializeField] private TutorialSettings settings = new TutorialSettings();
+
+        // Superseded by settings.PlayMode in v0.22. Kept only so existing assets migrate; never read at runtime.
+        [SerializeField, HideInInspector] private bool repeatable;
+        [SerializeField, HideInInspector] private bool settingsMigrated;
 
         public IReadOnlyList<TutorialGroupData> Groups => groups;
         public IReadOnlyList<TutorialBlackboardVar> Blackboard => blackboard;
 
-        /// <summary>If true, completion is never stored — the tutorial replays every time it's triggered.</summary>
+        /// <summary>This tutorial's playback settings (play mode, busy policy, input lock, pause, skip).</summary>
+        public TutorialSettings Settings
+        {
+            get
+            {
+                if (settings == null) settings = new TutorialSettings();
+                return settings;
+            }
+        }
+
+        /// <summary>
+        /// Legacy alias for <see cref="TutorialSettings.PlayMode"/>: true for anything but
+        /// <see cref="TutorialPlayMode.SingleUse"/>. Prefer <c>Settings.PlayMode</c>.
+        /// </summary>
         public bool Repeatable
         {
-            get => repeatable;
-            set => repeatable = value;
+            get => Settings.PlayMode != TutorialPlayMode.SingleUse;
+            set => Settings.PlayMode = value ? TutorialPlayMode.Recurring : TutorialPlayMode.SingleUse;
+        }
+
+        private void OnEnable() => MigrateLegacyFields();
+
+        /// <summary>Folds the pre-0.22 <c>repeatable</c> bool into <see cref="Settings"/>. Idempotent.</summary>
+        private void MigrateLegacyFields()
+        {
+            if (settings == null) settings = new TutorialSettings();
+            if (settingsMigrated) return;
+            settingsMigrated = true;
+            if (repeatable) settings.PlayMode = TutorialPlayMode.Recurring;
+        }
+
+        /// <summary>Replaces the settings block (used by the JSON loader). Null restores defaults.</summary>
+        public void SetSettings(TutorialSettings newSettings)
+        {
+            settings = newSettings ?? new TutorialSettings();
+            settingsMigrated = true;
         }
 
         /// <summary>This graph's preferred editor flow direction. <c>UseDefault</c> follows the project setting.</summary>
@@ -248,6 +283,7 @@ namespace TutorialKit
         /// <summary>Ensures every node has an id and the entry points at a valid node.</summary>
         public void Validate()
         {
+            MigrateLegacyFields();
             foreach (var n in nodes) n?.EnsureId();
             if (FindNode(entryNodeId) == null && nodes.Count > 0)
                 entryNodeId = nodes[0].Id;

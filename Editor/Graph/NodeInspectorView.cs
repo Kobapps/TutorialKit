@@ -7,11 +7,21 @@ using UnityEngine.UIElements;
 
 namespace TutorialKit.Editor
 {
-    /// <summary>Right-docked inspector: a colour-coded header (the node's accent) plus its editable fields.</summary>
+    /// <summary>
+    /// Right-docked inspector with two tabs: <b>Node</b> (the selected node's fields) and <b>Tutorial</b>
+    /// (the graph's identity and playback <see cref="TutorialSettings"/>). Each tab gets a colour-coded
+    /// header — the node's accent, or a neutral accent for the tutorial.
+    /// </summary>
     public sealed class NodeInspectorView : VisualElement
     {
-        private static readonly Color DefaultAccent = new Color(0.36f, 0.40f, 0.48f);
+        /// <summary>Which of the inspector's two tabs is showing.</summary>
+        public enum Tab { Node = 0, Tutorial = 1 }
 
+        private static readonly Color DefaultAccent = new Color(0.36f, 0.40f, 0.48f);
+        private static readonly Color GraphAccent = new Color(0.29f, 0.33f, 0.41f);
+
+        private readonly Button _nodeTab;
+        private readonly Button _tutorialTab;
         private readonly VisualElement _header;
         private readonly VisualElement _chip;
         private readonly Label _title;
@@ -22,12 +32,27 @@ namespace TutorialKit.Editor
         private readonly VisualElement _card;
         private readonly VisualElement _fields;
 
+        // What the panel is currently describing; re-rendered whenever the tab or the selection changes.
+        private Tab _tab = Tab.Tutorial;
+        private TutorialGraph _graph;
+        private SerializedObject _serializedGraph;
+        private TutorialNode _node;
+        private Action _onNodeChanged;
+
         private MonoScript _script;
         private static readonly Dictionary<Type, MonoScript> _scriptCache = new Dictionary<Type, MonoScript>();
 
         public NodeInspectorView()
         {
             AddToClassList("tk-inspector");
+
+            var tabs = new VisualElement();
+            tabs.AddToClassList("tk-tabs");
+            _nodeTab = MakeTab("Node", "The selected node's properties", Tab.Node);
+            _tutorialTab = MakeTab("Tutorial", "Settings for the whole tutorial: play mode, busy policy, input lock, pause", Tab.Tutorial);
+            tabs.Add(_nodeTab);
+            tabs.Add(_tutorialTab);
+            Add(tabs);
 
             _header = new VisualElement();
             _header.AddToClassList("tk-inspector-header");
@@ -54,7 +79,7 @@ namespace TutorialKit.Editor
             _desc.AddToClassList("tk-inspector-desc");
             Add(_desc);
 
-            _empty = new Label("Select a node to edit its properties.\n\nRight-click the canvas to add nodes.");
+            _empty = new Label();
             _empty.AddToClassList("tk-inspector-empty");
             Add(_empty);
 
@@ -64,48 +89,119 @@ namespace TutorialKit.Editor
             _card.Add(_fields);
             Add(_card);
 
-            SetAccent(DefaultAccent);
-            _card.style.display = DisplayStyle.None;
+            Render();
+        }
+
+        private Button MakeTab(string text, string tooltip, Tab tab)
+        {
+            var button = new Button(() => SelectTab(tab)) { text = text, tooltip = tooltip };
+            button.AddToClassList("tk-tab");
+            return button;
+        }
+
+        /// <summary>Switches tabs (also reachable from the tab bar).</summary>
+        public void SelectTab(Tab tab)
+        {
+            _tab = tab;
+            Render();
+        }
+
+        /// <summary>Points the panel at a graph. Shows the Tutorial tab, since nothing is selected yet.</summary>
+        public void SetGraph(TutorialGraph graph, SerializedObject serializedGraph)
+        {
+            _graph = graph;
+            _serializedGraph = serializedGraph;
+            _node = null;
+            _onNodeChanged = null;
+            _tab = Tab.Tutorial;
+            Render();
+        }
+
+        /// <summary>Shows a node's fields, switching to the Node tab.</summary>
+        public void ShowNode(TutorialNode node, SerializedObject serializedGraph, Action onChanged)
+        {
+            _node = node;
+            _serializedGraph = serializedGraph;
+            _onNodeChanged = onChanged;
+            _tab = Tab.Node;
+            Render();
         }
 
         public void Clear()
         {
-            _fields.Clear();
-            _title.text = "Inspector";
-            _typeLabel.text = "";
-            _desc.text = "";
-            _script = null;
-            _editScript.style.display = DisplayStyle.None;
-            _empty.style.display = DisplayStyle.Flex;
-            _card.style.display = DisplayStyle.None;
-            SetAccent(DefaultAccent);
+            _graph = null;
+            _serializedGraph = null;
+            _node = null;
+            _onNodeChanged = null;
+            Render();
         }
 
-        public void ShowNode(TutorialNode node, SerializedObject serializedGraph, Action onChanged)
+        // ---- Rendering ----
+
+        private void Render()
         {
             _fields.Clear();
-            if (node == null || serializedGraph == null)
+            _script = null;
+            _editScript.style.display = DisplayStyle.None;
+
+            _nodeTab.EnableInClassList("tk-tab--active", _tab == Tab.Node);
+            _tutorialTab.EnableInClassList("tk-tab--active", _tab == Tab.Tutorial);
+
+            if (_tab == Tab.Tutorial) RenderTutorial();
+            else RenderNode();
+        }
+
+        private void RenderTutorial()
+        {
+            if (_graph == null || _serializedGraph == null)
             {
-                Clear();
+                ShowPlaceholder("Inspector", "Open a tutorial to edit its settings.", DefaultAccent);
                 return;
             }
 
-            var info = NodeTypeRegistry.Get(node.GetType());
-            Color accent = info != null && info.HasColor ? info.Color : DefaultAccent;
-            SetAccent(accent);
+            SetAccent(GraphAccent);
+            _title.text = "Tutorial Settings";
+            _typeLabel.text = _graph.DisplayName;
+            SetDescription("Applies to the whole tutorial — how often it plays, what happens if it's triggered while another one is running, and what the game does while it plays.");
+            _empty.style.display = DisplayStyle.None;
+            _card.style.display = DisplayStyle.Flex;
+
+            foreach (var path in new[] { "tutorialId", "displayName", "description", "settings" })
+            {
+                var prop = _serializedGraph.FindProperty(path);
+                if (prop == null) continue;
+                var field = new PropertyField(prop);
+                field.BindProperty(prop);
+                _fields.Add(field);
+            }
+
+            _fields.Bind(_serializedGraph);
+        }
+
+        private void RenderNode()
+        {
+            if (_node == null || _serializedGraph == null)
+            {
+                ShowPlaceholder("Inspector",
+                    "Select a node to edit its properties.\n\nRight-click the canvas to add nodes.",
+                    DefaultAccent);
+                return;
+            }
+
+            var info = NodeTypeRegistry.Get(_node.GetType());
+            SetAccent(info != null && info.HasColor ? info.Color : DefaultAccent);
 
             _empty.style.display = DisplayStyle.None;
             _card.style.display = DisplayStyle.Flex;
-            _title.text = node.DisplayName;
-            _typeLabel.text = info != null && !string.IsNullOrEmpty(info.MenuPath) ? info.MenuPath : node.GetType().Name;
-            _desc.text = info != null ? info.Description ?? "" : "";
-            _desc.style.display = string.IsNullOrEmpty(_desc.text) ? DisplayStyle.None : DisplayStyle.Flex;
+            _title.text = _node.DisplayName;
+            _typeLabel.text = info != null && !string.IsNullOrEmpty(info.MenuPath) ? info.MenuPath : _node.GetType().Name;
+            SetDescription(info != null ? info.Description : null);
 
             // Shortcut to open the node's own .cs (works for one-class-per-file nodes, i.e. custom nodes).
-            _script = FindScript(node.GetType());
+            _script = FindScript(_node.GetType());
             _editScript.style.display = _script != null ? DisplayStyle.Flex : DisplayStyle.None;
 
-            var el = TutorialNodeView.FindNodeProperty(serializedGraph, node.Id);
+            var el = TutorialNodeView.FindNodeProperty(_serializedGraph, _node.Id);
             if (el == null) return;
 
             var end = el.GetEndProperty();
@@ -118,6 +214,7 @@ namespace TutorialKit.Editor
                 if (SerializedProperty.EqualContents(it, end)) break;
                 if (it.name == "id" || it.name == "editorPosition") continue;
                 any = true;
+                var onChanged = _onNodeChanged;
                 var field = new PropertyField(it);
                 field.BindProperty(it);
                 field.RegisterValueChangeCallback(_ => onChanged?.Invoke());
@@ -127,7 +224,24 @@ namespace TutorialKit.Editor
                 _fields.Add(new Label("This node has no editable fields.")
                 { style = { color = new Color(0.6f, 0.62f, 0.68f), unityFontStyleAndWeight = FontStyle.Italic } });
 
-            _fields.Bind(serializedGraph);
+            _fields.Bind(_serializedGraph);
+        }
+
+        private void ShowPlaceholder(string title, string message, Color accent)
+        {
+            SetAccent(accent);
+            _title.text = title;
+            _typeLabel.text = "";
+            SetDescription(null);
+            _empty.text = message;
+            _empty.style.display = DisplayStyle.Flex;
+            _card.style.display = DisplayStyle.None;
+        }
+
+        private void SetDescription(string text)
+        {
+            _desc.text = text ?? "";
+            _desc.style.display = string.IsNullOrEmpty(_desc.text) ? DisplayStyle.None : DisplayStyle.Flex;
         }
 
         private void OpenScript()

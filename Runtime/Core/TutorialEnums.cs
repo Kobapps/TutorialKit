@@ -87,4 +87,26 @@ namespace TutorialKit
         Manual = 2,
         OnSignal = 3,
     }
+
+    /// <summary>How often a tutorial is allowed to play. See <see cref="TutorialKit.TutorialSettings"/>.</summary>
+    public enum TutorialPlayMode
+    {
+        /// <summary>Plays once ever. Completion is saved, so it never plays again (classic onboarding step).</summary>
+        SingleUse = 0,
+        /// <summary>Plays every time it's triggered. Completion is never saved (a recurring hint/reminder).</summary>
+        Recurring = 1,
+        /// <summary>Plays once per app session, then again after a restart. Nothing is saved to disk.</summary>
+        OncePerSession = 2,
+    }
+
+    /// <summary>What happens when a tutorial is started while another one is already playing.</summary>
+    public enum TutorialBusyPolicy
+    {
+        /// <summary>Abort the running tutorial and start this one immediately.</summary>
+        Interrupt = 0,
+        /// <summary>Drop this request; the running tutorial keeps going.</summary>
+        Ignore = 1,
+        /// <summary>Wait in line and start as soon as the running tutorial finishes.</summary>
+        Queue = 2,
+    }
 }

@@ -219,7 +219,9 @@ namespace TutorialKit.Editor
                 this.Bind(SerializedGraph);
             }
             _blackboard.SetGraph(graph);
-            Inspector?.Clear();
+            // Opens on the Tutorial tab; selecting a node switches to the Node tab.
+            if (graph != null) Inspector?.SetGraph(graph, SerializedGraph);
+            else Inspector?.Clear();
             _loading = false;
         }
 

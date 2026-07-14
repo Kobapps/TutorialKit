@@ -102,10 +102,33 @@ Add a `TutorialTrigger` component in the scene, assign the graph, and set When =
 Manual, plus gating (only-if-not-completed, conditions). Or start from code:
 `TutorialDirector.EnsureExists().Play(graph);`
 
-For a **recurring** tutorial that should play *every time* it's triggered (a hint that isn't a one-time
-onboarding step), set the graph's **Repeatable** flag (`graph.Repeatable = true`, or the toggle in the
-graph's inspector). Repeatable tutorials are never written to persistence, so they ignore the
-only-once / only-if-not-completed gating.
+### Tutorial settings (per graph)
+
+Every graph carries a `TutorialSettings` block — edit it in the graph editor's side panel under the
+**Tutorial** tab (the Node tab shows the selected node), in the graph asset's inspector, or from code
+via `graph.Settings`. The director enforces it for every entry point (trigger, code, remote), so you
+never re-implement this gating:
+
+| Setting | Meaning |
+| --- | --- |
+| `PlayMode` | `SingleUse` (default — plays once ever, completion saved), `Recurring` (plays every trigger, nothing saved — hints), `OncePerSession` (once per app run) |
+| `MaxPlays` | Recurring only: stop after N completed plays. 0 = unlimited |
+| `CooldownSeconds` | Recurring only: minimum real seconds between plays; survives a restart |
+| `WhenBusy` | Triggered while another tutorial runs: `Interrupt` (default), `Ignore`, `Queue` |
+| `LockInputWhilePlaying` + `InputLockGroup` | Hold an input lock for the whole tutorial |
+| `PauseGameWhilePlaying` | `Time.timeScale = 0` while it plays (overlay animations are unscaled) |
+| `AllowSkip` | Whether `handle.Skip()` works. Off = mandatory tutorial |
+
+```csharp
+var graph = TutorialGraphAuthoring.CreateGraph("Assets/Tutorials/LowAmmoHint.asset");
+graph.Settings.PlayMode = TutorialPlayMode.Recurring;
+graph.Settings.MaxPlays = 3;              // nag at most 3 times
+graph.Settings.CooldownSeconds = 120f;    // and no more than once every 2 minutes
+graph.Settings.WhenBusy = TutorialBusyPolicy.Ignore;  // never interrupt a real tutorial
+```
+
+Ask `director.CanPlay(graph, out var reason)` to test the gating yourself; `Play(graph, force: true)`
+bypasses it. `graph.Repeatable` still works as a legacy alias for `PlayMode != SingleUse`.
 
 ## 4. Test it (via Unity MCP)
 

@@ -22,7 +22,8 @@ namespace TutorialKit
         [SerializeField, Min(0f)] private float delay = 0f;
 
         [Header("Gating")]
-        [Tooltip("Don't replay if the tutorial is already marked completed in persistence.")]
+        [Tooltip("Respect the tutorial's own play-mode rules (Single Use / Recurring limits / cooldown). " +
+                 "Turn off to trigger it regardless of its history.")]
         [SerializeField] private bool onlyIfNotCompleted = true;
         [Tooltip("Force replay even if completed (useful for testing).")]
         [SerializeField] private bool forceReplay = false;
@@ -77,8 +78,7 @@ namespace TutorialKit
 
             var director = TutorialDirector.EnsureExists();
 
-            if (!forceReplay && onlyIfNotCompleted && !graph.Repeatable &&
-                director.Persistence.IsTutorialCompleted(graph.TutorialId))
+            if (!forceReplay && onlyIfNotCompleted && !director.CanPlay(graph))
                 return null;
 
             for (int i = 0; i < conditions.Count; i++)
@@ -86,11 +86,13 @@ namespace TutorialKit
                     return null;
 
             var handle = director.Play(graph, force: forceReplay);
-            if (handle != null && handle.IsRunning)
-            {
-                onPlayStarted?.Invoke();
-                handle.Finished += _ => onPlayFinished?.Invoke();
-            }
+            if (handle == null || handle.IsFinished) return handle;
+
+            // A queued tutorial (busy policy) starts later, so fire the event off the handle rather than now.
+            if (handle.IsRunning) onPlayStarted?.Invoke();
+            else handle.Started += _ => onPlayStarted?.Invoke();
+
+            handle.Finished += _ => onPlayFinished?.Invoke();
             return handle;
         }
     }

@@ -17,6 +17,11 @@ namespace TutorialKit
         private static string CpKey(string tid, string cid) => $"{Prefix}{tid}.cp.{cid}";
         private static string ValKey(string key) => $"{Prefix}kv.{key}";
 
+        /// <summary>The underlying PlayerPrefs key for a completion flag (handy for editor tooling).</summary>
+        public static string CompletionPrefsKey(string tutorialId) => DoneKey(tutorialId);
+        /// <summary>The underlying PlayerPrefs key for a key/value entry (handy for editor tooling).</summary>
+        public static string ValuePrefsKey(string key) => ValKey(key);
+
         public bool IsTutorialCompleted(string tutorialId) => PlayerPrefs.GetInt(DoneKey(tutorialId), 0) == 1;
 
         public void SetTutorialCompleted(string tutorialId, bool completed = true)
@@ -44,6 +49,9 @@ namespace TutorialKit
         public void ResetTutorial(string tutorialId)
         {
             PlayerPrefs.DeleteKey(DoneKey(tutorialId));
+            // Also clear the play history, so a capped or cooling-down Recurring tutorial can play again.
+            PlayerPrefs.DeleteKey(ValKey(TutorialDirector.PlayCountKey(tutorialId)));
+            PlayerPrefs.DeleteKey(ValKey(TutorialDirector.LastPlayedKey(tutorialId)));
             // Checkpoint keys are per-checkpoint; callers that need a full wipe should use ResetAll.
             Save();
         }

@@ -77,9 +77,34 @@ await handle.Completion;          // UniTask
 | `TutorialTargets` | Register **dynamic** targets from code — `RegisterDynamic(id, () => FindElement())` for runtime-found elements, or `RegisterRect(id, () => rect)` for an explicit position/size. |
 | `TutorialTrigger` | Starts a graph from a trigger, gated by conditions. |
 
-By default a tutorial plays **once** (completion is saved to persistence). Turn on a graph's
-**Repeatable** flag (in its inspector, or `graph.Repeatable = true`) for a recurring tutorial/hint that
-**plays every time it's triggered** — it's never written to persistence and ignores the only-once gate.
+## Tutorial settings
+
+Every `TutorialGraph` carries a **Tutorial Settings** block. Edit it in the graph editor's side panel
+under the **Tutorial** tab (next to the **Node** tab, which shows the selected node), in the graph
+asset's own inspector, or from code via `graph.Settings`. The director enforces it for **every** entry
+point (trigger, code, remote), so games never re-implement it:
+
+| Setting | What it does |
+|------|------|
+| **Play Mode** | **Single Use** (default) plays once ever and saves completion. **Recurring** plays every time it's triggered and saves nothing — hints and reminders. **Once Per Session** plays once per app run, again after a restart. |
+| **Max Plays** | *Recurring only.* Stop after this many completed plays. 0 = unlimited. |
+| **Cooldown Seconds** | *Recurring only.* Minimum real time between plays. Saved, so it survives a restart. |
+| **When Busy** | Triggered while another tutorial is running: **Interrupt** (abort the other one), **Ignore** (drop it), or **Queue** (start when the other finishes). |
+| **Lock Input While Playing** | Holds an input lock (optionally a named group) for the whole tutorial. |
+| **Pause Game While Playing** | Zeroes `Time.timeScale` for the duration. Overlay animations are unscaled, so they keep running. |
+| **Allow Skip** | Whether `handle.Skip()` is honoured. Turn off for a mandatory tutorial. |
+
+```csharp
+graph.Settings.PlayMode = TutorialPlayMode.Recurring;
+graph.Settings.MaxPlays = 3;                          // nag at most 3 times…
+graph.Settings.CooldownSeconds = 120f;                // …and at most once every 2 minutes
+graph.Settings.WhenBusy = TutorialBusyPolicy.Queue;   // never cut off a running tutorial
+```
+
+`director.CanPlay(graph, out var reason)` reports whether the settings currently allow a play (and why
+not), and `Play(graph, force: true)` bypasses the gating. A play is only counted when a tutorial
+reaches its end or is skipped — aborting never burns one. The graph inspector shows the saved history
+and its **Reset Saved Progress** button clears completion, play count, and cooldown together.
 
 ## Adapters (the game boundary)
 

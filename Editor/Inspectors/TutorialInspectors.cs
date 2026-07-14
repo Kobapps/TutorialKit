@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
@@ -18,6 +20,7 @@ namespace TutorialKit.Editor
 
             EditorGUILayout.Space(6);
             EditorGUILayout.HelpBox($"{graph.Nodes.Count} nodes · {graph.Edges.Count} connections", MessageType.None);
+            EditorGUILayout.HelpBox(DescribeProgress(graph), MessageType.None);
 
             using (new EditorGUILayout.HorizontalScope())
             {
@@ -38,10 +41,48 @@ namespace TutorialKit.Editor
 
             if (GUILayout.Button("Reset Saved Progress"))
             {
-                PlayerPrefs.DeleteKey($"tk.{graph.TutorialId}.done");
-                PlayerPrefs.Save();
-                Debug.Log($"[TutorialKit] Cleared completion for '{graph.TutorialId}'.");
+                Persistence.ResetTutorial(graph.TutorialId);
+                Debug.Log($"[TutorialKit] Cleared saved progress (completion, play count, cooldown) for '{graph.TutorialId}'.");
             }
+        }
+
+        /// <summary>
+        /// The live persistence backend while playing, so the readout reflects a custom save adapter;
+        /// PlayerPrefs otherwise, which is what the default adapter writes.
+        /// </summary>
+        private static IPersistenceService Persistence =>
+            (Application.isPlaying && TutorialDirector.Current != null)
+                ? TutorialDirector.Current.Persistence
+                : _editModePersistence ??= new PlayerPrefsPersistenceService();
+
+        private static PlayerPrefsPersistenceService _editModePersistence;
+
+        /// <summary>One line of saved state, so authors can see why a tutorial won't replay.</summary>
+        private static string DescribeProgress(TutorialGraph graph)
+        {
+            var persistence = Persistence;
+            var id = graph.TutorialId;
+
+            int plays = TutorialDirector.GetPlayCount(persistence, id);
+            if (plays == 0 && !persistence.IsTutorialCompleted(id))
+                return "Saved progress:  never played";
+
+            var parts = new List<string> { $"played {plays}×" };
+            if (persistence.IsTutorialCompleted(id)) parts.Add("marked completed");
+
+            var since = TutorialDirector.GetTimeSinceLastPlay(persistence, id);
+            if (since.HasValue && since.Value != TimeSpan.MaxValue)
+                parts.Add($"last {Ago(since.Value)}");
+
+            return "Saved progress:  " + string.Join(" · ", parts);
+        }
+
+        private static string Ago(TimeSpan span)
+        {
+            if (span.TotalMinutes < 1) return $"{span.TotalSeconds:0}s ago";
+            if (span.TotalHours < 1) return $"{span.TotalMinutes:0}m ago";
+            if (span.TotalDays < 1) return $"{span.TotalHours:0}h ago";
+            return $"{span.TotalDays:0}d ago";
         }
 
         private static void ExportJson(TutorialGraph graph)

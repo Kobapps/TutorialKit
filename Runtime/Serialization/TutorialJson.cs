@@ -19,6 +19,8 @@ namespace TutorialKit
             public string displayName;
             public string description;
             public string entry;
+            // Absent in pre-0.22 JSON; JsonUtility then leaves this default instance (Single Use).
+            public TutorialSettings settings = new TutorialSettings();
             public List<NodeDto> nodes = new List<NodeDto>();
             public List<EdgeDto> edges = new List<EdgeDto>();
             public List<DataEdgeDto> dataEdges = new List<DataEdgeDto>();
@@ -60,6 +62,7 @@ namespace TutorialKit
                 displayName = graph.DisplayName,
                 description = graph.Description,
                 entry = graph.EntryNodeId,
+                settings = graph.Settings.Clone(),
             };
 
             foreach (var node in graph.Nodes)
@@ -127,6 +130,7 @@ namespace TutorialKit
                         edges.Add(new TutorialEdge(ed.from, ed.port, ed.to));
 
             target.Populate(dto.tutorialId, dto.displayName, dto.description, dto.entry, nodes, edges);
+            target.SetSettings(dto.settings);
 
             var dataEdges = new List<TutorialDataEdge>();
             if (dto.dataEdges != null)

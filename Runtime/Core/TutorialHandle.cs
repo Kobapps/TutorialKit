@@ -23,6 +23,12 @@ namespace TutorialKit
 
         /// <summary>Raised on the main thread when a node begins.</summary>
         public event Action<TutorialNode> NodeEntered;
+        /// <summary>
+        /// Raised when the tutorial actually begins. For a tutorial held behind
+        /// <see cref="TutorialBusyPolicy.Queue"/> this fires later than <c>Play</c> returns, so callers
+        /// that react to a start should use this rather than checking <see cref="IsRunning"/> immediately.
+        /// </summary>
+        public event Action<TutorialHandle> Started;
         /// <summary>Raised when the tutorial finishes, with the final status.</summary>
         public event Action<TutorialHandle> Finished;
 
@@ -34,7 +40,14 @@ namespace TutorialKit
             _cts = cts;
         }
 
-        internal void MarkRunning() => Status = TutorialStatus.Running;
+        internal void MarkRunning()
+        {
+            Status = TutorialStatus.Running;
+            Started?.Invoke(this);
+        }
+
+        /// <summary>True while this tutorial is waiting in the busy queue for its turn to start.</summary>
+        public bool IsQueued => Status == TutorialStatus.Idle;
 
         internal void RaiseNodeEntered(TutorialNode node)
         {
@@ -56,10 +69,21 @@ namespace TutorialKit
 
         internal bool SkipRequested => _skipRequested;
 
-        /// <summary>Stops the tutorial and marks it complete in persistence (as if the user finished).</summary>
+        /// <summary>True when <see cref="Skip"/> would do anything: still live, and the graph allows skipping.</summary>
+        public bool CanSkip => !IsFinished && (Graph == null || Graph.Settings.AllowSkip);
+
+        /// <summary>
+        /// Stops the tutorial and marks it complete in persistence (as if the user finished).
+        /// Does nothing when the graph's settings have <c>Allow Skip</c> turned off.
+        /// </summary>
         public void Skip()
         {
             if (IsFinished) return;
+            if (Graph != null && !Graph.Settings.AllowSkip)
+            {
+                Debug.LogWarning($"[TutorialKit] '{Graph.TutorialId}' cannot be skipped (its settings have Allow Skip off).");
+                return;
+            }
             _skipRequested = true;
             _cts.Cancel();
         }

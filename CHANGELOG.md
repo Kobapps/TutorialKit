@@ -2,6 +2,38 @@
 
 All notable changes to TutorialKit are documented here.
 
+## [0.22.0] — 2026-07-14
+
+### Added
+- **Tutorial settings.** Every `TutorialGraph` now carries a `TutorialSettings` block (`graph.Settings`).
+  The graph editor's side panel is now tabbed — **Node** (the selected node, as before) and **Tutorial**
+  (these settings) — and the graph asset's inspector shows the same block. `TutorialDirector` enforces
+  it for every entry point — trigger, code, or remotely loaded JSON:
+  - **Play Mode** — `SingleUse` (plays once, completion saved), `Recurring` (plays every trigger,
+    nothing saved), `OncePerSession` (once per app run).
+  - **Max Plays** / **Cooldown Seconds** — *Recurring only*; cap the number of plays and enforce a
+    minimum real-time gap between them. Both survive a restart.
+  - **When Busy** — what happens when a tutorial is triggered while another is running: `Interrupt`
+    (previous behaviour), `Ignore`, or `Queue`.
+  - **Lock Input While Playing** (+ lock group) and **Pause Game While Playing** (`Time.timeScale = 0`),
+    both released when the tutorial ends, however it ends.
+  - **Allow Skip** — turn off for a mandatory tutorial; `TutorialHandle.Skip()` then does nothing.
+- `TutorialDirector.CanPlay(graph, out var reason)` reports whether a graph's settings currently allow a
+  play, plus `GetPlayCount` / `GetTimeSinceLastPlay` / `PlayedThisSession` for the saved history.
+- `TutorialHandle.Started` (fires when a queued tutorial actually begins), `IsQueued`, and `CanSkip`.
+- The graph inspector shows the saved play history, and **Reset Saved Progress** now clears the
+  completion flag, play count, and cooldown together (via `IPersistenceService.ResetTutorial`).
+
+### Changed
+- A play is now recorded only when a tutorial **completes or is skipped**; an aborted tutorial no longer
+  counts toward Max Plays or the cooldown.
+- `TutorialTrigger`'s *only if not completed* gate now defers to the graph's play mode via `CanPlay`.
+- `TutorialJson` round-trips the settings block. JSON written before 0.22 loads with defaults.
+
+### Deprecated
+- `graph.Repeatable` still works as an alias for `PlayMode != SingleUse`. Existing assets that had the
+  flag set migrate to `Recurring` automatically the first time they load. Prefer `graph.Settings.PlayMode`.
+
 ## [0.21.0] — 2026-07-10
 
 ### Added

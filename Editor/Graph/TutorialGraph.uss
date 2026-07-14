@@ -51,6 +51,41 @@
     padding: 0;
 }
 
+.tk-tabs {
+    flex-direction: row;
+    background-color: rgb(35, 36, 40);
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(0, 0, 0, 0.45);
+    flex-shrink: 0;
+}
+
+.tk-tab {
+    flex-grow: 1;
+    height: 24px;
+    margin: 0;
+    padding: 0 6px;
+    border-width: 0;
+    border-radius: 0;
+    background-color: transparent;
+    color: rgb(150, 156, 168);
+    font-size: 11px;
+    /* Reserve the active tab's underline so switching tabs doesn't shift the label. */
+    border-bottom-width: 2px;
+    border-bottom-color: rgba(0, 0, 0, 0);
+}
+
+.tk-tab:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: rgb(205, 210, 220);
+}
+
+.tk-tab--active {
+    background-color: rgb(44, 45, 49);
+    color: rgb(235, 237, 242);
+    -unity-font-style: bold;
+    border-bottom-color: rgb(90, 150, 230);
+}
+
 .tk-inspector-header {
     flex-direction: row;
     align-items: center;
