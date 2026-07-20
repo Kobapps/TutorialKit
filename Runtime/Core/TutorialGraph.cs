@@ -23,6 +23,10 @@ namespace TutorialKit
         [SerializeField] private List<TutorialBlackboardVar> blackboard = new List<TutorialBlackboardVar>();
         [SerializeField, HideInInspector] private TutorialLayoutDirection layoutDirection = TutorialLayoutDirection.UseDefault;
 
+        [Tooltip("Whether the graph editor auto-opens and live-attaches when this tutorial plays. " +
+                 "Use Default follows the project-wide setting (Settings ▸ TutorialKit).")]
+        [SerializeField] private TutorialAutoOpenMode autoOpenEditor = TutorialAutoOpenMode.UseDefault;
+
         [Tooltip("How this tutorial plays: how often, what happens if it's triggered while another one is " +
                  "running, and what the game does while it plays.")]
         [SerializeField] private TutorialSettings settings = new TutorialSettings();
@@ -77,6 +81,16 @@ namespace TutorialKit
         {
             get => layoutDirection;
             set => layoutDirection = value;
+        }
+
+        /// <summary>
+        /// Whether the graph editor auto-opens when this tutorial plays. <c>UseDefault</c> follows the
+        /// project-wide setting; <c>Always</c>/<c>Never</c> override it for this tutorial. Editor-only.
+        /// </summary>
+        public TutorialAutoOpenMode AutoOpenEditor
+        {
+            get => autoOpenEditor;
+            set => autoOpenEditor = value;
         }
 
         /// <summary>Stable id used for persistence and remote lookup. Falls back to the asset name.</summary>

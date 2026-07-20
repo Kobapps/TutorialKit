@@ -7,6 +7,17 @@ namespace TutorialKit
         Rectangle = 1,
     }
 
+    /// <summary>How a text box animates on show / hide.</summary>
+    public enum TextBoxAnimation
+    {
+        /// <summary>Code/tween-driven (built-in slide + fade, or a subclass override of the play methods).</summary>
+        Script = 0,
+        /// <summary>Play clips on a Unity legacy <see cref="UnityEngine.Animation"/> component.</summary>
+        Legacy = 1,
+        /// <summary>Appear / disappear instantly (no animation).</summary>
+        None = 2,
+    }
+
     /// <summary>Visual style of the pointer.</summary>
     public enum PointerKind
     {
@@ -23,6 +34,20 @@ namespace TutorialKit
         Horizontal = 1,
         /// <summary>Flow top → bottom (VFX-graph style).</summary>
         Vertical = 2,
+    }
+
+    /// <summary>
+    /// Whether the graph editor auto-opens and live-attaches when this tutorial starts playing
+    /// (editor-only; stored per graph). Overrides the project-wide default in Settings ▸ TutorialKit.
+    /// </summary>
+    public enum TutorialAutoOpenMode
+    {
+        /// <summary>Follow the project default (Settings ▸ TutorialKit ▸ auto-open toggle).</summary>
+        UseDefault = 0,
+        /// <summary>Always open the editor on play, regardless of the project default.</summary>
+        Always = 1,
+        /// <summary>Never open the editor on play, regardless of the project default.</summary>
+        Never = 2,
     }
 
     /// <summary>Animated gesture a pointer performs.</summary>

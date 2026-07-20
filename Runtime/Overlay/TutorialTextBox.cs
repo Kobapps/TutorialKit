@@ -1,4 +1,6 @@
 using System;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -20,6 +22,32 @@ namespace TutorialKit
         [SerializeField] private Button continueButton;
         [SerializeField] private TMP_Text continueLabel;
 
+        [Header("Show / hide animation")]
+        [Tooltip("How this box animates in and out.\n" +
+                 "• Script — code/tween-driven (built-in slide + fade, or override PlayShowScript / PlayHideScript).\n" +
+                 "• Legacy — play clips on a Unity Animation component (see fields below).\n" +
+                 "• None — appear / disappear instantly.")]
+        [SerializeField] private TextBoxAnimation animationMode = TextBoxAnimation.Script;
+
+        [Tooltip("Legacy Animation component to drive (Legacy mode). Empty = one on this GameObject. " +
+                 "Note: legacy clips use scaled time, so they won't visibly play while the game is paused.")]
+        [SerializeField] private Animation legacyAnimation;
+        [Tooltip("Clip name played on show (Legacy mode).")]
+        [SerializeField] private string showClip = "Show";
+        [Tooltip("Clip name played on hide (Legacy mode).")]
+        [SerializeField] private string hideClip = "Hide";
+
+        [Header("Script animation tuning (Script mode)")]
+        [Tooltip("Slide-up distance in pixels for the built-in show animation.")]
+        [SerializeField] private float slideDistance = 28f;
+        [Tooltip("Show (slide + fade in) duration in seconds.")]
+        [SerializeField] private float showDuration = 0.24f;
+        [Tooltip("Hide (fade out) duration in seconds.")]
+        [SerializeField] private float hideDuration = 0.15f;
+
+        /// <summary>Show / hide animation style used by this box.</summary>
+        public TextBoxAnimation AnimationMode { get => animationMode; set => animationMode = value; }
+
         /// <summary>Raised when the continue button is pressed.</summary>
         public event Action Continued;
 
@@ -35,6 +63,85 @@ namespace TutorialKit
         {
             TutorialTween.Kill(ref SlideTween);
             TutorialTween.Kill(ref FadeTween);
+        }
+
+        /// <summary>
+        /// Plays the show animation. Called by the overlay after the box is positioned and bound; the
+        /// overlay does not await it, so a longer animation overlaps the typewriter. Override this (or
+        /// <see cref="PlayShowScript"/>) on a custom box for a fully bespoke script animation.
+        /// </summary>
+        public virtual UniTask PlayShow(CancellationToken ct)
+        {
+            KillTweens();
+            switch (animationMode)
+            {
+                case TextBoxAnimation.None:
+                    if (CanvasGroup != null) CanvasGroup.alpha = 1f;
+                    return UniTask.CompletedTask;
+                case TextBoxAnimation.Legacy:
+                    return PlayLegacy(showClip, entering: true, ct);
+                default:
+                    return PlayShowScript(ct);
+            }
+        }
+
+        /// <summary>Plays the hide animation. The overlay awaits this, then deactivates the box.</summary>
+        public virtual UniTask PlayHide(CancellationToken ct)
+        {
+            KillTweens();
+            switch (animationMode)
+            {
+                case TextBoxAnimation.None:
+                    return UniTask.CompletedTask;
+                case TextBoxAnimation.Legacy:
+                    return PlayLegacy(hideClip, entering: false, ct);
+                default:
+                    return PlayHideScript(ct);
+            }
+        }
+
+        /// <summary>Built-in show: slide up + fade in. Not awaited by the overlay (overlaps typewriter).</summary>
+        protected virtual UniTask PlayShowScript(CancellationToken ct)
+        {
+            var panel = Panel;
+            Vector2 target = panel.anchoredPosition; // resting position set by the overlay before Show
+            Vector2 from = target + new Vector2(0f, -slideDistance);
+            panel.anchoredPosition = from;
+            SlideTween = TutorialTween.Animate(showDuration, TutorialEase.OutCubic,
+                p => panel.anchoredPosition = Vector2.LerpUnclamped(from, target, p));
+
+            var group = CanvasGroup;
+            if (group != null)
+            {
+                group.alpha = 0f;
+                FadeTween = TutorialTween.Animate(showDuration, TutorialEase.Linear, p => group.alpha = p);
+            }
+            return UniTask.CompletedTask;
+        }
+
+        /// <summary>Built-in hide: fade out. Awaited by the overlay before the box is deactivated.</summary>
+        protected virtual UniTask PlayHideScript(CancellationToken ct)
+        {
+            var group = CanvasGroup;
+            if (group == null) return UniTask.CompletedTask;
+            float start = group.alpha;
+            FadeTween = TutorialTween.Animate(hideDuration, TutorialEase.Linear,
+                p => group.alpha = Mathf.LerpUnclamped(start, 0f, p));
+            return FadeTween.ToUniTask(ct);
+        }
+
+        // Plays a named clip on the legacy Animation component, awaiting its length. Falls back to the
+        // script animation when no component/clip is available (e.g. the built-in procedural box).
+        private UniTask PlayLegacy(string clip, bool entering, CancellationToken ct)
+        {
+            var anim = legacyAnimation != null ? legacyAnimation : GetComponent<Animation>();
+            AnimationClip ac = (anim != null && !string.IsNullOrEmpty(clip)) ? anim.GetClip(clip) : null;
+            if (anim == null || ac == null)
+                return entering ? PlayShowScript(ct) : PlayHideScript(ct);
+
+            if (entering && CanvasGroup != null) CanvasGroup.alpha = 1f; // the clip drives the visuals
+            anim.Play(clip);
+            return UniTask.Delay(TimeSpan.FromSeconds(Mathf.Max(0f, ac.length)), true, cancellationToken: ct);
         }
 
         protected virtual void Awake()

@@ -39,6 +39,8 @@ namespace TutorialKit.Editor
             EditorGUILayout.Space(12);
             DrawPointerArtSection();
             EditorGUILayout.Space(12);
+            DrawShaderSection();
+            EditorGUILayout.Space(12);
             DrawToolsSection();
             EditorGUILayout.Space(12);
             DrawProgressSection();
@@ -93,6 +95,7 @@ namespace TutorialKit.Editor
         private SerializedObject _settingsSO;
 
         private const string PointerArtDir = "Packages/com.kobapps.tutorialkit/Runtime/Resources/TutorialKit/Pointers/";
+        private const string VignetteShaderPath = "Packages/com.kobapps.tutorialkit/Runtime/Overlay/Shaders/UIVignette.shader";
         private static readonly (string field, string sprite, string label)[] PointerFields =
         {
             ("pointerHand", "hand_point", "Hand (point / tap)"),
@@ -197,8 +200,69 @@ namespace TutorialKit.Editor
                 if (prop != null)
                     prop.objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>(PointerArtDir + sprite + ".png");
             }
+            var shaderProp = so.FindProperty("vignetteShader");
+            if (shaderProp != null)
+                shaderProp.objectReferenceValue = LoadVignetteShader();
             so.ApplyModifiedPropertiesWithoutUndo();
             EditorUtility.SetDirty(s);
+        }
+
+        // Assign only the vignette shader, leaving the pointer art untouched.
+        private static void AssignVignetteShader(TutorialKitSettings s)
+        {
+            var so = new SerializedObject(s);
+            var prop = so.FindProperty("vignetteShader");
+            if (prop != null) prop.objectReferenceValue = LoadVignetteShader();
+            so.ApplyModifiedPropertiesWithoutUndo();
+            EditorUtility.SetDirty(s);
+        }
+
+        private static Shader LoadVignetteShader() =>
+            AssetDatabase.LoadAssetAtPath<Shader>(VignetteShaderPath) ?? Shader.Find("TutorialKit/UIVignette");
+
+        private void DrawShaderSection()
+        {
+            using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+            {
+                GUILayout.Label("Bundled Shaders", EditorStyles.boldLabel);
+                EditorGUILayout.LabelField(
+                    "The overlay looks up its vignette shader with Shader.Find, which works in the editor but " +
+                    "gets stripped from a build. Referencing it here (this asset lives in Resources) keeps it in " +
+                    "the build so highlights render in a player.", WrapLabel);
+
+                var settings = LoadSettings();
+                if (settings == null)
+                {
+                    EditorGUILayout.Space(4);
+                    EditorGUILayout.LabelField("No settings asset yet — create it in the section above.", EditorStyles.miniLabel);
+                    return;
+                }
+
+                if (_settingsSO == null || _settingsSO.targetObject != settings)
+                    _settingsSO = new SerializedObject(settings);
+
+                _settingsSO.Update();
+                var prop = _settingsSO.FindProperty("vignetteShader");
+                EditorGUI.BeginChangeCheck();
+                if (prop != null) EditorGUILayout.PropertyField(prop, new GUIContent("Vignette Shader"));
+                if (EditorGUI.EndChangeCheck())
+                {
+                    _settingsSO.ApplyModifiedProperties();
+                    EditorUtility.SetDirty(settings);
+                }
+
+                if (prop != null && prop.objectReferenceValue == null)
+                {
+                    EditorGUILayout.HelpBox(
+                        "No shader assigned — the vignette overlay may not render in a build. Assign the bundled shader.",
+                        MessageType.Warning);
+                    if (GUILayout.Button("Assign bundled UIVignette shader"))
+                    {
+                        AssignVignetteShader(settings);
+                        _settingsSO = null;
+                    }
+                }
+            }
         }
 
         private const string DOTweenDefine = "TUTORIALKIT_DOTWEEN";
@@ -292,7 +356,8 @@ namespace TutorialKit.Editor
                 EditorGUILayout.Space(4);
                 bool auto = EditorGUILayout.ToggleLeft(
                     new GUIContent("Auto-open the graph editor when a tutorial plays",
-                        "In Play mode, open and live-attach the graph editor to whichever tutorial starts."),
+                        "Project-wide default: in Play mode, open and live-attach the graph editor to whichever " +
+                        "tutorial starts. Each tutorial can override this (Always / Never) in its Tutorial settings."),
                     TutorialGraphAutoOpen.Enabled);
                 if (auto != TutorialGraphAutoOpen.Enabled) TutorialGraphAutoOpen.Enabled = auto;
 

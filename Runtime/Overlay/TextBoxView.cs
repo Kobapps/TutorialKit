@@ -17,6 +17,11 @@ namespace TutorialKit
         [SerializeField] private Color accentColor = new Color(0.23f, 0.48f, 0.84f, 1f);
         [SerializeField] private Color textColor = Color.white;
 
+        [Tooltip("Show / hide animation used by the built-in default box. Custom prefabs set their own on " +
+                 "their TutorialTextBox component. (Legacy needs an Animation component, so the procedural " +
+                 "default box treats Legacy as Script.)")]
+        [SerializeField] private TextBoxAnimation defaultAnimation = TextBoxAnimation.Script;
+
         private TutorialOverlay _overlay;
         private readonly Dictionary<string, GameObject> _prefabs = new Dictionary<string, GameObject>();
         private readonly Dictionary<string, TutorialTextBox> _active = new Dictionary<string, TutorialTextBox>();
@@ -38,21 +43,9 @@ namespace TutorialKit
             box.Bind(request.Title, request.Body, request.ShowContinueButton, request.ContinueLabel);
             Position(box, request);
 
-            // Slide up + fade in.
-            box.KillTweens();
-            var panel = box.Panel;
-            Vector2 target = panel.anchoredPosition;
-            Vector2 from = target + new Vector2(0f, -28f);
-            panel.anchoredPosition = from;
-            box.SlideTween = TutorialTween.Animate(0.24f, TutorialEase.OutCubic,
-                p => panel.anchoredPosition = Vector2.LerpUnclamped(from, target, p));
-
-            var group = box.CanvasGroup;
-            if (group != null)
-            {
-                group.alpha = 0f;
-                box.FadeTween = TutorialTween.Animate(0.2f, TutorialEase.Linear, p => group.alpha = p);
-            }
+            // The box owns its show animation (script / legacy / none). Don't await it, so a longer
+            // animation overlaps the typewriter — matching the built-in slide-up + fade-in feel.
+            box.PlayShow(ct).Forget();
 
             if (request.Typewriter && box.BodyLabel != null)
                 await RunTypewriter(box, request.Body, request.TypewriterCps, ct);
@@ -89,14 +82,7 @@ namespace TutorialKit
         {
             id = string.IsNullOrEmpty(id) ? "main" : id;
             if (!_active.TryGetValue(id, out var box) || box == null) return;
-            box.KillTweens();
-            var group = box.CanvasGroup;
-            if (group != null)
-            {
-                float start = group.alpha;
-                box.FadeTween = TutorialTween.Animate(0.15f, TutorialEase.Linear, p => group.alpha = Mathf.LerpUnclamped(start, 0f, p));
-                await box.FadeTween.ToUniTask(ct);
-            }
+            await box.PlayHide(ct);
             if (box != null) box.gameObject.SetActive(false);
         }
 
@@ -202,6 +188,7 @@ namespace TutorialKit
 
             var box = root.AddComponent<TutorialTextBox>();
             box.Wire(root.GetComponent<CanvasGroup>(), rt, title, body, btn, btnLabel);
+            box.AnimationMode = defaultAnimation;
             return box;
         }
 

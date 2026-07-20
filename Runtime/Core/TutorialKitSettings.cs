@@ -28,6 +28,15 @@ namespace TutorialKit
         public Sprite PointerHandClosed => pointerHandClosed;
         public Sprite PointerArrow => pointerArrow;
 
+        [Header("Bundled shaders")]
+        [Tooltip("The overlay vignette shader (TutorialKit/UIVignette). The overlay looks it up at runtime, " +
+                 "but a shader referenced only via Shader.Find gets stripped from a build — assigning it here " +
+                 "keeps it in the build because this asset lives in Resources. Leave set to the bundled shader.")]
+        [SerializeField] private Shader vignetteShader;
+
+        /// <summary>The vignette overlay shader, if assigned. Null → the overlay falls back to <c>Shader.Find</c>.</summary>
+        public Shader VignetteShader => vignetteShader;
+
         [Header("Animation")]
         [Tooltip("Which animation backend the overlays use. \"native\" (built-in, no dependency) or the " +
                  "id of a registered adapter such as \"dotween\". Empty = native.")]

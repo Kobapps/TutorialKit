@@ -48,7 +48,11 @@ namespace TutorialKit
         {
             _overlay = overlay;
             _image = GetComponent<Image>();
-            var shader = Shader.Find("TutorialKit/UIVignette");
+            // Prefer the shader referenced by the settings asset (in Resources → survives build stripping);
+            // fall back to Shader.Find for setups without a settings asset (e.g. editor / play mode).
+            var settings = TutorialKitSettings.Instance;
+            var shader = settings != null ? settings.VignetteShader : null;
+            if (shader == null) shader = Shader.Find("TutorialKit/UIVignette");
             _material = new Material(shader) { name = "TK_Vignette (Instance)" };
             _image.material = _material;
             _image.color = new Color(1, 1, 1, 0f);

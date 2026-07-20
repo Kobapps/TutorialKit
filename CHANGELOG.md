@@ -2,6 +2,25 @@
 
 All notable changes to TutorialKit are documented here.
 
+## [0.23.0] — 2026-07-21
+
+### Added
+- **Text box show / hide animations.** Each text box now chooses how it animates in and out via an
+  `Animation Mode` on its `TutorialTextBox` — **Script** (code/tween-driven; the built-in slide + fade,
+  or override `PlayShowScript` / `PlayHideScript` on a custom box), **Legacy** (play named clips on a
+  Unity `Animation` component), or **None** (instant). The built-in default box's mode is set on the
+  `TextBoxView` component. Legacy gracefully falls back to the script animation when no clip is present.
+- **Per-tutorial auto-open control.** A tutorial can override the project-wide "auto-open the graph
+  editor on play" setting with its own `Auto Open Editor` mode — `UseDefault`, `Always`, or `Never`
+  (in the graph editor's **Tutorial** tab and the graph inspector).
+- **Vignette shader shipped in builds.** The overlay's `TutorialKit/UIVignette` shader is now referenced
+  by the `TutorialKitSettings` asset (which lives in `Resources`), so it is no longer stripped from a
+  player build where it was only reached via `Shader.Find`. The Settings window assigns it by default
+  and warns if it is missing.
+
+### Changed
+- **Merge pointer** shows only the hand now — the trailing circle/dot indicator was removed.
+
 ## [0.22.0] — 2026-07-14
 
 ### Added

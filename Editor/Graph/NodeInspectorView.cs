@@ -166,7 +166,7 @@ namespace TutorialKit.Editor
             _empty.style.display = DisplayStyle.None;
             _card.style.display = DisplayStyle.Flex;
 
-            foreach (var path in new[] { "tutorialId", "displayName", "description", "settings" })
+            foreach (var path in new[] { "tutorialId", "displayName", "description", "settings", "autoOpenEditor" })
             {
                 var prop = _serializedGraph.FindProperty(path);
                 if (prop == null) continue;

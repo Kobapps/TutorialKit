@@ -28,8 +28,6 @@ namespace TutorialKit
         private RectTransform _inner;    // animated relative to _follow
         private Image _pointerImage;
         private Image _ring;
-        private RectTransform _secondary; // for merge
-        private Image _secondaryImage;
 
         private ITutorialTweenSequence _sequence;
         private ITutorialTween _hideFade;
@@ -51,10 +49,6 @@ namespace TutorialKit
             _pointerImage = CreateImage("Pointer", _inner,
                 handSprite != null ? handSprite : TutorialSpriteFactory.Hand, pointerSize);
             _pointerImage.color = tint;
-
-            _secondary = CreateChild("Secondary", transform as RectTransform);
-            _secondaryImage = CreateImage("SecondaryDot", _secondary, TutorialSpriteFactory.Dot, pointerSize * 0.7f);
-            _secondaryImage.color = tint;
 
             gameObject.SetActive(false);
         }
@@ -101,7 +95,6 @@ namespace TutorialKit
             _inner.anchoredPosition = Vector2.zero;
             _inner.localScale = Vector3.one;
             _ring.rectTransform.localScale = Vector3.one;
-            _secondary.gameObject.SetActive(false);
             _pointerImage.color = tint;
             SetRingAlpha(0f);
 
@@ -188,18 +181,15 @@ namespace TutorialKit
             Vector2 a = ResolvePosition(r.Target, r.ScreenOffset);
             Vector2 b = ResolvePosition(r.SecondaryTarget, r.ScreenOffset);
             Vector2 mid = (a + b) * 0.5f;
-            _secondary.gameObject.SetActive(true);
             float move = 0.6f / Speed;
+            // Just the hand: it sweeps from the first target to the midpoint, then pulses (no circle indicator).
             _sequence = TutorialTween.Sequence()
                 .AppendCallback(() =>
                 {
                     _follow.anchoredPosition = a;
-                    _secondary.anchoredPosition = b;
                     _pointerImage.color = tint;
-                    _secondaryImage.color = tint;
                 })
                 .Append(move, TutorialEase.InOutQuad, p => _follow.anchoredPosition = Vector2.LerpUnclamped(a, mid, p))
-                .Join(move, TutorialEase.InOutQuad, p => _secondary.anchoredPosition = Vector2.LerpUnclamped(b, mid, p))
                 .Append(0.15f, TutorialEase.OutQuad, p => SetInnerScale(Mathf.LerpUnclamped(1f, 1.25f, p)))   // pulse up
                 .Append(0.15f, TutorialEase.OutQuad, p => SetInnerScale(Mathf.LerpUnclamped(1.25f, 1f, p)))   // pulse down
                 .AppendInterval(0.3f / Speed)

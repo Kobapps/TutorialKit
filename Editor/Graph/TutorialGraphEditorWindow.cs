@@ -427,9 +427,24 @@ namespace TutorialKit.Editor
             TutorialDirector.AnyStarted += OnAnyStarted;
         }
 
+        /// <summary>
+        /// Resolves whether to auto-open for a specific graph: the graph's own
+        /// <see cref="TutorialAutoOpenMode"/> wins, falling back to the project-wide <see cref="Enabled"/>.
+        /// </summary>
+        public static bool ShouldOpenFor(TutorialGraph graph)
+        {
+            if (graph == null) return false;
+            switch (graph.AutoOpenEditor)
+            {
+                case TutorialAutoOpenMode.Always: return true;
+                case TutorialAutoOpenMode.Never: return false;
+                default: return Enabled; // UseDefault
+            }
+        }
+
         private static void OnAnyStarted(TutorialHandle handle)
         {
-            if (!Enabled || handle?.Graph == null) return;
+            if (!ShouldOpenFor(handle?.Graph)) return;
             var h = handle;
             // Defer one tick: opening an editor window from inside the runtime start callback is safest next frame.
             EditorApplication.delayCall += () =>
