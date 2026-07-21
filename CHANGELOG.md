@@ -2,6 +2,24 @@
 
 All notable changes to TutorialKit are documented here.
 
+## [0.24.0] — 2026-07-21
+
+### Added
+- **Standalone pointer API (`TutorialPointers`).** Show animated pointers (hand / arrow doing point /
+  tap / swipe / drag / merge) anywhere in the game — no tutorial graph or running sequence required.
+  Each call returns a `PointerHandle` you keep and later `Hide()`; several pointers can be on screen at
+  once. Convenience methods `Point` / `Tap` / `Arrow` / `Swipe` / `Drag` / `Merge` / `ShowAt`, plus a
+  general `Show(ITutorialTarget, …)`, with overloads taking a `Transform`, a screen `Vector2`, a
+  registered target id, or any `ITutorialTarget`. `HideAll()` clears them.
+  ```csharp
+  var hint = TutorialPointers.Tap(button.transform); // looping hint that follows the button
+  hint.Hide();
+  TutorialPointers.Swipe(cardA.transform, cardB.transform);
+  ```
+  Pointers render on the shared overlay above all game UI and are independent of tutorials (a playing
+  tutorial never disturbs them). Backed by a pool of dedicated pointer views separate from the tutorial
+  pointer. `TutorialDirector.EnsureOverlay()` is now public so standalone APIs can reach the overlay.
+
 ## [0.23.0] — 2026-07-21
 
 ### Added

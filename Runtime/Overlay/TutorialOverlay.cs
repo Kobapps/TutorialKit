@@ -62,6 +62,19 @@ namespace TutorialKit
             return overlay;
         }
 
+        /// <summary>
+        /// Creates an extra full-screen <see cref="PointerView"/> layered above the others. Used by
+        /// <see cref="TutorialPointers"/> to show ambient game pointers independently of the tutorial one,
+        /// so several can be on screen at once and tutorials never disturb them.
+        /// </summary>
+        public PointerView CreatePointer(string name = "Pointer")
+        {
+            var view = CreateFullScreenView<PointerView>(name, withImage: false);
+            view.Init(this);
+            view.transform.SetAsLastSibling();
+            return view;
+        }
+
         private T CreateFullScreenView<T>(string name, bool withImage) where T : Component
         {
             var go = withImage

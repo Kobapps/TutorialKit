@@ -109,10 +109,15 @@ namespace TutorialKit
             return this;
         }
 
-        private void EnsureOverlay()
+        /// <summary>
+        /// Ensures the overlay canvas exists (creating it on demand) and returns it. Public so standalone
+        /// APIs like <see cref="TutorialPointers"/> can reach the overlay outside a tutorial run.
+        /// </summary>
+        public TutorialOverlay EnsureOverlay()
         {
-            if (_overlay != null) return;
-            _overlay = TutorialOverlay.Create(_targets, transform);
+            EnsureInitialized();
+            if (_overlay == null) _overlay = TutorialOverlay.Create(_targets, transform);
+            return _overlay;
         }
 
         // ---- Adapter overrides (call before the first Play) ----
