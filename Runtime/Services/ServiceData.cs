@@ -82,7 +82,8 @@ namespace TutorialKit
         public string ContinueLabel;
         public bool WaitForDismiss;     // if true, ShowAsync completes when user taps continue
         public bool Typewriter;
-        public float TypewriterCps;     // characters per second
+        public float TypewriterCps;     // characters per second (<= 0 => use the project default)
+        public TutorialTextAlignment BodyAlignment; // Default => use the project default alignment
 
         public static TextBoxRequest Default => new TextBoxRequest
         {
@@ -94,6 +95,7 @@ namespace TutorialKit
             WaitForDismiss = true,
             Typewriter = true,
             TypewriterCps = 45f,
+            BodyAlignment = TutorialTextAlignment.Default,
         };
     }
 

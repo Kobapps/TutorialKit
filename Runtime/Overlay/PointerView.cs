@@ -101,12 +101,15 @@ namespace TutorialKit
             Vector2 start = ResolvePosition(request.Target, request.ScreenOffset);
             _follow.anchoredPosition = start;
 
-            _followTarget = request.Gesture == PointerGesture.Point || request.Gesture == PointerGesture.Tap;
+            _followTarget = request.Gesture == PointerGesture.Point
+                || request.Gesture == PointerGesture.Tap
+                || request.Gesture == PointerGesture.DoubleTap;
 
             switch (request.Gesture)
             {
                 case PointerGesture.Point: BuildPoint(request); break;
                 case PointerGesture.Tap: BuildTap(request); break;
+                case PointerGesture.DoubleTap: BuildDoubleTap(request); break;
                 case PointerGesture.Swipe: BuildSwipe(request); break;
                 case PointerGesture.Drag: BuildDrag(request); break;
                 case PointerGesture.Merge: BuildMerge(request); break;
@@ -136,6 +139,29 @@ namespace TutorialKit
                 .Append(d, TutorialEase.OutBack, p => SetInnerScale(Mathf.LerpUnclamped(0.82f, 1f, p)))
                 .Join(d, TutorialEase.Linear, p => SetRingAlpha(Mathf.LerpUnclamped(0.6f, 0f, p)))
                 .AppendInterval(0.35f / Speed)
+                .SetLoops(-1)
+                .Play();
+        }
+
+        private void BuildDoubleTap(PointerRequest r)
+        {
+            // Two quick presses (each: dip + expanding ring) back-to-back, then a longer rest so the
+            // "double" reads clearly. One press = the Tap dip/ring, but tighter and with no rest between.
+            float d = 0.16f / Speed;
+            var seq = TutorialTween.Sequence();
+            for (int i = 0; i < 2; i++)
+            {
+                seq
+                    .Append(d, TutorialEase.OutQuad, p => SetInnerScale(Mathf.LerpUnclamped(1f, 0.8f, p)))
+                    .Join(d, TutorialEase.Linear, p => SetRingAlpha(Mathf.LerpUnclamped(0f, 0.55f, p)))
+                    .Join(d * 2f, TutorialEase.Linear, p => SetRingScale(Mathf.LerpUnclamped(0.55f, 1.35f, p)))
+                    .Append(d, TutorialEase.OutBack, p => SetInnerScale(Mathf.LerpUnclamped(0.8f, 1f, p)))
+                    .Join(d, TutorialEase.Linear, p => SetRingAlpha(Mathf.LerpUnclamped(0.55f, 0f, p)))
+                    .AppendCallback(() => SetRingScale(0.55f))
+                    .AppendInterval(0.06f / Speed); // tiny gap between the two taps
+            }
+            _sequence = seq
+                .AppendInterval(0.55f / Speed) // longer rest before the pair repeats
                 .SetLoops(-1)
                 .Play();
         }

@@ -2,6 +2,23 @@
 
 All notable changes to TutorialKit are documented here.
 
+## [0.25.0] — 2026-07-22
+
+### Added
+- **Double-tap pointer gesture.** New `PointerGesture.DoubleTap` performs two quick taps in succession
+  then a pause, over a single target (which it follows like Point/Tap). Available on the Show Pointer
+  node's Gesture dropdown and via the standalone API: `TutorialPointers.DoubleTap(target)`.
+- **Text box text alignment.** Show Text Box nodes gain a `BodyAlignment` field
+  (`Default` / `Left` / `Center` / `Right` / `Justified`) controlling the horizontal alignment of the
+  body text. `Default` follows the project-wide setting.
+- **Global default styles for vignettes and text boxes.** `TutorialKitSettings` now carries a
+  `VignetteDefaults` block (shape, overlay colour, softness, padding, corner radius, fade) and a
+  `TextBoxDefaults` block (panel/accent/text colour, body alignment, typewriter speed, animation). The
+  built-in text box uses the text box defaults; a Show Vignette node with the new **Use Global Style**
+  toggle (on by default) draws with the vignette defaults instead of its own fields. A node's `Default`
+  alignment and `0` typewriter speed resolve to these. Edit them in **Window ▸ TutorialKit ▸ Settings ▸
+  Default Vignette & Text Box Style**.
+
 ## [0.24.0] — 2026-07-21
 
 ### Added

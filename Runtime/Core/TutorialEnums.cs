@@ -63,6 +63,22 @@ namespace TutorialKit
         Drag = 3,
         /// <summary>Two elements moving together into one point.</summary>
         Merge = 4,
+        /// <summary>Two quick taps in succession over a single target, then a pause.</summary>
+        DoubleTap = 5,
+    }
+
+    /// <summary>
+    /// Horizontal alignment of text-box text. <see cref="Default"/> follows the project-wide
+    /// default (Settings ▸ TutorialKit ▸ Default Text Box Style).
+    /// </summary>
+    public enum TutorialTextAlignment
+    {
+        /// <summary>Follow the project default (Settings ▸ TutorialKit).</summary>
+        Default = 0,
+        Left = 1,
+        Center = 2,
+        Right = 3,
+        Justified = 4,
     }
 
     public enum InputLockMode

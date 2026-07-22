@@ -138,10 +138,11 @@ dir.Signals.Emit("firstMatchMade");
 - **Highlight**: Show/Hide Vignette (circle or rounded-rect hole, softness, padding; add
   `Additional Targets` to cut **multiple holes** at once; taps pass through the holes unless you turn
   off `Allow Clicks Through Holes` to lock them too)
-- **Pointer**: Show/Hide Pointer (point, tap, swipe, drag, merge) — ships with bundled hand & arrow
-  art (CC0, Kenney); the drag gesture even closes the hand into a fist. Assign your own
+- **Pointer**: Show/Hide Pointer (point, tap, double-tap, swipe, drag, merge) — ships with bundled hand
+  & arrow art (CC0, Kenney); the drag gesture even closes the hand into a fist. Assign your own
   `handSprite`/`arrowSprite` on the pointer view to override.
-- **Text**: Show/Hide Text Box (default styled box or custom prefab, typewriter, wait-for-continue)
+- **Text**: Show/Hide Text Box (default styled box or custom prefab, typewriter, body-text alignment,
+  wait-for-continue)
 - **Interaction**: Set Input Lock, Game Command, Emit Signal
 - **Target providers**: Target By Id, Target By Screen Position (subclass `TargetNodeBase` for custom
   logic) — connect their **Target output** into the optional **Target input** on a vignette / pointer /
@@ -210,6 +211,13 @@ The same window has a **Default Pointer Art** section: create a `TutorialKitSett
 with the bundled CC0 art) and swap the hand/arrow sprites to re-skin every pointer project-wide. The
 asset lives in a `Resources` folder so runtime and builds pick it up; an empty field falls back to the
 bundled default. Per-tutorial art can still be assigned on the pointer view.
+
+It also has a **Default Vignette & Text Box Style** section — project-wide defaults so a whole game
+reads consistently. Set the vignette look (shape, overlay colour, softness, padding, corner radius,
+fade) and the text box look (panel/accent/text colour, body alignment, typewriter speed, animation)
+once. A Show Vignette node with **Use Global Style** on draws with the vignette defaults; the built-in
+text box uses the text box defaults, and a node's `Default` alignment / `0` typewriter speed resolve to
+them (set explicit values on a node to override).
 
 ## Custom nodes
 

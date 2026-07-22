@@ -65,6 +65,10 @@ namespace TutorialKit
         public static PointerHandle Tap(Transform target, float speed = 1f)
             => Show(Target(target), PointerKind.Hand, PointerGesture.Tap, speed);
 
+        /// <summary>Convenience: a repeated "double tap" hint on a target.</summary>
+        public static PointerHandle DoubleTap(Transform target, float speed = 1f)
+            => Show(Target(target), PointerKind.Hand, PointerGesture.DoubleTap, speed);
+
         /// <summary>Convenience: an arrow that points at a target.</summary>
         public static PointerHandle Arrow(Transform target, PointerGesture gesture = PointerGesture.Point, float speed = 1f)
             => Show(Target(target), PointerKind.Arrow, gesture, speed);

@@ -22,12 +22,40 @@ namespace TutorialKit
                  "default box treats Legacy as Script.)")]
         [SerializeField] private TextBoxAnimation defaultAnimation = TextBoxAnimation.Script;
 
+        [Tooltip("Default body-text alignment when a Show Text Box node's alignment is 'Default'.")]
+        [SerializeField] private TutorialTextAlignment defaultBodyAlignment = TutorialTextAlignment.Left;
+
+        [Tooltip("Default typewriter speed (chars/sec) when a request leaves speed at 0.")]
+        [SerializeField] private float defaultTypewriterCps = 45f;
+
         private TutorialOverlay _overlay;
+        private bool _defaultsApplied;
         private readonly Dictionary<string, GameObject> _prefabs = new Dictionary<string, GameObject>();
         private readonly Dictionary<string, TutorialTextBox> _active = new Dictionary<string, TutorialTextBox>();
         private GameObject _defaultPrefabInstanceTemplate;
 
-        internal void Init(TutorialOverlay overlay) => _overlay = overlay;
+        internal void Init(TutorialOverlay overlay)
+        {
+            _overlay = overlay;
+            ApplyGlobalDefaults();
+        }
+
+        // Pull the project-wide text box style from the settings asset (if any) so a whole game's default
+        // boxes can be restyled from one place. Called once; safe to no-op when no settings asset exists.
+        private void ApplyGlobalDefaults()
+        {
+            if (_defaultsApplied) return;
+            _defaultsApplied = true;
+            var s = TutorialKitSettings.Instance;
+            var d = s != null ? s.TextBoxDefaults : null;
+            if (d == null) return;
+            panelColor = d.PanelColor;
+            accentColor = d.AccentColor;
+            textColor = d.TextColor;
+            defaultAnimation = d.Animation;
+            defaultBodyAlignment = d.BodyAlignment;
+            defaultTypewriterCps = d.TypewriterCps;
+        }
 
         public void RegisterPrefab(string key, GameObject prefab)
         {
@@ -41,6 +69,9 @@ namespace TutorialKit
             var box = GetOrCreate(id, request.PrefabKey);
             box.gameObject.SetActive(true);
             box.Bind(request.Title, request.Body, request.ShowContinueButton, request.ContinueLabel);
+            // Resolve "Default" alignment to the project-wide default before applying it.
+            var align = request.BodyAlignment == TutorialTextAlignment.Default ? defaultBodyAlignment : request.BodyAlignment;
+            box.SetBodyAlignment(align);
             Position(box, request);
 
             // The box owns its show animation (script / legacy / none). Don't await it, so a longer
@@ -48,7 +79,10 @@ namespace TutorialKit
             box.PlayShow(ct).Forget();
 
             if (request.Typewriter && box.BodyLabel != null)
-                await RunTypewriter(box, request.Body, request.TypewriterCps, ct);
+            {
+                float cps = request.TypewriterCps > 0f ? request.TypewriterCps : defaultTypewriterCps;
+                await RunTypewriter(box, request.Body, cps, ct);
+            }
 
             if (request.WaitForDismiss && request.ShowContinueButton)
             {

@@ -39,6 +39,8 @@ namespace TutorialKit.Editor
             EditorGUILayout.Space(12);
             DrawPointerArtSection();
             EditorGUILayout.Space(12);
+            DrawStyleDefaultsSection();
+            EditorGUILayout.Space(12);
             DrawShaderSection();
             EditorGUILayout.Space(12);
             DrawToolsSection();
@@ -160,6 +162,50 @@ namespace TutorialKit.Editor
                 EditorGUILayout.HelpBox(
                     "Play-mode preview updates immediately. Sprites should be imported as Sprite (2D and UI).",
                     MessageType.None);
+            }
+        }
+
+        private void DrawStyleDefaultsSection()
+        {
+            using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+            {
+                GUILayout.Label("Default Vignette & Text Box Style", EditorStyles.boldLabel);
+                EditorGUILayout.LabelField(
+                    "Project-wide defaults. A Show Vignette node with 'Use Global Style' on draws with the " +
+                    "vignette values; the built-in text box uses the text box values, and a node's 'Default' " +
+                    "alignment / 0 typewriter speed resolve to these.", WrapLabel);
+
+                var settings = LoadSettings();
+                if (settings == null)
+                {
+                    EditorGUILayout.Space(4);
+                    EditorGUILayout.LabelField("No settings asset yet.", EditorStyles.miniLabel);
+                    GUI.backgroundColor = new Color(0.4f, 0.7f, 1f);
+                    if (GUILayout.Button("Create Settings Asset (with generic defaults)", GUILayout.Height(26)))
+                    {
+                        Selection.activeObject = CreateSettings();
+                        _settingsSO = null;
+                    }
+                    GUI.backgroundColor = Color.white;
+                    return;
+                }
+
+                if (_settingsSO == null || _settingsSO.targetObject != settings)
+                    _settingsSO = new SerializedObject(settings);
+
+                _settingsSO.Update();
+                EditorGUI.BeginChangeCheck();
+                var vig = _settingsSO.FindProperty("vignetteDefaults");
+                var txt = _settingsSO.FindProperty("textBoxDefaults");
+                if (vig != null) EditorGUILayout.PropertyField(vig, new GUIContent("Vignette"), true);
+                EditorGUILayout.Space(2);
+                if (txt != null) EditorGUILayout.PropertyField(txt, new GUIContent("Text Box"), true);
+                if (EditorGUI.EndChangeCheck())
+                {
+                    _settingsSO.ApplyModifiedProperties();
+                    EditorUtility.SetDirty(settings);
+                    TutorialKitSettings.ClearCache();
+                }
             }
         }
 

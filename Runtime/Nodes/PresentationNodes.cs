@@ -15,6 +15,9 @@ namespace TutorialKit
         public TutorialTargetRef Target;
         [Tooltip("Extra targets — cut an additional hole for each (multi-highlight). All holes share the shape/softness below.")]
         public List<TutorialTargetRef> AdditionalTargets = new List<TutorialTargetRef>();
+        [Tooltip("Draw with the project-wide vignette style (Settings ▸ TutorialKit) instead of the fields " +
+                 "below. Turn off to use this node's own shape/colour/softness.")]
+        public bool UseGlobalStyle = true;
         [Tooltip("Circle, or rounded Rectangle hole.")]
         public HighlightShape Shape = HighlightShape.Circle;
         [Tooltip("Edge softness of the hole. 0 = hard edge, 1 = very soft falloff.")]
@@ -56,15 +59,19 @@ namespace TutorialKit
                     if (it != null) list.Add(it);
                 }
 
+            // Style comes from either the project-wide defaults (Use Global Style) or this node's fields.
+            var s = UseGlobalStyle ? TutorialKitSettings.Instance : null;
+            var g = s != null ? s.VignetteDefaults : null;
+
             var req = new HighlightRequest
             {
                 Targets = list.ToArray(),
-                Shape = Shape,
-                Softness = Softness,
-                Padding = Padding,
-                CornerRadius = CornerRadius,
-                FadeDuration = FadeDuration,
-                OverlayColor = OverlayColor,
+                Shape = g != null ? g.Shape : Shape,
+                Softness = g != null ? g.Softness : Softness,
+                Padding = g != null ? g.Padding : Padding,
+                CornerRadius = g != null ? g.CornerRadius : CornerRadius,
+                FadeDuration = g != null ? g.FadeDuration : FadeDuration,
+                OverlayColor = g != null ? g.OverlayColor : OverlayColor,
                 BlockRaycasts = BlockRaycastsOutsideHole,
                 BlockHoles = !AllowClicksThroughHoles,
             };
@@ -92,7 +99,7 @@ namespace TutorialKit
     {
         [Tooltip("Hand or arrow pointer sprite.")]
         public PointerKind Kind = PointerKind.Hand;
-        [Tooltip("Point, Tap, Swipe, Drag, or Merge animation.")]
+        [Tooltip("Point, Tap, Double Tap, Swipe, Drag, or Merge animation.")]
         public PointerGesture Gesture = PointerGesture.Tap;
         [Tooltip("Target the pointer starts on / points at.")]
         public TutorialTargetRef Target;
@@ -158,10 +165,13 @@ namespace TutorialKit
         public TutorialTargetRef Target;
         public bool ShowContinueButton = true;
         public string ContinueLabel = "Next";
+        [Tooltip("Horizontal alignment of the body text. Default = follow the project setting.")]
+        public TutorialTextAlignment BodyAlignment = TutorialTextAlignment.Default;
         [Tooltip("If true, this node blocks until the player presses continue.")]
         public bool WaitForDismiss = true;
         public bool Typewriter = true;
-        [Min(1f)] public float TypewriterCps = 45f;
+        [Tooltip("Characters per second. 0 = use the project default typewriter speed.")]
+        [Min(0f)] public float TypewriterCps = 45f;
 
         public override string GetSummary(TutorialGraph graph)
         {
@@ -188,6 +198,7 @@ namespace TutorialKit
                 WaitForDismiss = WaitForDismiss,
                 Typewriter = Typewriter,
                 TypewriterCps = TypewriterCps,
+                BodyAlignment = BodyAlignment,
             };
             await ctx.TextBox.ShowAsync(req, ct);
             return OutPort;

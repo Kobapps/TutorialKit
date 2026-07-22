@@ -130,6 +130,20 @@ graph.Settings.WhenBusy = TutorialBusyPolicy.Ignore;  // never interrupt a real 
 Ask `director.CanPlay(graph, out var reason)` to test the gating yourself; `Play(graph, force: true)`
 bypasses it. `graph.Repeatable` still works as a legacy alias for `PlayMode != SingleUse`.
 
+### Project-wide default styles (Window ▸ TutorialKit ▸ Settings)
+
+`TutorialKitSettings` (a ScriptableObject in a `Resources` folder) holds default styling so a whole
+game reads consistently without setting it on every node:
+- **Vignette defaults** — shape, overlay colour, softness, padding, corner radius, fade. A Show Vignette
+  node with **Use Global Style** on (the default) draws with these; turn it off to use the node's own
+  fields. So restyle every highlight from one place by editing the vignette defaults.
+- **Text box defaults** — panel/accent/text colour, body alignment, typewriter speed, animation. The
+  built-in default text box uses these. A Show Text Box node's `BodyAlignment = Default` and
+  `TypewriterCps = 0` resolve to the defaults; set explicit values to override per node.
+
+Body text alignment (`Left` / `Center` / `Right` / `Justified`) is on the Show Text Box node.
+Pointer gestures include `DoubleTap` (two quick taps then a pause) alongside Point/Tap/Swipe/Drag/Merge.
+
 ## 4. Test it (via Unity MCP)
 
 1. Make sure the scene has the referenced `TutorialTarget` ids and a trigger (or a controller that calls

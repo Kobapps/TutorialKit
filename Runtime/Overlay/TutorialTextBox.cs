@@ -181,5 +181,26 @@ namespace TutorialKit
         {
             if (bodyLabel != null) bodyLabel.maxVisibleCharacters = count;
         }
+
+        /// <summary>
+        /// Sets the horizontal alignment of the body text. <see cref="TutorialTextAlignment.Default"/>
+        /// leaves the label's authored alignment untouched (the overlay resolves Default beforehand).
+        /// </summary>
+        public virtual void SetBodyAlignment(TutorialTextAlignment alignment)
+        {
+            if (bodyLabel == null || alignment == TutorialTextAlignment.Default) return;
+            bodyLabel.horizontalAlignment = ToHorizontal(alignment);
+        }
+
+        internal static HorizontalAlignmentOptions ToHorizontal(TutorialTextAlignment a)
+        {
+            switch (a)
+            {
+                case TutorialTextAlignment.Center: return HorizontalAlignmentOptions.Center;
+                case TutorialTextAlignment.Right: return HorizontalAlignmentOptions.Right;
+                case TutorialTextAlignment.Justified: return HorizontalAlignmentOptions.Justified;
+                default: return HorizontalAlignmentOptions.Left;
+            }
+        }
     }
 }
