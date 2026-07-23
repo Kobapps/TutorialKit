@@ -135,5 +135,3 @@ namespace TutorialKit
         public float RestDuration = 0.3f;
     }
 }
-</content>
-</invoke>

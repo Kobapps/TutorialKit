@@ -2,6 +2,13 @@
 
 All notable changes to TutorialKit are documented here.
 
+## [0.26.1] — 2026-07-23
+
+### Fixed
+- **Compile error in `TutorialPointerDefaults.cs`** (`CS8803: Top-level statements must precede
+  namespace and type declarations`). Stray trailing text after the namespace's closing brace, introduced
+  when the file was written in 0.26.0, broke compilation. Removed it. No API or behaviour changes.
+
 ## [0.26.0] — 2026-07-23
 
 ### Added
