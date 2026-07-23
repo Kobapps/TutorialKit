@@ -15,13 +15,6 @@ namespace TutorialKit
     {
         [SerializeField] private Sprite handSprite;
         [SerializeField] private Sprite arrowSprite;
-        [SerializeField] private Color tint = Color.white;
-        [SerializeField] private float pointerSize = 110f;
-
-        [Header("Hotspot offset (fraction of size) so the finger/arrow tip — not the sprite centre —")]
-        [Tooltip("sits at the target, leaving the target (e.g. a button's label) visible.")]
-        [SerializeField] private Vector2 handHotspot = new Vector2(0.40f, -0.42f);
-        [SerializeField] private Vector2 arrowHotspot = new Vector2(0f, -0.45f);
 
         private TutorialOverlay _overlay;
         private RectTransform _follow;   // moved to the target
@@ -34,11 +27,18 @@ namespace TutorialKit
         private PointerRequest _request;
         private bool _followTarget;
 
+        // Project-wide appearance & timings, resolved from settings on each Show so editor tweaks
+        // apply live. Values below mirror the resolved defaults for use between Init and the first Show.
+        private TutorialPointerDefaults _defaults = new TutorialPointerDefaults();
+        private Color tint = Color.white;
+        private float pointerSize = 110f;
+
         public bool IsVisible { get; private set; }
 
         internal void Init(TutorialOverlay overlay)
         {
             _overlay = overlay;
+            ResolveDefaults();
 
             _follow = CreateChild("Follow", transform as RectTransform);
             _inner = CreateChild("Inner", _follow);
@@ -51,6 +51,17 @@ namespace TutorialKit
             _pointerImage.color = tint;
 
             gameObject.SetActive(false);
+        }
+
+        // Pull the current project defaults and re-apply the sprite/ring sizes so changes made in the
+        // settings window (even during play) take effect the next time a pointer is shown.
+        private void ResolveDefaults()
+        {
+            _defaults = TutorialKitSettings.ResolvePointerDefaults();
+            tint = _defaults.Tint;
+            pointerSize = _defaults.Size;
+            if (_pointerImage != null) _pointerImage.rectTransform.sizeDelta = new Vector2(pointerSize, pointerSize);
+            if (_ring != null) _ring.rectTransform.sizeDelta = new Vector2(pointerSize * 1.4f, pointerSize * 1.4f);
         }
 
         private static RectTransform CreateChild(string name, RectTransform parent)
@@ -80,6 +91,7 @@ namespace TutorialKit
         public UniTask ShowAsync(PointerRequest request, CancellationToken ct)
         {
             KillTweens();
+            ResolveDefaults();
             _request = request;
             _pointerImage.sprite = request.Kind == PointerKind.Arrow
                 ? (arrowSprite != null ? arrowSprite : TutorialSpriteFactory.Arrow)
@@ -87,7 +99,7 @@ namespace TutorialKit
 
             // Offset the sprite so its tip (not its centre) is the hotspot at the target; the ring stays
             // centred so the tap ripples from the fingertip while the palm/arrow body clears the target.
-            Vector2 hot = request.Kind == PointerKind.Arrow ? arrowHotspot : handHotspot;
+            Vector2 hot = request.Kind == PointerKind.Arrow ? _defaults.ArrowHotspot : _defaults.HandHotspot;
             _pointerImage.rectTransform.anchoredPosition = hot * pointerSize;
 
             gameObject.SetActive(true);
@@ -121,24 +133,27 @@ namespace TutorialKit
 
         private void BuildPoint(PointerRequest r)
         {
-            float t = 0.6f / Speed;
+            var cfg = _defaults.Point;
+            float t = cfg.BobDuration / Speed;
+            float dip = -Mathf.Abs(cfg.BobDistance);
             _sequence = TutorialTween.Sequence()
-                .Append(t, TutorialEase.InOutSine, p => SetInner(Mathf.LerpUnclamped(0f, -18f, p), Mathf.LerpUnclamped(1f, 1.08f, p)))
-                .Append(t, TutorialEase.InOutSine, p => SetInner(Mathf.LerpUnclamped(-18f, 0f, p), Mathf.LerpUnclamped(1.08f, 1f, p)))
+                .Append(t, TutorialEase.InOutSine, p => SetInner(Mathf.LerpUnclamped(0f, dip, p), Mathf.LerpUnclamped(1f, cfg.BobScale, p)))
+                .Append(t, TutorialEase.InOutSine, p => SetInner(Mathf.LerpUnclamped(dip, 0f, p), Mathf.LerpUnclamped(cfg.BobScale, 1f, p)))
                 .SetLoops(-1)
                 .Play();
         }
 
         private void BuildTap(PointerRequest r)
         {
-            float d = 0.28f / Speed;
+            var cfg = _defaults.Tap;
+            float d = cfg.PressDuration / Speed;
             _sequence = TutorialTween.Sequence()
-                .Append(d, TutorialEase.OutQuad, p => SetInnerScale(Mathf.LerpUnclamped(1f, 0.82f, p)))
-                .Join(d, TutorialEase.Linear, p => SetRingAlpha(Mathf.LerpUnclamped(0f, 0.6f, p)))
-                .Join(d * 2f, TutorialEase.Linear, p => SetRingScale(Mathf.LerpUnclamped(0.6f, 1.4f, p)))
-                .Append(d, TutorialEase.OutBack, p => SetInnerScale(Mathf.LerpUnclamped(0.82f, 1f, p)))
-                .Join(d, TutorialEase.Linear, p => SetRingAlpha(Mathf.LerpUnclamped(0.6f, 0f, p)))
-                .AppendInterval(0.35f / Speed)
+                .Append(d, TutorialEase.OutQuad, p => SetInnerScale(Mathf.LerpUnclamped(1f, cfg.DipScale, p)))
+                .Join(d, TutorialEase.Linear, p => SetRingAlpha(Mathf.LerpUnclamped(0f, cfg.RingAlpha, p)))
+                .Join(d * 2f, TutorialEase.Linear, p => SetRingScale(Mathf.LerpUnclamped(cfg.RingFromScale, cfg.RingToScale, p)))
+                .Append(d, TutorialEase.OutBack, p => SetInnerScale(Mathf.LerpUnclamped(cfg.DipScale, 1f, p)))
+                .Join(d, TutorialEase.Linear, p => SetRingAlpha(Mathf.LerpUnclamped(cfg.RingAlpha, 0f, p)))
+                .AppendInterval(cfg.RestDuration / Speed)
                 .SetLoops(-1)
                 .Play();
         }
@@ -147,67 +162,72 @@ namespace TutorialKit
         {
             // Two quick presses (each: dip + expanding ring) back-to-back, then a longer rest so the
             // "double" reads clearly. One press = the Tap dip/ring, but tighter and with no rest between.
-            float d = 0.16f / Speed;
+            var cfg = _defaults.DoubleTap;
+            float d = cfg.PressDuration / Speed;
             var seq = TutorialTween.Sequence();
             for (int i = 0; i < 2; i++)
             {
                 seq
-                    .Append(d, TutorialEase.OutQuad, p => SetInnerScale(Mathf.LerpUnclamped(1f, 0.8f, p)))
-                    .Join(d, TutorialEase.Linear, p => SetRingAlpha(Mathf.LerpUnclamped(0f, 0.55f, p)))
-                    .Join(d * 2f, TutorialEase.Linear, p => SetRingScale(Mathf.LerpUnclamped(0.55f, 1.35f, p)))
-                    .Append(d, TutorialEase.OutBack, p => SetInnerScale(Mathf.LerpUnclamped(0.8f, 1f, p)))
-                    .Join(d, TutorialEase.Linear, p => SetRingAlpha(Mathf.LerpUnclamped(0.55f, 0f, p)))
-                    .AppendCallback(() => SetRingScale(0.55f))
-                    .AppendInterval(0.06f / Speed); // tiny gap between the two taps
+                    .Append(d, TutorialEase.OutQuad, p => SetInnerScale(Mathf.LerpUnclamped(1f, cfg.DipScale, p)))
+                    .Join(d, TutorialEase.Linear, p => SetRingAlpha(Mathf.LerpUnclamped(0f, cfg.RingAlpha, p)))
+                    .Join(d * 2f, TutorialEase.Linear, p => SetRingScale(Mathf.LerpUnclamped(cfg.RingFromScale, cfg.RingToScale, p)))
+                    .Append(d, TutorialEase.OutBack, p => SetInnerScale(Mathf.LerpUnclamped(cfg.DipScale, 1f, p)))
+                    .Join(d, TutorialEase.Linear, p => SetRingAlpha(Mathf.LerpUnclamped(cfg.RingAlpha, 0f, p)))
+                    .AppendCallback(() => SetRingScale(cfg.RingFromScale))
+                    .AppendInterval(cfg.GapDuration / Speed); // tiny gap between the two taps
             }
             _sequence = seq
-                .AppendInterval(0.55f / Speed) // longer rest before the pair repeats
+                .AppendInterval(cfg.RestDuration / Speed) // longer rest before the pair repeats
                 .SetLoops(-1)
                 .Play();
         }
 
         private void BuildSwipe(PointerRequest r)
         {
+            var cfg = _defaults.Swipe;
             Vector2 start = ResolvePosition(r.Target, r.ScreenOffset);
             Vector2 end = ResolvePosition(r.SecondaryTarget, r.ScreenOffset);
             _follow.anchoredPosition = start;
-            float move = 0.5f / Speed;
+            float move = cfg.MoveDuration / Speed;
             _sequence = TutorialTween.Sequence()
                 .AppendCallback(() => { _follow.anchoredPosition = start; _pointerImage.color = tint; })
                 .Append(move, TutorialEase.InOutQuad, p => _follow.anchoredPosition = Vector2.LerpUnclamped(start, end, p))
                 .Join(move, TutorialEase.InQuad, p => SetPointerAlpha(Mathf.LerpUnclamped(1f, 0f, p)), delay: move * 0.6f)
-                .AppendInterval(0.25f / Speed)
+                .AppendInterval(cfg.RestDuration / Speed)
                 .SetLoops(-1)
                 .Play();
         }
 
         private void BuildDrag(PointerRequest r)
         {
+            var cfg = _defaults.Drag;
             Vector2 start = ResolvePosition(r.Target, r.ScreenOffset);
             Vector2 end = ResolvePosition(r.SecondaryTarget, r.ScreenOffset);
             _follow.anchoredPosition = start;
             // Only the bundled hand art has distinct open/closed poses; skip swaps for arrow/custom art.
             Sprite open = handSprite != null ? handSprite : TutorialSpriteFactory.HandOpen;
             Sprite closed = handSprite != null ? handSprite : TutorialSpriteFactory.HandClosed;
-            float move = 0.9f / Speed;
+            float move = cfg.MoveDuration / Speed;
             _sequence = TutorialTween.Sequence()
                 .AppendCallback(() => { _follow.anchoredPosition = start; SetInnerScale(1f); _pointerImage.sprite = open; })
-                .Append(0.2f, TutorialEase.OutQuad, p => SetInnerScale(Mathf.LerpUnclamped(1f, 0.85f, p)))   // grab
+                .Append(cfg.GrabDuration / Speed, TutorialEase.OutQuad, p => SetInnerScale(Mathf.LerpUnclamped(1f, cfg.GrabScale, p)))   // grab
                 .AppendCallback(() => _pointerImage.sprite = closed)                                          // fist closes
                 .Append(move, TutorialEase.InOutSine, p => _follow.anchoredPosition = Vector2.LerpUnclamped(start, end, p))
                 .AppendCallback(() => _pointerImage.sprite = open)                                            // release, hand opens
-                .Append(0.2f, TutorialEase.OutQuad, p => SetInnerScale(Mathf.LerpUnclamped(0.85f, 1f, p)))    // release
-                .AppendInterval(0.35f / Speed)
+                .Append(cfg.ReleaseDuration / Speed, TutorialEase.OutQuad, p => SetInnerScale(Mathf.LerpUnclamped(cfg.GrabScale, 1f, p)))    // release
+                .AppendInterval(cfg.RestDuration / Speed)
                 .SetLoops(-1)
                 .Play();
         }
 
         private void BuildMerge(PointerRequest r)
         {
+            var cfg = _defaults.Merge;
             Vector2 a = ResolvePosition(r.Target, r.ScreenOffset);
             Vector2 b = ResolvePosition(r.SecondaryTarget, r.ScreenOffset);
             Vector2 mid = (a + b) * 0.5f;
-            float move = 0.6f / Speed;
+            float move = cfg.MoveDuration / Speed;
+            float pulse = cfg.PulseDuration / Speed;
             // Just the hand: it sweeps from the first target to the midpoint, then pulses (no circle indicator).
             _sequence = TutorialTween.Sequence()
                 .AppendCallback(() =>
@@ -216,9 +236,9 @@ namespace TutorialKit
                     _pointerImage.color = tint;
                 })
                 .Append(move, TutorialEase.InOutQuad, p => _follow.anchoredPosition = Vector2.LerpUnclamped(a, mid, p))
-                .Append(0.15f, TutorialEase.OutQuad, p => SetInnerScale(Mathf.LerpUnclamped(1f, 1.25f, p)))   // pulse up
-                .Append(0.15f, TutorialEase.OutQuad, p => SetInnerScale(Mathf.LerpUnclamped(1.25f, 1f, p)))   // pulse down
-                .AppendInterval(0.3f / Speed)
+                .Append(pulse, TutorialEase.OutQuad, p => SetInnerScale(Mathf.LerpUnclamped(1f, cfg.PulseScale, p)))   // pulse up
+                .Append(pulse, TutorialEase.OutQuad, p => SetInnerScale(Mathf.LerpUnclamped(cfg.PulseScale, 1f, p)))   // pulse down
+                .AppendInterval(cfg.RestDuration / Speed)
                 .SetLoops(-1)
                 .Play();
         }
@@ -248,7 +268,8 @@ namespace TutorialKit
             if (!IsVisible) return;
             KillTweens();
             float from = _pointerImage.color.a;
-            _hideFade = TutorialTween.Animate(0.15f, TutorialEase.Linear, p => SetPointerAlpha(Mathf.LerpUnclamped(from, 0f, p)));
+            float fade = Mathf.Max(0f, _defaults.HideFadeDuration);
+            _hideFade = TutorialTween.Animate(fade, TutorialEase.Linear, p => SetPointerAlpha(Mathf.LerpUnclamped(from, 0f, p)));
             await _hideFade.ToUniTask(ct);
             HideImmediate();
         }

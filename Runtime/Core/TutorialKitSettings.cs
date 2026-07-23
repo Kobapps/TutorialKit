@@ -104,6 +104,20 @@ namespace TutorialKit
         /// <summary>Project-wide default text box look/behaviour (never null on a loaded asset).</summary>
         public TutorialTextBoxDefaults TextBoxDefaults => textBoxDefaults ?? (textBoxDefaults = new TutorialTextBoxDefaults());
 
+        [Header("Pointer animation")]
+        [Tooltip("Project-wide pointer look and per-gesture timings for every animated pointer.")]
+        [SerializeField] private TutorialPointerDefaults pointerDefaults = new TutorialPointerDefaults();
+
+        /// <summary>Project-wide pointer appearance and gesture timings (never null on a loaded asset).</summary>
+        public TutorialPointerDefaults PointerDefaults => pointerDefaults ?? (pointerDefaults = new TutorialPointerDefaults());
+
+        /// <summary>Pointer defaults from the loaded settings asset, or a fresh default set if none exists.</summary>
+        public static TutorialPointerDefaults ResolvePointerDefaults()
+        {
+            var s = Instance;
+            return s != null ? s.PointerDefaults : new TutorialPointerDefaults();
+        }
+
         private static TutorialKitSettings _instance;
         private static bool _looked;
 

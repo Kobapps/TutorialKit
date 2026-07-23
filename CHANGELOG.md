@@ -2,6 +2,25 @@
 
 All notable changes to TutorialKit are documented here.
 
+## [0.26.0] — 2026-07-23
+
+### Added
+- **Pointer animation settings editor.** `TutorialKitSettings` now carries a `PointerDefaults` block
+  that controls the look and per-gesture timing of *every* animated pointer — both Show Pointer nodes
+  and the standalone `TutorialPointers` API — from one place. Appearance: size, tint, hand/arrow tip
+  hotspot, hide-fade duration. Per-gesture timing groups (`Point`, `Tap`, `DoubleTap`, `Swipe`,
+  `Drag`, `Merge`) expose their durations (seconds at speed 1), dip/pulse scales, tap-ring alpha and
+  from/to scales, and the idle rest between cycles. All durations are still divided by a pointer's
+  per-call `speed`. Edit them in **Window ▸ TutorialKit ▸ Settings ▸ Pointer Animation** (with a
+  "Reset to defaults" button); read them from code via `TutorialKitSettings.ResolvePointerDefaults()`.
+  Previously these values were hardcoded inside `PointerView`.
+
+### Changed
+- **Faster double-tap.** The `DoubleTap` gesture is now noticeably snappier by default — shorter press
+  (0.16s → 0.10s), tighter gap between the two taps (0.06s → 0.03s) and a shorter rest before it
+  repeats (0.55s → 0.40s) — so the two taps read as one crisp gesture. All still tunable in the new
+  Pointer Animation settings.
+
 ## [0.25.0] — 2026-07-22
 
 ### Added

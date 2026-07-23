@@ -140,9 +140,19 @@ game reads consistently without setting it on every node:
 - **Text box defaults** — panel/accent/text colour, body alignment, typewriter speed, animation. The
   built-in default text box uses these. A Show Text Box node's `BodyAlignment = Default` and
   `TypewriterCps = 0` resolve to the defaults; set explicit values to override per node.
+- **Pointer animation** — one place that controls the look and per-gesture timing of *every* animated
+  pointer (both Show Pointer nodes and standalone `TutorialPointers`). Appearance: `Size`, `Tint`,
+  `HandHotspot` / `ArrowHotspot` (tip offset so the fingertip/arrow point — not the sprite centre —
+  sits on the target), `HideFadeDuration`. Per-gesture timing groups (`Point`, `Tap`, `DoubleTap`,
+  `Swipe`, `Drag`, `Merge`) hold the durations (seconds at speed 1), dip/pulse scales, ring alpha and
+  ring from/to scales, and idle rest between cycles. All durations are still divided by a pointer's
+  per-call `speed` (higher speed = snappier). Editing these restyles/retimes every pointer at once;
+  the node/API `speed` remains the per-instance override. In code:
+  `TutorialKitSettings.ResolvePointerDefaults()` returns the active set (or fresh defaults if no asset).
 
 Body text alignment (`Left` / `Center` / `Right` / `Justified`) is on the Show Text Box node.
-Pointer gestures include `DoubleTap` (two quick taps then a pause) alongside Point/Tap/Swipe/Drag/Merge.
+Pointer gestures include `DoubleTap` (two quick taps then a pause — tuned snappy by default) alongside
+Point/Tap/Swipe/Drag/Merge. Tune any gesture's feel in Settings ▸ TutorialKit ▸ Pointer Animation.
 
 ## 4. Test it (via Unity MCP)
 

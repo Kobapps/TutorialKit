@@ -219,6 +219,13 @@ once. A Show Vignette node with **Use Global Style** on draws with the vignette 
 text box uses the text box defaults, and a node's `Default` alignment / `0` typewriter speed resolve to
 them (set explicit values on a node to override).
 
+Finally, a **Pointer Animation** section controls the look and per-gesture timing of *every* animated
+pointer (Show Pointer nodes and the standalone `TutorialPointers` API) from one place: size, tint,
+hand/arrow tip hotspot and hide-fade, plus timing groups for Point, Tap, Double Tap, Swipe, Drag and
+Merge (durations, dip/pulse scales, tap-ring alpha and scales, idle rest). Durations are seconds at
+speed 1 and are still divided by a pointer's per-call `speed`. Enter Play mode and show a pointer to
+preview changes live; a **Reset to defaults** button restores the built-in feel.
+
 ## Custom nodes
 
 See [Documentation~/custom-nodes.md](Documentation~/custom-nodes.md). In short: subclass

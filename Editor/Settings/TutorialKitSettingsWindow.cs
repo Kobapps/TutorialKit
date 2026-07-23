@@ -41,6 +41,8 @@ namespace TutorialKit.Editor
             EditorGUILayout.Space(12);
             DrawStyleDefaultsSection();
             EditorGUILayout.Space(12);
+            DrawPointerAnimationSection();
+            EditorGUILayout.Space(12);
             DrawShaderSection();
             EditorGUILayout.Space(12);
             DrawToolsSection();
@@ -207,6 +209,73 @@ namespace TutorialKit.Editor
                     TutorialKitSettings.ClearCache();
                 }
             }
+        }
+
+        private void DrawPointerAnimationSection()
+        {
+            using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+            {
+                GUILayout.Label("Pointer Animation", EditorStyles.boldLabel);
+                EditorGUILayout.LabelField(
+                    "Project-wide look and per-gesture timings for every animated pointer (tutorial pointers " +
+                    "and standalone TutorialPointers). Durations are seconds at speed 1; a pointer's speed " +
+                    "multiplier still scales them. Changes apply the next time a pointer is shown.", WrapLabel);
+
+                var settings = LoadSettings();
+                if (settings == null)
+                {
+                    EditorGUILayout.Space(4);
+                    EditorGUILayout.LabelField("No settings asset yet.", EditorStyles.miniLabel);
+                    GUI.backgroundColor = new Color(0.4f, 0.7f, 1f);
+                    if (GUILayout.Button("Create Settings Asset (with generic defaults)", GUILayout.Height(26)))
+                    {
+                        Selection.activeObject = CreateSettings();
+                        _settingsSO = null;
+                    }
+                    GUI.backgroundColor = Color.white;
+                    return;
+                }
+
+                if (_settingsSO == null || _settingsSO.targetObject != settings)
+                    _settingsSO = new SerializedObject(settings);
+
+                _settingsSO.Update();
+                EditorGUI.BeginChangeCheck();
+                var ptr = _settingsSO.FindProperty("pointerDefaults");
+                if (ptr != null) EditorGUILayout.PropertyField(ptr, new GUIContent("Pointer"), true);
+                if (EditorGUI.EndChangeCheck())
+                {
+                    _settingsSO.ApplyModifiedProperties();
+                    EditorUtility.SetDirty(settings);
+                    TutorialKitSettings.ClearCache();
+                }
+
+                EditorGUILayout.Space(4);
+                if (GUILayout.Button("Reset pointer animation to defaults"))
+                {
+                    if (EditorUtility.DisplayDialog("TutorialKit",
+                        "Reset all pointer appearance & timing values to the built-in defaults?", "Reset", "Cancel"))
+                    {
+                        ResetPointerDefaults(settings);
+                        _settingsSO = null;
+                    }
+                }
+                EditorGUILayout.HelpBox(
+                    "Tip: enter Play mode and show a pointer (e.g. via a tutorial or TutorialPointers.DoubleTap) " +
+                    "to preview timing changes live.", MessageType.None);
+            }
+        }
+
+        // Replace the whole pointerDefaults sub-object with a fresh default instance, so every nested
+        // timing group returns to its code default without hand-clearing each field.
+        private static void ResetPointerDefaults(TutorialKitSettings s)
+        {
+            var field = typeof(TutorialKitSettings).GetField("pointerDefaults",
+                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            field?.SetValue(s, new TutorialPointerDefaults());
+            EditorUtility.SetDirty(s);
+            AssetDatabase.SaveAssets();
+            TutorialKitSettings.ClearCache();
         }
 
         private static TutorialKitSettings LoadSettings()
