@@ -48,7 +48,7 @@ example graphs (highlight, pointer, text, waits, commands, dynamic targets).
 ## Quick start
 
 1. Add a **Tutorial Graph**: `Assets ▸ Create ▸ TutorialKit ▸ Tutorial Graph`.
-2. Open it: double-click the asset, or `Window ▸ TutorialKit ▸ Tutorial Graph Editor`.
+2. Open it: double-click the asset, or `Tools ▸ TutorialKit ▸ Tutorial Graph Editor`.
    Every graph has a built-in **Start** node (the fixed entry — it can't be deleted) and at least one
    **End**; branching flows can have several Ends (one per terminating branch). Right-click the canvas ▸
    **Add Node** to build the flow. Any branch that doesn't reach an End gets a ⚠ badge.
@@ -169,7 +169,7 @@ the graph's inspector — Import brings a JSON in as a new tutorial asset. Edit/
 
 ## Graph editor
 
-**Window ▸ TutorialKit ▸ Tutorial Graph Editor** — a draggable/collapsible **minimap**, a
+**Tools ▸ TutorialKit ▸ Tutorial Graph Editor** — a draggable/collapsible **minimap**, a
 **blackboard** panel for typed variables, node **groups**, copy/paste & duplicate, full **undo/redo**,
 one-click **Auto Layout**, an **inspector** for the selected node (with field tooltips), an animated
 pulse on the live node during **▶ Test in Play**, a **grouped toolbar** (manage / layout / view /
@@ -199,7 +199,7 @@ open it just follows along; the **Attach** toolbar toggle controls whether it tr
 
 ## Settings & AI authoring skill
 
-**Window ▸ TutorialKit ▸ Settings** installs an **AI authoring skill** — an instruction file that
+**Tools ▸ TutorialKit ▸ Settings** installs an **AI authoring skill** — an instruction file that
 teaches an AI assistant (Claude Code, etc.) how to author, configure, test, and debug tutorials in
 your project. It has the assistant **create and edit tutorial `.asset`s** through the editor API
 (`TutorialKit.Editor.TutorialGraphAuthoring` — `CreateGraph` / `AddNode<T>` / `Connect` / `Chain` /

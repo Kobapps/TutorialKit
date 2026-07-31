@@ -48,7 +48,7 @@ namespace TutorialKit
 
     /// <summary>
     /// Project-level TutorialKit configuration, loaded at runtime from a <c>Resources</c> folder
-    /// (create/edit it from <b>Window ▸ TutorialKit ▸ Settings</b>). Holds optional overrides for the
+    /// (create/edit it from <b>Tools ▸ TutorialKit ▸ Settings</b>). Holds optional overrides for the
     /// default pointer art (leave a field empty to fall back to the bundled sprite, then a procedural
     /// shape), the bundled shader, the animation backend, and project-wide default styling for vignettes
     /// and text boxes. Games that want per-instance art can still assign the pointer view's fields.

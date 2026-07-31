@@ -10,7 +10,7 @@ namespace TutorialKit.Editor
         private Vector2 _scroll;
         private readonly List<TutorialGraph> _graphs = new List<TutorialGraph>();
 
-        [MenuItem("Window/TutorialKit/Tutorial Browser")]
+        [MenuItem("Tools/TutorialKit/Tutorial Browser")]
         public static void ShowWindow()
         {
             var w = GetWindow<TutorialBrowserWindow>();

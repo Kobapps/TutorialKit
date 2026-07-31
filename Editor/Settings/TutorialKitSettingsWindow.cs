@@ -16,7 +16,7 @@ namespace TutorialKit.Editor
         private Vector2 _scroll;
         private string _lastInstalledPath;
 
-        [MenuItem("Window/TutorialKit/Settings")]
+        [MenuItem("Tools/TutorialKit/Settings")]
         public static void ShowWindow()
         {
             var w = GetWindow<TutorialKitSettingsWindow>();

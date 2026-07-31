@@ -2,6 +2,17 @@
 
 All notable changes to TutorialKit are documented here.
 
+## [1.0.0] — 2026-07-31
+
+### Changed
+- **The three TutorialKit windows moved from the Window menu to Tools.** The Tutorial Browser, the
+  Tutorial Graph Editor and Settings are now under **Tools ▸ TutorialKit**, so the kit's commands
+  sit in one place beside every other Kobapps tool rather than in Unity's Window menu. The README,
+  the sample README and the `TutorialKitSettings` tooltip were updated to match.
+
+  First stable release. Nothing about the authoring model, the graph format or the runtime API
+  changed here — the version simply now says what the 0.26 line already was.
+
 ## [0.26.1] — 2026-07-23
 
 ### Fixed

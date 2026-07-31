@@ -21,5 +21,5 @@ This sample shows TutorialKit end-to-end:
 2. Add the **TutorialKitDemoController** component to any GameObject.
 3. Press Play.
 
-Open the graph editor via **Window ▸ TutorialKit ▸ Tutorial Graph Editor** and press **▶ Test in Play**
+Open the graph editor via **Tools ▸ TutorialKit ▸ Tutorial Graph Editor** and press **▶ Test in Play**
 to run authored `.asset` graphs and watch the live node highlight during playback.

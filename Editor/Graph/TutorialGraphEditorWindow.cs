@@ -23,7 +23,7 @@ namespace TutorialKit.Editor
         private bool _subscribed;
         private bool _attach = true;
 
-        [MenuItem("Window/TutorialKit/Tutorial Graph Editor")]
+        [MenuItem("Tools/TutorialKit/Tutorial Graph Editor")]
         public static void ShowWindow()
         {
             var w = GetWindow<TutorialGraphEditorWindow>();
