@@ -15,7 +15,9 @@ namespace TutorialKit
     public sealed class TutorialPointerDefaults
     {
         [Header("Appearance")]
-        [Tooltip("Pointer sprite size in pixels.")]
+        [Tooltip("Base pointer size in pixels — scales the sprite and the tap ring. The sprite is additionally " +
+                 "multiplied by the project's pointer Art Scale (Settings ▸ TutorialKit ▸ Default Pointer Art), " +
+                 "which is where custom art that reads too small is compensated.")]
         public float Size = 110f;
         [Tooltip("Tint applied to the pointer and its tap ring.")]
         public Color Tint = Color.white;

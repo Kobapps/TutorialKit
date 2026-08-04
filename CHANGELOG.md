@@ -2,6 +2,29 @@
 
 All notable changes to TutorialKit are documented here.
 
+## [1.1.0] — 2026-08-04
+
+### Added
+- **Global pointer Art Scale.** `TutorialKitSettings` gained a `pointerArtScale` multiplier, shown as
+  **Art Scale (×)** in *Tools ▸ TutorialKit ▸ Settings ▸ Default Pointer Art* — right beside the sprite
+  overrides. It scales the pointer **sprites only** (hand, open/closed hand, arrow) for every pointer in
+  the game: Show Pointer nodes and the standalone `TutorialPointers` API. Custom art usually carries
+  transparent padding and so reads much smaller in game than the bundled hand at the same size; `1.5`–`3`
+  brings it back up. The tap ring and the gesture distances keep following the pointer size, so the
+  ripple doesn't inflate with the art. Restoring the bundled art also restores the scale to `1`.
+- **Pointer Size mirrored into the Default Pointer Art section.** The base `Size` (px) — which scales the
+  sprite *and* the tap ring — now appears next to the art overrides as well as under Pointer Animation,
+  so the section a game opens after swapping in its own art has both scale knobs in it, with a live
+  "sprites drawn at N px" readout.
+
+### Fixed
+- **Non-square pointer art is no longer squashed.** Pointer sprites were forced into a square
+  `Size × Size` rect, distorting any art that isn't 1:1. They are now fitted by their longest side with
+  the aspect preserved, and the tip hotspot is offset against the fitted rect (so the fingertip/arrow
+  point still lands on the target at any scale). The drag gesture re-fits on each open/closed hand swap,
+  which matters when custom hand poses have different aspects. Bundled art is square, so its look is
+  unchanged.
+
 ## [1.0.0] — 2026-07-31
 
 ### Changed

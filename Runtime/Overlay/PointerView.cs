@@ -32,6 +32,7 @@ namespace TutorialKit
         private TutorialPointerDefaults _defaults = new TutorialPointerDefaults();
         private Color tint = Color.white;
         private float pointerSize = 110f;
+        private float artScale = 1f;   // project-wide multiplier for the sprite only (custom art compensation)
 
         public bool IsVisible { get; private set; }
 
@@ -46,8 +47,9 @@ namespace TutorialKit
             _ring = CreateImage("Ring", _inner, TutorialSpriteFactory.Ring, pointerSize * 1.4f);
             _ring.color = new Color(tint.r, tint.g, tint.b, 0f);
 
-            _pointerImage = CreateImage("Pointer", _inner,
-                handSprite != null ? handSprite : TutorialSpriteFactory.Hand, pointerSize);
+            Sprite hand = handSprite != null ? handSprite : TutorialSpriteFactory.Hand;
+            _pointerImage = CreateImage("Pointer", _inner, hand, pointerSize);
+            _pointerImage.rectTransform.sizeDelta = SpriteSize(hand);
             _pointerImage.color = tint;
 
             gameObject.SetActive(false);
@@ -60,8 +62,36 @@ namespace TutorialKit
             _defaults = TutorialKitSettings.ResolvePointerDefaults();
             tint = _defaults.Tint;
             pointerSize = _defaults.Size;
-            if (_pointerImage != null) _pointerImage.rectTransform.sizeDelta = new Vector2(pointerSize, pointerSize);
+            artScale = TutorialKitSettings.ResolvePointerArtScale();
+            if (_pointerImage != null) _pointerImage.rectTransform.sizeDelta = SpriteSize(_pointerImage.sprite);
             if (_ring != null) _ring.rectTransform.sizeDelta = new Vector2(pointerSize * 1.4f, pointerSize * 1.4f);
+        }
+
+        // Rect size for a pointer sprite: fit its longest side to pointerSize * artScale and keep its aspect,
+        // so non-square custom art isn't squashed into a square box. artScale is the project-wide sprite
+        // multiplier — custom art with transparent padding reads much smaller than the bundled hand at the
+        // same box size, and this is the knob that brings it back up.
+        private Vector2 SpriteSize(Sprite sprite)
+        {
+            float box = pointerSize * artScale;
+            if (sprite == null) return new Vector2(box, box);
+            Vector2 px = sprite.rect.size;
+            float longest = Mathf.Max(px.x, px.y);
+            if (longest <= 0f) return new Vector2(box, box);
+            return px * (box / longest);
+        }
+
+        // Assign the sprite and re-fit the rect + tip hotspot to it. Used on Show and on the drag's
+        // open/closed hand swaps, where the two sprites can have different aspects.
+        private void SetPointerSprite(Sprite sprite)
+        {
+            _pointerImage.sprite = sprite;
+            Vector2 size = SpriteSize(sprite);
+            _pointerImage.rectTransform.sizeDelta = size;
+            // Offset the sprite so its tip (not its centre) is the hotspot at the target; the ring stays
+            // centred so the tap ripples from the fingertip while the palm/arrow body clears the target.
+            Vector2 hot = _request.Kind == PointerKind.Arrow ? _defaults.ArrowHotspot : _defaults.HandHotspot;
+            _pointerImage.rectTransform.anchoredPosition = new Vector2(hot.x * size.x, hot.y * size.y);
         }
 
         private static RectTransform CreateChild(string name, RectTransform parent)
@@ -93,14 +123,9 @@ namespace TutorialKit
             KillTweens();
             ResolveDefaults();
             _request = request;
-            _pointerImage.sprite = request.Kind == PointerKind.Arrow
+            SetPointerSprite(request.Kind == PointerKind.Arrow
                 ? (arrowSprite != null ? arrowSprite : TutorialSpriteFactory.Arrow)
-                : (handSprite != null ? handSprite : TutorialSpriteFactory.Hand);
-
-            // Offset the sprite so its tip (not its centre) is the hotspot at the target; the ring stays
-            // centred so the tap ripples from the fingertip while the palm/arrow body clears the target.
-            Vector2 hot = request.Kind == PointerKind.Arrow ? _defaults.ArrowHotspot : _defaults.HandHotspot;
-            _pointerImage.rectTransform.anchoredPosition = hot * pointerSize;
+                : (handSprite != null ? handSprite : TutorialSpriteFactory.Hand));
 
             gameObject.SetActive(true);
             IsVisible = true;
@@ -209,11 +234,11 @@ namespace TutorialKit
             Sprite closed = handSprite != null ? handSprite : TutorialSpriteFactory.HandClosed;
             float move = cfg.MoveDuration / Speed;
             _sequence = TutorialTween.Sequence()
-                .AppendCallback(() => { _follow.anchoredPosition = start; SetInnerScale(1f); _pointerImage.sprite = open; })
+                .AppendCallback(() => { _follow.anchoredPosition = start; SetInnerScale(1f); SetPointerSprite(open); })
                 .Append(cfg.GrabDuration / Speed, TutorialEase.OutQuad, p => SetInnerScale(Mathf.LerpUnclamped(1f, cfg.GrabScale, p)))   // grab
-                .AppendCallback(() => _pointerImage.sprite = closed)                                          // fist closes
+                .AppendCallback(() => SetPointerSprite(closed))                                               // fist closes
                 .Append(move, TutorialEase.InOutSine, p => _follow.anchoredPosition = Vector2.LerpUnclamped(start, end, p))
-                .AppendCallback(() => _pointerImage.sprite = open)                                            // release, hand opens
+                .AppendCallback(() => SetPointerSprite(open))                                                 // release, hand opens
                 .Append(cfg.ReleaseDuration / Speed, TutorialEase.OutQuad, p => SetInnerScale(Mathf.LerpUnclamped(cfg.GrabScale, 1f, p)))    // release
                 .AppendInterval(cfg.RestDuration / Speed)
                 .SetLoops(-1)

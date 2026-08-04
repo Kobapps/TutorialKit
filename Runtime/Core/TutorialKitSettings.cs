@@ -68,10 +68,21 @@ namespace TutorialKit
         [Tooltip("Arrow used by the Arrow pointer kind. Empty = bundled default.")]
         [SerializeField] private Sprite pointerArrow;
 
+        [Tooltip("Uniform scale for the pointer sprites, project-wide. 1 = drawn at the pointer size set under " +
+                 "Pointer Animation. Raise it when custom art reads smaller than the bundled hand/arrow (art with " +
+                 "transparent padding usually needs 1.5–3). Only the sprites scale — the tap ring and the gesture " +
+                 "distances keep following the pointer size.")]
+        [Range(0.1f, 8f)]
+        [SerializeField] private float pointerArtScale = 1f;
+
         public Sprite PointerHand => pointerHand;
         public Sprite PointerHandOpen => pointerHandOpen;
         public Sprite PointerHandClosed => pointerHandClosed;
         public Sprite PointerArrow => pointerArrow;
+
+        /// <summary>Project-wide multiplier applied to every pointer sprite (see <c>pointerArtScale</c>).
+        /// A non-positive value (e.g. an asset serialized before this field existed) resolves to 1.</summary>
+        public float PointerArtScale => pointerArtScale > 0f ? pointerArtScale : 1f;
 
         [Header("Bundled shaders")]
         [Tooltip("The overlay vignette shader (TutorialKit/UIVignette). The overlay looks it up at runtime, " +
@@ -116,6 +127,13 @@ namespace TutorialKit
         {
             var s = Instance;
             return s != null ? s.PointerDefaults : new TutorialPointerDefaults();
+        }
+
+        /// <summary>Pointer sprite scale from the loaded settings asset, or 1 if none exists.</summary>
+        public static float ResolvePointerArtScale()
+        {
+            var s = Instance;
+            return s != null ? s.PointerArtScale : 1f;
         }
 
         private static TutorialKitSettings _instance;

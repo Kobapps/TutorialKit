@@ -115,7 +115,8 @@ namespace TutorialKit.Editor
                 GUILayout.Label("Default Pointer Art", EditorStyles.boldLabel);
                 EditorGUILayout.LabelField(
                     "Sprites the pointer nodes use by default. Replace any to re-skin the hand/arrow " +
-                    "project-wide; leave one empty to use the bundled default (CC0, Kenney).", WrapLabel);
+                    "project-wide; leave one empty to use the bundled default (CC0, Kenney). Custom art often " +
+                    "reads smaller than the bundled hand at the same size — use Art Scale below to match it.", WrapLabel);
 
                 var settings = LoadSettings();
                 if (settings == null)
@@ -142,6 +143,29 @@ namespace TutorialKit.Editor
                     var prop = _settingsSO.FindProperty(field);
                     if (prop != null) EditorGUILayout.PropertyField(prop, new GUIContent(label));
                 }
+
+                // Size and Art Scale live here as well as in Pointer Animation: this is the section a game
+                // opens after swapping in its own art, and scale is the first thing that needs fixing.
+                EditorGUILayout.Space(4);
+                GUILayout.Label("Scale (whole project)", EditorStyles.miniBoldLabel);
+                var sizeProp = _settingsSO.FindProperty("pointerDefaults.Size");
+                if (sizeProp != null)
+                    EditorGUILayout.PropertyField(sizeProp, new GUIContent("Pointer Size (px)",
+                        "Base pointer size in pixels. Scales the sprite AND the tap ring — the overall " +
+                        "footprint of every pointer in the game."));
+                var scaleProp = _settingsSO.FindProperty("pointerArtScale");
+                if (scaleProp != null)
+                {
+                    EditorGUILayout.PropertyField(scaleProp, new GUIContent("Art Scale (×)",
+                        "Multiplier for the pointer sprites only, on top of Pointer Size. Raise it when custom " +
+                        "art looks too small (padded art usually needs 1.5–3). The tap ring and gesture " +
+                        "distances keep following Pointer Size."));
+                    if (sizeProp != null)
+                        EditorGUILayout.LabelField(" ",
+                            $"Sprites drawn at {sizeProp.floatValue * scaleProp.floatValue:0.#} px " +
+                            "(longest side, aspect preserved)", EditorStyles.miniLabel);
+                }
+
                 if (EditorGUI.EndChangeCheck())
                 {
                     _settingsSO.ApplyModifiedProperties();
@@ -315,6 +339,9 @@ namespace TutorialKit.Editor
                 if (prop != null)
                     prop.objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>(PointerArtDir + sprite + ".png");
             }
+            // The bundled art is calibrated for 1×, so restoring it restores the scale too.
+            var scaleProp = so.FindProperty("pointerArtScale");
+            if (scaleProp != null) scaleProp.floatValue = 1f;
             var shaderProp = so.FindProperty("vignetteShader");
             if (shaderProp != null)
                 shaderProp.objectReferenceValue = LoadVignetteShader();

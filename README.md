@@ -212,6 +212,18 @@ with the bundled CC0 art) and swap the hand/arrow sprites to re-skin every point
 asset lives in a `Resources` folder so runtime and builds pick it up; an empty field falls back to the
 bundled default. Per-tutorial art can still be assigned on the pointer view.
 
+Two scale knobs sit in that same section, because custom art almost never matches the bundled hand's
+footprint (padding around the sprite makes it read small in game):
+
+- **Pointer Size (px)** — the base size of every pointer; scales the sprite *and* the tap ring.
+- **Art Scale (×)** — multiplies the **sprites only**, on top of the size. Padded art usually needs
+  `1.5`–`3`. The tap ring and gesture distances keep following the size, so raising this enlarges the
+  hand/arrow without inflating the ripple.
+
+Both apply to every pointer in the game — Show Pointer nodes and the standalone `TutorialPointers` API.
+Sprites are fitted by their longest side with the aspect preserved, so non-square art is no longer
+squashed into a square box.
+
 It also has a **Default Vignette & Text Box Style** section — project-wide defaults so a whole game
 reads consistently. Set the vignette look (shape, overlay colour, softness, padding, corner radius,
 fade) and the text box look (panel/accent/text colour, body alignment, typewriter speed, animation)
@@ -220,7 +232,8 @@ text box uses the text box defaults, and a node's `Default` alignment / `0` type
 them (set explicit values on a node to override).
 
 Finally, a **Pointer Animation** section controls the look and per-gesture timing of *every* animated
-pointer (Show Pointer nodes and the standalone `TutorialPointers` API) from one place: size, tint,
+pointer (Show Pointer nodes and the standalone `TutorialPointers` API) from one place: size (the same
+field mirrored in Default Pointer Art), tint,
 hand/arrow tip hotspot and hide-fade, plus timing groups for Point, Tap, Double Tap, Swipe, Drag and
 Merge (durations, dip/pulse scales, tap-ring alpha and scales, idle rest). Durations are seconds at
 speed 1 and are still divided by a pointer's per-call `speed`. Enter Play mode and show a pointer to
