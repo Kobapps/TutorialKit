@@ -9,7 +9,7 @@ namespace TutorialKit
     /// <summary>Shows the dimming vignette with a highlight hole over a target.</summary>
     [Serializable]
     [TutorialNode("Highlight/Show Vignette", "Dim the screen and cut a hole over a target.", Color = "#C2185B")]
-    public sealed class ShowVignetteNode : TutorialNode
+    public class ShowVignetteNode : TutorialNode
     {
         [Tooltip("Id of the TutorialTarget to cut a hole around. Empty = dim the whole screen.")]
         public TutorialTargetRef Target;
@@ -43,10 +43,21 @@ namespace TutorialKit
         }
 
         // Multi-capacity: connect several target provider nodes to cut several holes.
-        private static readonly TutorialDataPort[] TargetInputPort = { new TutorialDataPort("Target", TutorialPortTypes.Target, multi: true) };
+        /// <summary>The multi-capacity "Target" data input — reuse when a subclass keeps the same port shape.</summary>
+        protected static readonly TutorialDataPort[] TargetInputPort = { new TutorialDataPort("Target", TutorialPortTypes.Target, multi: true) };
         public override IReadOnlyList<TutorialDataPort> InputDataPorts => TargetInputPort;
 
         public override async UniTask<string> ExecuteAsync(TutorialRunContext ctx, CancellationToken ct)
+        {
+            await ctx.Vignette.ShowAsync(BuildRequest(ctx), ct);
+            return OutPort;
+        }
+
+        /// <summary>
+        /// Every hole this node cuts: the connected target providers, the <see cref="Target"/> field and
+        /// <see cref="AdditionalTargets"/>. Override to add or filter holes.
+        /// </summary>
+        protected virtual List<ITutorialTarget> CollectTargets(TutorialRunContext ctx)
         {
             var list = new List<ITutorialTarget>();
             list.AddRange(ctx.ResolveTargetInputs(this, "Target")); // all connected target providers
@@ -58,14 +69,22 @@ namespace TutorialKit
                     var it = ctx.Resolve(t);
                     if (it != null) list.Add(it);
                 }
+            return list;
+        }
 
+        /// <summary>
+        /// Builds the request handed to <see cref="IVignetteService"/>. Override (usually as
+        /// <c>var req = base.BuildRequest(ctx); … ; return req;</c>) to adjust the look per node.
+        /// </summary>
+        protected virtual HighlightRequest BuildRequest(TutorialRunContext ctx)
+        {
             // Style comes from either the project-wide defaults (Use Global Style) or this node's fields.
             var s = UseGlobalStyle ? TutorialKitSettings.Instance : null;
             var g = s != null ? s.VignetteDefaults : null;
 
-            var req = new HighlightRequest
+            return new HighlightRequest
             {
-                Targets = list.ToArray(),
+                Targets = CollectTargets(ctx).ToArray(),
                 Shape = g != null ? g.Shape : Shape,
                 Softness = g != null ? g.Softness : Softness,
                 Padding = g != null ? g.Padding : Padding,
@@ -75,15 +94,13 @@ namespace TutorialKit
                 BlockRaycasts = BlockRaycastsOutsideHole,
                 BlockHoles = !AllowClicksThroughHoles,
             };
-            await ctx.Vignette.ShowAsync(req, ct);
-            return OutPort;
         }
     }
 
     /// <summary>Hides the vignette.</summary>
     [Serializable]
     [TutorialNode("Highlight/Hide Vignette", "Fade out the vignette.", Color = "#C2185B")]
-    public sealed class HideVignetteNode : TutorialNode
+    public class HideVignetteNode : TutorialNode
     {
         public override async UniTask<string> ExecuteAsync(TutorialRunContext ctx, CancellationToken ct)
         {
@@ -95,7 +112,7 @@ namespace TutorialKit
     /// <summary>Shows an animated hand/arrow pointer performing a gesture.</summary>
     [Serializable]
     [TutorialNode("Pointer/Show Pointer", "Show an animated pointer gesture.", Color = "#EF6C00")]
-    public sealed class ShowPointerNode : TutorialNode
+    public class ShowPointerNode : TutorialNode
     {
         [Tooltip("Hand or arrow pointer sprite.")]
         public PointerKind Kind = PointerKind.Hand;
@@ -112,7 +129,8 @@ namespace TutorialKit
 
         public override string GetSummary(TutorialGraph graph) => $"{Gesture} @ {Target}";
 
-        private static readonly TutorialDataPort[] PointerInputs =
+        /// <summary>The "Target"/"Secondary" data inputs — reuse when a subclass keeps the same port shape.</summary>
+        protected static readonly TutorialDataPort[] PointerInputs =
         {
             new TutorialDataPort("Target", TutorialPortTypes.Target),
             new TutorialDataPort("Secondary", TutorialPortTypes.Target),
@@ -121,25 +139,30 @@ namespace TutorialKit
 
         public override async UniTask<string> ExecuteAsync(TutorialRunContext ctx, CancellationToken ct)
         {
-            var req = new PointerRequest
-            {
-                Kind = Kind,
-                Gesture = Gesture,
-                Target = ctx.ResolveTargetInput(this, "Target", Target),
-                SecondaryTarget = ctx.ResolveTargetInput(this, "Secondary", SecondaryTarget),
-                ScreenOffset = ScreenOffset,
-                Speed = Speed,
-                Loop = true,
-            };
-            await ctx.Pointer.ShowAsync(req, ct);
+            await ctx.Pointer.ShowAsync(BuildRequest(ctx), ct);
             return OutPort;
         }
+
+        /// <summary>
+        /// Builds the request handed to <see cref="IPointerService"/>. Override (usually as
+        /// <c>var req = base.BuildRequest(ctx); … ; return req;</c>) to change the gesture, targets or timing.
+        /// </summary>
+        protected virtual PointerRequest BuildRequest(TutorialRunContext ctx) => new PointerRequest
+        {
+            Kind = Kind,
+            Gesture = Gesture,
+            Target = ctx.ResolveTargetInput(this, "Target", Target),
+            SecondaryTarget = ctx.ResolveTargetInput(this, "Secondary", SecondaryTarget),
+            ScreenOffset = ScreenOffset,
+            Speed = Speed,
+            Loop = true,
+        };
     }
 
     /// <summary>Hides the pointer.</summary>
     [Serializable]
     [TutorialNode("Pointer/Hide Pointer", "Fade out the pointer.", Color = "#EF6C00")]
-    public sealed class HidePointerNode : TutorialNode
+    public class HidePointerNode : TutorialNode
     {
         public override async UniTask<string> ExecuteAsync(TutorialRunContext ctx, CancellationToken ct)
         {
@@ -151,7 +174,7 @@ namespace TutorialKit
     /// <summary>Shows a text box (default styled or a registered custom prefab).</summary>
     [Serializable]
     [TutorialNode("Text/Show Text Box", "Display a styled text box.", Color = "#1565C0")]
-    public sealed class ShowTextBoxNode : TutorialNode
+    public class ShowTextBoxNode : TutorialNode
     {
         [Tooltip("Logical id so this box can be hidden later by a Hide Text Box node.")]
         public string BoxId = "main";
@@ -179,36 +202,43 @@ namespace TutorialKit
             return Body.Length <= 28 ? Body : Body.Substring(0, 27) + "…";
         }
 
-        private static readonly TutorialDataPort[] TargetInputPort = { new TutorialDataPort("Target", TutorialPortTypes.Target) };
+        /// <summary>The single "Target" data input — reuse when a subclass keeps the same port shape.</summary>
+        protected static readonly TutorialDataPort[] TargetInputPort = { new TutorialDataPort("Target", TutorialPortTypes.Target) };
         public override IReadOnlyList<TutorialDataPort> InputDataPorts => TargetInputPort;
 
         public override async UniTask<string> ExecuteAsync(TutorialRunContext ctx, CancellationToken ct)
         {
-            var req = new TextBoxRequest
-            {
-                Id = BoxId,
-                PrefabKey = PrefabKey,
-                Title = Title,
-                Body = Body,
-                Placement = Placement,
-                NormalizedPosition = NormalizedPosition,
-                Target = ctx.ResolveTargetInput(this, "Target", Target),
-                ShowContinueButton = ShowContinueButton,
-                ContinueLabel = ContinueLabel,
-                WaitForDismiss = WaitForDismiss,
-                Typewriter = Typewriter,
-                TypewriterCps = TypewriterCps,
-                BodyAlignment = BodyAlignment,
-            };
-            await ctx.TextBox.ShowAsync(req, ct);
+            await ctx.TextBox.ShowAsync(BuildRequest(ctx), ct);
             return OutPort;
         }
+
+        /// <summary>
+        /// Builds the request handed to <see cref="ITextBoxService"/>. Override (usually as
+        /// <c>var req = base.BuildRequest(ctx); … ; return req;</c>) to localize the text, swap the
+        /// prefab key, or reposition the box.
+        /// </summary>
+        protected virtual TextBoxRequest BuildRequest(TutorialRunContext ctx) => new TextBoxRequest
+        {
+            Id = BoxId,
+            PrefabKey = PrefabKey,
+            Title = Title,
+            Body = Body,
+            Placement = Placement,
+            NormalizedPosition = NormalizedPosition,
+            Target = ctx.ResolveTargetInput(this, "Target", Target),
+            ShowContinueButton = ShowContinueButton,
+            ContinueLabel = ContinueLabel,
+            WaitForDismiss = WaitForDismiss,
+            Typewriter = Typewriter,
+            TypewriterCps = TypewriterCps,
+            BodyAlignment = BodyAlignment,
+        };
     }
 
     /// <summary>Hides a text box by id.</summary>
     [Serializable]
     [TutorialNode("Text/Hide Text Box", "Hide a text box by id.", Color = "#1565C0")]
-    public sealed class HideTextBoxNode : TutorialNode
+    public class HideTextBoxNode : TutorialNode
     {
         [Tooltip("Logical id of the text box to hide (matches a Show Text Box node's Box Id).")]
         public string BoxId = "main";

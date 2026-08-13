@@ -246,6 +246,12 @@ See [Documentation~/custom-nodes.md](Documentation~/custom-nodes.md). In short: 
 editor, the JSON format, and the AI skill automatically. Select the node and click **Edit Script** in
 the inspector header to jump straight to its `.cs` file.
 
+No shipped node is `sealed` — you can also subclass a built-in one (`ShowTextBoxNode`,
+`ShowPointerNode`, `ShowVignetteNode`, `WaitInputNode`, `ConditionNode`, …) to keep its fields and
+editor look while changing one piece of its behaviour through a `protected virtual` hook such as
+`BuildRequest`, `Evaluate` or `IsInputSatisfied`. Re-apply `[Serializable]` and `[TutorialNode(...)]`
+on the subclass — neither attribute is inherited.
+
 ## Requirements
 
 Unity 6000.0+, UniTask, DOTween, com.unity.ugui (TextMeshPro), Input System.

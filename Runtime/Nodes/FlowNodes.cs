@@ -13,7 +13,7 @@ namespace TutorialKit
     [Serializable]
     [TutorialNode("Flow/Start", "Entry point of the tutorial (one per graph, managed automatically).",
         Color = "#2E7D32", HideInMenu = true)]
-    public sealed class StartNode : TutorialNode
+    public class StartNode : TutorialNode
     {
         public override bool HasInput => false;
         public override string DisplayName => "Start";
@@ -28,9 +28,10 @@ namespace TutorialKit
     [Serializable]
     [TutorialNode("Flow/End", "Ends the tutorial (or a branch). A graph needs at least one.",
         Color = "#455A64")]
-    public sealed class EndNode : TutorialNode
+    public class EndNode : TutorialNode
     {
-        private static readonly string[] NoPorts = Array.Empty<string>();
+        /// <summary>Shared empty port list — a subclass keeping the "terminal" shape can reuse it.</summary>
+        protected static readonly string[] NoPorts = Array.Empty<string>();
         public override IReadOnlyList<string> OutputPorts => NoPorts;
         public override string DisplayName => "End";
         public override UniTask<string> ExecuteAsync(TutorialRunContext ctx, CancellationToken ct)
@@ -40,7 +41,7 @@ namespace TutorialKit
     /// <summary>Waits for a fixed amount of unscaled time.</summary>
     [Serializable]
     [TutorialNode("Wait/Wait Time", "Pause for a number of seconds.", Color = "#00838F")]
-    public sealed class WaitTimeNode : TutorialNode
+    public class WaitTimeNode : TutorialNode
     {
         [Tooltip("How long to pause, in seconds.")]
         [Min(0f)] public float Seconds = 1f;
@@ -49,9 +50,12 @@ namespace TutorialKit
 
         public override string GetSummary(TutorialGraph graph) => $"{Seconds:0.##}s";
 
+        /// <summary>How long to actually wait. Override to scale the delay (difficulty, replay speed…).</summary>
+        protected virtual float GetSeconds(TutorialRunContext ctx) => Mathf.Max(0f, Seconds);
+
         public override async UniTask<string> ExecuteAsync(TutorialRunContext ctx, CancellationToken ct)
         {
-            await UniTask.Delay(TimeSpan.FromSeconds(Mathf.Max(0f, Seconds)), RealTime, cancellationToken: ct);
+            await UniTask.Delay(TimeSpan.FromSeconds(GetSeconds(ctx)), RealTime, cancellationToken: ct);
             return OutPort;
         }
     }
@@ -59,16 +63,19 @@ namespace TutorialKit
     /// <summary>Waits until a game action/signal is emitted on the signal bus.</summary>
     [Serializable]
     [TutorialNode("Wait/Wait For Signal", "Block until game code emits a named signal.", Color = "#00838F")]
-    public sealed class WaitSignalNode : TutorialNode
+    public class WaitSignalNode : TutorialNode
     {
         [Tooltip("Signal id emitted via ITutorialSignalBus.Emit / TutorialSignalEmitter.")]
         public string SignalId = "signal.id";
 
         public override string GetSummary(TutorialGraph graph) => SignalId;
 
+        /// <summary>The signal to wait for. Override to compose it from run state (e.g. per-level ids).</summary>
+        protected virtual string GetSignalId(TutorialRunContext ctx) => SignalId;
+
         public override async UniTask<string> ExecuteAsync(TutorialRunContext ctx, CancellationToken ct)
         {
-            await ctx.Signals.WaitAsync(SignalId, ct);
+            await ctx.Signals.WaitAsync(GetSignalId(ctx), ct);
             return OutPort;
         }
     }
@@ -76,7 +83,7 @@ namespace TutorialKit
     /// <summary>Waits for player input: any input, a pointer press, or a tap on a target.</summary>
     [Serializable]
     [TutorialNode("Wait/Wait For Input", "Block until the player provides input.", Color = "#00838F")]
-    public sealed class WaitInputNode : TutorialNode
+    public class WaitInputNode : TutorialNode
     {
         public WaitInputKind Kind = WaitInputKind.AnyInput;
         [Tooltip("Target the player must tap when Kind = TapOnTarget.")]
@@ -85,38 +92,54 @@ namespace TutorialKit
         public override string GetSummary(TutorialGraph graph) =>
             Kind == WaitInputKind.TapOnTarget ? $"tap {Target}" : Kind.ToString();
 
-        private static readonly TutorialDataPort[] TargetInputPort = { new TutorialDataPort("Target", TutorialPortTypes.Target) };
+        /// <summary>The single "Target" data input — reuse it when a subclass keeps the same port shape.</summary>
+        protected static readonly TutorialDataPort[] TargetInputPort = { new TutorialDataPort("Target", TutorialPortTypes.Target) };
         public override IReadOnlyList<TutorialDataPort> InputDataPorts => TargetInputPort;
 
         public override async UniTask<string> ExecuteAsync(TutorialRunContext ctx, CancellationToken ct)
         {
+            await UniTask.WaitUntil(() => IsInputSatisfied(ctx), cancellationToken: ct);
+            return OutPort;
+        }
+
+        /// <summary>
+        /// Polled every frame until it returns true. Override to add input kinds of your own
+        /// (call <c>base.IsInputSatisfied</c> for the built-in ones).
+        /// </summary>
+        protected virtual bool IsInputSatisfied(TutorialRunContext ctx)
+        {
             switch (Kind)
             {
                 case WaitInputKind.AnyInput:
-                    await UniTask.WaitUntil(() => ctx.Input.AnyInputDownThisFrame, cancellationToken: ct);
-                    break;
+                    return ctx.Input.AnyInputDownThisFrame;
                 case WaitInputKind.PointerDown:
-                    await UniTask.WaitUntil(() => ctx.Input.TryGetPointerDown(out _), cancellationToken: ct);
-                    break;
+                    return ctx.Input.TryGetPointerDown(out _);
                 case WaitInputKind.TapOnTarget:
-                    await UniTask.WaitUntil(() =>
-                    {
-                        if (!ctx.Input.TryGetPointerDown(out var pos)) return false;
-                        var t = ctx.ResolveTargetInput(this, "Target", Target);
-                        return t != null && t.TryGetScreenRect(out var r) && r.Contains(pos);
-                    }, cancellationToken: ct);
-                    break;
+                    return ctx.Input.TryGetPointerDown(out var pos) && IsTapOnTarget(ctx, pos);
+                default:
+                    return true;
             }
-            return OutPort;
+        }
+
+        /// <summary>Hit test for TapOnTarget. Override to widen the hit area or accept several targets.</summary>
+        protected virtual bool IsTapOnTarget(TutorialRunContext ctx, Vector2 screenPos)
+        {
+            var t = ctx.ResolveTargetInput(this, "Target", Target);
+            return t != null && t.TryGetScreenRect(out var r) && r.Contains(screenPos);
         }
     }
 
     /// <summary>Branches based on a simple condition. Follows the "True" or "False" port.</summary>
     [Serializable]
     [TutorialNode("Flow/Condition", "Branch on a persistence/blackboard condition.", Color = "#6A1B9A")]
-    public sealed class ConditionNode : TutorialNode
+    public class ConditionNode : TutorialNode
     {
         public enum ConditionKind { BlackboardFlag, TutorialCompleted, CheckpointReached }
+
+        /// <summary>Port followed when <see cref="Evaluate"/> returns true.</summary>
+        public const string TruePort = "True";
+        /// <summary>Port followed when <see cref="Evaluate"/> returns false.</summary>
+        public const string FalsePort = "False";
 
         public ConditionKind Kind = ConditionKind.BlackboardFlag;
         [Tooltip("Blackboard key / other-tutorial id / checkpoint id depending on Kind.")]
@@ -124,38 +147,40 @@ namespace TutorialKit
         [Tooltip("Second id used by CheckpointReached (tutorial id). Empty = current tutorial.")]
         public string TutorialId = "";
 
-        private static readonly string[] Ports = { "True", "False" };
+        /// <summary>The True/False ports — reuse when a subclass keeps the same branching shape.</summary>
+        protected static readonly string[] Ports = { TruePort, FalsePort };
         public override IReadOnlyList<string> OutputPorts => Ports;
 
         public override string GetSummary(TutorialGraph graph) => $"{Kind}: {Key}";
 
         public override UniTask<string> ExecuteAsync(TutorialRunContext ctx, CancellationToken ct)
+            => UniTask.FromResult(Evaluate(ctx) ? TruePort : FalsePort);
+
+        /// <summary>
+        /// Decides which branch to follow. Override to add condition kinds of your own
+        /// (call <c>base.Evaluate</c> for the built-in ones).
+        /// </summary>
+        protected virtual bool Evaluate(TutorialRunContext ctx)
         {
-            bool result;
             switch (Kind)
             {
                 case ConditionKind.BlackboardFlag:
-                    result = ctx.Blackboard.TryGetValue(Key, out var v) && v is bool b && b;
-                    break;
+                    return ctx.Blackboard.TryGetValue(Key, out var v) && v is bool b && b;
                 case ConditionKind.TutorialCompleted:
-                    result = ctx.Persistence.IsTutorialCompleted(Key);
-                    break;
+                    return ctx.Persistence.IsTutorialCompleted(Key);
                 case ConditionKind.CheckpointReached:
                     string tid = string.IsNullOrEmpty(TutorialId) ? ctx.Graph.TutorialId : TutorialId;
-                    result = ctx.Persistence.IsCheckpointReached(tid, Key);
-                    break;
+                    return ctx.Persistence.IsCheckpointReached(tid, Key);
                 default:
-                    result = false;
-                    break;
+                    return false;
             }
-            return UniTask.FromResult(result ? "True" : "False");
         }
     }
 
     /// <summary>Records a checkpoint in persistence so the tutorial can resume/skip past it.</summary>
     [Serializable]
     [TutorialNode("Flow/Mark Checkpoint", "Persist a checkpoint id.", Color = "#6A1B9A")]
-    public sealed class MarkCheckpointNode : TutorialNode
+    public class MarkCheckpointNode : TutorialNode
     {
         public string CheckpointId = "checkpoint";
 
@@ -171,7 +196,7 @@ namespace TutorialKit
     /// <summary>Sets a boolean flag on the run blackboard (for use with Condition nodes).</summary>
     [Serializable]
     [TutorialNode("Flow/Set Flag", "Set a blackboard boolean.", Color = "#6A1B9A")]
-    public sealed class SetFlagNode : TutorialNode
+    public class SetFlagNode : TutorialNode
     {
         public string Key = "flag";
         public bool Value = true;

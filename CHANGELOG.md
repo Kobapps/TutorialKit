@@ -2,6 +2,33 @@
 
 All notable changes to TutorialKit are documented here.
 
+## [1.2.0] — 2026-08-13
+
+### Changed
+- **The shipped nodes are no longer `sealed`.** Every built-in node (`StartNode`, `EndNode`,
+  `WaitTimeNode`, `WaitSignalNode`, `WaitInputNode`, `ConditionNode`, `MarkCheckpointNode`,
+  `SetFlagNode`, `ShowVignetteNode`, `HideVignetteNode`, `ShowPointerNode`, `HidePointerNode`,
+  `ShowTextBoxNode`, `HideTextBoxNode`, `SetInputLockNode`, `GameCommandNode`, `EmitSignalNode`,
+  `TargetByIdNode`, `TargetByPositionNode`) can now be subclassed by a game, so a project can keep a
+  node's authoring fields, ports and editor look and change only the part it cares about.
+
+### Added
+- **`protected virtual` extension points on the built-in nodes**, so subclasses rarely have to
+  reimplement `ExecuteAsync`: `BuildRequest(ctx)` on Show Vignette / Show Pointer / Show Text Box
+  (plus `CollectTargets(ctx)` on the vignette), `IsInputSatisfied(ctx)` and `IsTapOnTarget(ctx, pos)`
+  on Wait For Input, `Evaluate(ctx)` on Condition, `GetSeconds(ctx)` on Wait Time, `GetSignalId(ctx)`
+  on Wait For Signal, `BuildCommandContext(ctx)` and `ParseParameters(arg)` on Game Command, and
+  `GetGroup(ctx)` on Set Input Lock. The requests are structs, so the usual shape is
+  `var req = base.BuildRequest(ctx); req.Field = …; return req;`.
+- **`ConditionNode.TruePort` / `ConditionNode.FalsePort`** constants for the branch port names.
+- The built-in port arrays are `protected static` (`TargetInputPort`, `PointerInputs`, `Ports`,
+  `NoPorts`, `TargetNodeBase.OutPorts` / `NoFlowPorts`) so a subclass keeping the same port shape can
+  reuse them instead of redeclaring.
+- **Docs:** a "Extending a built-in node" section in `Documentation~/custom-nodes.md` with the hook
+  table and the two Unity gotchas — `[Serializable]` and `[TutorialNode(...)]` are not inherited, so a
+  subclass must re-apply both (without the latter it still works, but lands under `Custom/<ClassName>`
+  in the Add Node menu with its class name as its JSON `TypeId`).
+
 ## [1.1.0] — 2026-08-04
 
 ### Added

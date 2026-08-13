@@ -14,8 +14,10 @@ namespace TutorialKit
     [Serializable]
     public abstract class TargetNodeBase : TutorialNode
     {
-        private static readonly string[] NoFlowPorts = Array.Empty<string>();
-        private static readonly TutorialDataPort[] OutPorts = { new TutorialDataPort("Target", TutorialPortTypes.Target) };
+        /// <summary>Empty flow-port list — reuse in subclasses that stay outside the execution flow.</summary>
+        protected static readonly string[] NoFlowPorts = Array.Empty<string>();
+        /// <summary>The single "Target" data output — reuse when a subclass keeps the same port shape.</summary>
+        protected static readonly TutorialDataPort[] OutPorts = { new TutorialDataPort("Target", TutorialPortTypes.Target) };
 
         public override bool HasInput => false;                       // not in the flow
         public override IReadOnlyList<string> OutputPorts => NoFlowPorts; // no flow output
@@ -34,7 +36,7 @@ namespace TutorialKit
     /// <summary>Provides a target from a registered id (a TutorialTarget or a dynamic target).</summary>
     [Serializable]
     [TutorialNode("Target/By Id", "Outputs a target resolved from a registered id.", Color = "#00897B")]
-    public sealed class TargetByIdNode : TargetNodeBase
+    public class TargetByIdNode : TargetNodeBase
     {
         [Tooltip("Id of a registered TutorialTarget or dynamic target.")]
         public TutorialTargetRef Target;
@@ -48,7 +50,7 @@ namespace TutorialKit
     /// <summary>Provides a target at an explicit normalized screen position and pixel size.</summary>
     [Serializable]
     [TutorialNode("Target/By Screen Position", "Outputs a target at a normalized screen position/size.", Color = "#00897B")]
-    public sealed class TargetByPositionNode : TargetNodeBase
+    public class TargetByPositionNode : TargetNodeBase
     {
         [Tooltip("Screen position in 0..1 (x=left→right, y=bottom→top).")]
         public Vector2 NormalizedPosition = new Vector2(0.5f, 0.5f);

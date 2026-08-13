@@ -9,7 +9,7 @@ namespace TutorialKit
     /// <summary>Locks or unlocks game interaction (all, or a named group).</summary>
     [Serializable]
     [TutorialNode("Interaction/Set Input Lock", "Lock or unlock game interaction.", Color = "#AD1457")]
-    public sealed class SetInputLockNode : TutorialNode
+    public class SetInputLockNode : TutorialNode
     {
         public InputLockMode Mode = InputLockMode.Lock;
         [Tooltip("Interaction group to affect. Empty = all interaction.")]
@@ -18,9 +18,12 @@ namespace TutorialKit
         public override string GetSummary(TutorialGraph graph) =>
             $"{Mode} {(string.IsNullOrEmpty(Group) ? "ALL" : Group)}";
 
+        /// <summary>The group to lock/unlock, or null for "all". Override to pick a group from run state.</summary>
+        protected virtual string GetGroup(TutorialRunContext ctx) => string.IsNullOrEmpty(Group) ? null : Group;
+
         public override UniTask<string> ExecuteAsync(TutorialRunContext ctx, CancellationToken ct)
         {
-            string group = string.IsNullOrEmpty(Group) ? null : Group;
+            string group = GetGroup(ctx);
             if (Mode == InputLockMode.Lock) ctx.InputLock.Lock(group);
             else ctx.InputLock.Unlock(group);
             return UniTask.FromResult(OutPort);
@@ -30,7 +33,7 @@ namespace TutorialKit
     /// <summary>Invokes a named game command registered by the game (play animation, open popup…).</summary>
     [Serializable]
     [TutorialNode("Interaction/Game Command", "Invoke a registered game command.", Color = "#5D4037")]
-    public sealed class GameCommandNode : TutorialNode
+    public class GameCommandNode : TutorialNode
     {
         public string CommandId = "command.id";
         [Tooltip("Free-form argument, or key=value;key2=value2 pairs parsed into Parameters.")]
@@ -42,7 +45,7 @@ namespace TutorialKit
 
         public override async UniTask<string> ExecuteAsync(TutorialRunContext ctx, CancellationToken ct)
         {
-            var cmdCtx = new TutorialCommandContext(CommandId, Argument, ParseParameters(Argument), ctx.Blackboard);
+            var cmdCtx = BuildCommandContext(ctx);
             if (WaitForCompletion)
                 await ctx.Commands.InvokeAsync(CommandId, cmdCtx, ct);
             else
@@ -50,7 +53,15 @@ namespace TutorialKit
             return OutPort;
         }
 
-        private static IReadOnlyDictionary<string, string> ParseParameters(string argument)
+        /// <summary>
+        /// Builds the context passed to the registered handler. Override to inject extra parameters
+        /// or to rewrite the argument from run state.
+        /// </summary>
+        protected virtual TutorialCommandContext BuildCommandContext(TutorialRunContext ctx) =>
+            new TutorialCommandContext(CommandId, Argument, ParseParameters(Argument), ctx.Blackboard);
+
+        /// <summary>Parses <c>key=value;key2=value2</c> into a dictionary. Override for a different syntax.</summary>
+        protected virtual IReadOnlyDictionary<string, string> ParseParameters(string argument)
         {
             var dict = new Dictionary<string, string>();
             if (string.IsNullOrEmpty(argument) || argument.IndexOf('=') < 0) return dict;
@@ -69,7 +80,7 @@ namespace TutorialKit
     /// <summary>Emits a signal on the bus (e.g. to notify game systems the tutorial reached a point).</summary>
     [Serializable]
     [TutorialNode("Interaction/Emit Signal", "Emit a signal on the bus.", Color = "#5D4037")]
-    public sealed class EmitSignalNode : TutorialNode
+    public class EmitSignalNode : TutorialNode
     {
         public string SignalId = "signal.id";
 

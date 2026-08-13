@@ -111,6 +111,57 @@ public sealed class NearestEnemyTargetNode : TargetNodeBase
 You can also return a `RectTutorialTarget(() => someScreenRect)` to point at an explicit position/size,
 or `ctx.Resolve(someRef)` to resolve a registered id.
 
+## Extending a built-in node
+
+None of the shipped nodes are `sealed` — subclass one when you want its authoring fields, ports and
+editor look, and only need to change *part* of what it does. Each one exposes `protected virtual`
+hooks so you rarely have to reimplement `ExecuteAsync`.
+
+```csharp
+[Serializable]                                          // required — [Serializable] is NOT inherited
+[TutorialNode("Game/Show Text Box (Localized)",         // your own menu entry + TypeId
+              "Text box whose Body is a localization key.")]
+public class LocalizedTextBoxNode : ShowTextBoxNode
+{
+    protected override TextBoxRequest BuildRequest(TutorialRunContext ctx)
+    {
+        var req = base.BuildRequest(ctx);               // keep every field the base node authored
+        req.Body = Localization.Get(Body);              // ...and translate the body
+        req.Title = Localization.Get(Title);
+        return req;
+    }
+}
+```
+
+Two Unity rules to respect when you subclass:
+
+- **Re-apply `[Serializable]`.** It is not inherited, and nodes are stored with `[SerializeReference]` —
+  without it your node won't serialize on the graph.
+- **Re-apply `[TutorialNode(...)]`.** It is not inherited either. Without it the node still works and is
+  still registered, but it lands under `Custom/<ClassName>` in the Add Node menu with its class name as
+  its `TypeId`. Adding your own attribute gives it a proper menu path and a stable JSON id.
+
+The hooks on the shipped nodes:
+
+| Node | Hook | Override to |
+|------|------|-------------|
+| `ShowVignetteNode` | `BuildRequest(ctx)` / `CollectTargets(ctx)` | change the look; add, filter or compute holes |
+| `ShowPointerNode` | `BuildRequest(ctx)` | change gesture, targets, offset or speed |
+| `ShowTextBoxNode` | `BuildRequest(ctx)` | localize text, swap the prefab key, reposition |
+| `WaitInputNode` | `IsInputSatisfied(ctx)` / `IsTapOnTarget(ctx, pos)` | add input kinds; widen the hit area |
+| `ConditionNode` | `Evaluate(ctx)` | add condition kinds of your own |
+| `WaitTimeNode` | `GetSeconds(ctx)` | scale the delay at runtime |
+| `WaitSignalNode` | `GetSignalId(ctx)` | compose the signal id from run state |
+| `GameCommandNode` | `BuildCommandContext(ctx)` / `ParseParameters(arg)` | inject parameters; use another argument syntax |
+| `SetInputLockNode` | `GetGroup(ctx)` | pick the lock group at runtime |
+| `TargetByIdNode`, `TargetByPositionNode` | `ResolveTarget(ctx)` | resolve the target differently |
+
+Call `base.X(...)` in an override to keep the built-in behaviour and adjust it — the `Show*` requests
+are structs, so `var req = base.BuildRequest(ctx); req.Field = …; return req;` is the usual shape.
+Everything else (`ExecuteAsync`, `OutputPorts`, `InputDataPorts`, `GetSummary`, `DisplayName`) is
+`virtual` on `TutorialNode` and overridable as usual; the built-in port arrays are `protected static`
+so you can reuse them when your subclass keeps the same port shape.
+
 ## For the "just call my command" case
 
 You usually don't need a custom node at all: use the built-in **Game Command** node and register a
